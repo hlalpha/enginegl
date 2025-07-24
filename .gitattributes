@@ -1,0 +1,20 @@
+*.c text eol=lf
+*.h text eol=lf
+*.cpp text eol=lf
+*.h text eol=lf
+*.CPP text eol=lf
+*.H text eol=lf
+
+*.txt text eol=lf
+*.bat text eol=lf
+*.sh text eol=lf
+
+*.ico binary
+
+*.exe binary
+
+*.dsp text eol=crlf
+*.dsw text eol=crlf
+*.mdp binary
+*.plg text eol=crlf
+
