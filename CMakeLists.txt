@@ -55,4 +55,5 @@ function( install_multiplatform target outdir )
 endfunction()
 
 add_subdirectory( engine )
+add_subdirectory( engine/gas2masm )
 add_subdirectory( thirdparty/proqcc )
