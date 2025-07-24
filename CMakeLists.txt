@@ -55,4 +55,4 @@ function( install_multiplatform target outdir )
 endfunction()
 
 add_subdirectory( engine )
-add_subdirectory( utils/ProQCC )
+add_subdirectory( thirdparty/proqcc )
