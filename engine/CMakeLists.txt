@@ -169,7 +169,6 @@ set( ENGINE_HEADERS # "Header Files"
 )
 
 set( ENGINE_RESOURCES # "Resource Files"
-	"qe3.ico"
 	"quake.ico"
 )
 
