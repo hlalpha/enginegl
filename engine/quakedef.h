@@ -61,7 +61,7 @@ void	VID_UnlockBuffer (void);
 
 #endif
 
-#if defined __i386__ // && !defined __sun__
+#if 0 // defined __i386__ // && !defined __sun__ // TODO(SanyaSho): ASM
 #define id386	1
 #else
 #define id386	0
