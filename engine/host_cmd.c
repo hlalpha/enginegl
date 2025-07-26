@@ -679,6 +679,7 @@ void Host_Loadgame_f (void)
 		{	// parse an edict
 
 			ent = EDICT_NUM(entnum);
+			ED_FreePrivateData (ent);
 			memset (&ent->v, 0, progs->entityfields * 4);
 			ent->free = false;
 			ED_ParseEdict (start, ent);
@@ -1205,7 +1206,10 @@ void Host_Kill_f (void)
 	
 	pr_global_struct->time = sv.time;
 	pr_global_struct->self = EDICT_TO_PROG(sv_player);
+	PR_ExecuteProgramFromDLL (6);
+#if defined( QUIVER_QUAKE_COMPAT )
 	PR_ExecuteProgram (pr_global_struct->ClientKill);
+#endif
 }
 
 
@@ -1305,7 +1309,10 @@ void Host_Spawn_f (void)
 		// set up the edict
 		ent = host_client->edict;
 
+		ED_FreePrivateData (ent);
 		memset (&ent->v, 0, progs->entityfields * 4);
+		ED_SetGameDLLVars (ent);
+
 		ent->v.colormap = NUM_FOR_EDICT(ent);
 		ent->v.team = (host_client->colors & 15) + 1;
 		ent->v.netname = host_client->name - pr_strings;
@@ -1319,12 +1326,18 @@ void Host_Spawn_f (void)
 
 		pr_global_struct->time = sv.time;
 		pr_global_struct->self = EDICT_TO_PROG(sv_player);
+		PR_ExecuteProgramFromDLL (7);
+#if defined( QUIVER_QUAKE_COMPAT )
 		PR_ExecuteProgram (pr_global_struct->ClientConnect);
+#endif
 
 		if ((Sys_FloatTime() - host_client->netconnection->connecttime) <= sv.time)
 			Sys_Printf ("%s entered the game\n", host_client->name);
 
-		PR_ExecuteProgram (pr_global_struct->PutClientInServer);	
+		PR_ExecuteProgramFromDLL (8);
+#if defined( QUIVER_QUAKE_COMPAT )
+		PR_ExecuteProgram (pr_global_struct->PutClientInServer);
+#endif
 	}
 
 

@@ -221,10 +221,19 @@ typedef struct
 	vec3_t	origin;
 	vec3_t	angles;
 	int		modelindex;
+#ifdef QUIVER
+	int		unknown;
+#endif // QUIVER
 	int		frame;
 	int		colormap;
 	int		skin;
 	int		effects;
+#ifdef QUIVER
+	int		rendermode;
+	int		renderamt;
+	byte	rendercolor[4];
+	int		renderfx;
+#endif // QUIVER
 } entity_state_t;
 
 
@@ -260,6 +269,11 @@ typedef struct
 
 #ifdef GLQUAKE
 #include "glquake.h"
+#endif
+
+#if defined( QUIVER )
+#include "sys_dll.h"
+#include "pr_cmds.h"
 #endif
 
 //=============================================================================

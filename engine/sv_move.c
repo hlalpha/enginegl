@@ -390,17 +390,14 @@ SV_MoveToGoal
 
 ======================
 */
-void SV_MoveToGoal (void)
+void SV_MoveToGoal_I (edict_t *ent, float dist)
 {
-	edict_t		*ent, *goal;
-	float		dist;
+	edict_t		*goal;
 #ifdef QUAKE2
 	edict_t		*enemy;
 #endif
 
-	ent = PROG_TO_EDICT(pr_global_struct->self);
 	goal = PROG_TO_EDICT(ent->v.goalentity);
-	dist = G_FLOAT(OFS_PARM0);
 
 	if ( !( (int)ent->v.flags & (FL_ONGROUND|FL_FLY|FL_SWIM) ) )
 	{
@@ -423,5 +420,9 @@ void SV_MoveToGoal (void)
 	{
 		SV_NewChaseDir (ent, goal, dist);
 	}
+}
+void SV_MoveToGoal (void)
+{
+	SV_MoveToGoal_I (PROG_TO_EDICT(pr_global_struct->self), G_FLOAT(OFS_PARM0));
 }
 

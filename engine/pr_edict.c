@@ -71,6 +71,9 @@ void ED_ClearEdict (edict_t *e)
 {
 	memset (&e->v, 0, progs->entityfields * 4);
 	e->free = false;
+
+	ED_FreePrivateData (e);
+	ED_SetGameDLLVars (e);
 }
 
 /*
@@ -122,6 +125,8 @@ FIXME: walk all entities and NULL out references to this entity
 void ED_Free (edict_t *ed)
 {
 	SV_UnlinkEdict (ed);		// unlink from world bsp
+
+	ED_FreePrivateData (ed);
 
 	ed->free = true;
 	ed->v.model = 0;
@@ -520,6 +525,8 @@ void ED_Write (FILE *f, edict_t *ed)
 	}
 
 	fprintf (f, "}\n");
+
+	CallDispatchFunc( ed, 6, f );
 }
 
 void ED_PrintNum (int ent)
@@ -790,6 +797,8 @@ qboolean	ED_ParseEpair (void *base, ddef_t *key, char *s)
 	return true;
 }
 
+void SuckOutClassname( char *data, edict_t *ent );
+
 /*
 ====================
 ED_ParseEdict
@@ -802,16 +811,33 @@ Used for initial level load and for savegames.
 char *ED_ParseEdict (char *data, edict_t *ent)
 {
 	ddef_t		*key;
-	qboolean	anglehack;
 	qboolean	init;
 	char		keyname[256];
 	int			n;
+	KeyValueData kvdata;
+	DISPATCHFUNC func;
+	const char	*classname;
 
 	init = false;
 
 // clear it
 	if (ent != sv.edicts)	// hack
 		memset (&ent->v, 0, progs->entityfields * 4);
+
+	ED_SetGameDLLVars (ent);
+
+	SuckOutClassname (data, ent);
+
+	classname = pr_strings + ent->v.classname;
+	func = FunctionFromName( classname );
+	if ( func )
+	{
+		func( &ent->v, NULL );
+	}
+	else
+	{
+		Con_Printf( "Can't init %s\n", classname );
+	}
 
 // go through all the dictionary pairs
 	while (1)
@@ -822,20 +848,6 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 			break;
 		if (!data)
 			Sys_Error ("ED_ParseEntity: EOF without closing brace");
-		
-// anglehack is to allow QuakeEd to write single scalar angles
-// and allow them to be turned into vectors. (FIXME...)
-if (!strcmp(com_token, "angle"))
-{
-	strcpy (com_token, "angles");
-	anglehack = true;
-}
-else
-	anglehack = false;
-
-// FIXME: change light to _light to get rid of this hack
-if (!strcmp(com_token, "light"))
-	strcpy (com_token, "light_lev");	// hack for single light def
 
 		strcpy (keyname, com_token);
 
@@ -861,23 +873,42 @@ if (!strcmp(com_token, "light"))
 // and are immediately discarded by quake
 		if (keyname[0] == '_')
 			continue;
-		
-		key = ED_FindField (keyname);
-		if (!key)
+
+		classname = pr_strings + ent->v.classname;
+		if ( !classname || strcmp( classname, com_token ) )
 		{
-			Con_Printf ("'%s' is not a field\n", keyname);
-			continue;
+			// anglehack is to allow QuakeEd to write single scalar angles
+			// and allow them to be turned into vectors. (FIXME...)
+			if (!strcmp(keyname, "angle"))
+			{
+				char	temp[32];
+				strcpy (temp, com_token);
+				sprintf (com_token, "0 %s 0", temp);
+
+				strcpy (keyname, "angles");
+			}
+
+			key = ED_FindField (keyname);
+			if (key)
+			{
+				if (!ED_ParseEpair ((void *)&ent->v, key, com_token))
+					Host_Error ("ED_ParseEdict: parse error");
+
+				continue;
+			}
+
+			kvdata.szKeyName = keyname;
+			kvdata.szClassName = pr_strings + ent->v.classname;
+			kvdata.fHandled = FALSE;
+			kvdata.szValue = com_token;
+
+			CallDispatchFunc (ent, 5, &kvdata);
+
+			if ( !kvdata.fHandled )
+			{
+				Con_DPrintf ("'%s' not a field of '%s'\n", keyname, pr_strings + ent->v.classname);
+			}
 		}
-
-if (anglehack)
-{
-char	temp[32];
-strcpy (temp, com_token);
-sprintf (com_token, "0 %s 0", temp);
-}
-
-		if (!ED_ParseEpair ((void *)&ent->v, key, com_token))
-			Host_Error ("ED_ParseEdict: parse error");
 	}
 
 	if (!init)
@@ -906,8 +937,10 @@ void ED_LoadFromFile (char *data)
 {	
 	edict_t		*ent;
 	int			inhibit;
+#if !defined( QUIVER ) || defined( QUIVER_QUAKE_COMPAT )
 	dfunction_t	*func;
-	
+#endif
+
 	ent = NULL;
 	inhibit = 0;
 	pr_global_struct->time = sv.time;
@@ -923,9 +956,15 @@ void ED_LoadFromFile (char *data)
 			Sys_Error ("ED_LoadFromFile: found %s when expecting {",com_token);
 
 		if (!ent)
+		{
 			ent = EDICT_NUM(0);
+			ED_FreePrivateData (ent);
+			ED_SetGameDLLVars (ent);
+		}
 		else
+		{
 			ent = ED_Alloc ();
+		}
 		data = ED_ParseEdict (data, ent);
 
 // remove things from different skill levels or deathmatch
@@ -958,6 +997,7 @@ void ED_LoadFromFile (char *data)
 			continue;
 		}
 
+#if !defined( QUIVER ) || defined( QUIVER_QUAKE_COMPAT )
 	// look for the spawn function
 		func = ED_FindFunction ( pr_strings + ent->v.classname );
 
@@ -968,9 +1008,13 @@ void ED_LoadFromFile (char *data)
 			ED_Free (ent);
 			continue;
 		}
+#endif
 
 		pr_global_struct->self = EDICT_TO_PROG(ent);
+		CallDispatchFunc (ent, 0, NULL);
+#if defined( QUIVER_QUAKE_COMPAT )
 		PR_ExecuteProgram (func - pr_functions);
+#endif
 	}	
 
 	Con_DPrintf ("%i entities inhibited\n", inhibit);
@@ -1103,4 +1147,33 @@ int NUM_FOR_EDICT(edict_t *e)
 	if (b < 0 || b >= sv.num_edicts)
 		Sys_Error ("NUM_FOR_EDICT: bad pointer");
 	return b;
+}
+
+void SuckOutClassname( char *data, edict_t *ent )
+{
+	char *parse;
+	ddef_t *field;
+	char classname[256];
+
+	while ( 1 )
+	{
+		parse = COM_Parse(data);
+		if ( com_token[0] == '}' )
+			break;
+
+		strcpy ( classname, com_token );
+
+		data = COM_Parse( parse );
+		if ( !strcmp( classname, "classname" ) )
+		{
+			field = ED_FindField( classname );
+			if ( !field )
+				Host_Error( "SuckOutClassname: MUST find classname key" );
+
+			if ( !ED_ParseEpair( &ent->v, field, com_token ) )
+				Host_Error( "SuckOutClassname: parse error" );
+
+			return;
+		}
+	}
 }

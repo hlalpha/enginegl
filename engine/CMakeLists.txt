@@ -4,6 +4,7 @@
 cmake_minimum_required( VERSION 3.20 )
 
 set( GLQUAKE 1 )
+set( QUIVER  1 )
 
 set( ENGINE_SOURCES # "Source Files"
 	"cd_win.c"
@@ -111,11 +112,15 @@ set( ENGINE_SOURCES # "Source Files"
 	#"worlda.s"
 	"zone.c"
 
+	"sys_dll.c"
+
 	"progdefs.q1"
 	"progdefs.q2"
 )
 
 set( ENGINE_HEADERS # "Header Files"
+	"${SRCDIR}/public/extdll.h"
+
 	"anorm_dots.h"
 	"anorms.h"
 	"bspfile.h"
@@ -147,6 +152,7 @@ set( ENGINE_HEADERS # "Header Files"
 	"net_wins.h"
 	"net_wipx.h"
 	"pr_comp.h"
+	"pr_cmds.h"
 	"progdefs.h"
 	"progs.h"
 	"protocol.h"
@@ -166,6 +172,8 @@ set( ENGINE_HEADERS # "Header Files"
 	"winquake.h"
 	"world.h"
 	"zone.h"
+
+	"sys_dll.h"
 )
 
 set( ENGINE_RESOURCES # "Resource Files"
@@ -175,6 +183,6 @@ set( ENGINE_RESOURCES # "Resource Files"
 add_executable( enginegl WIN32 ${ENGINE_SOURCES} ${ENGINE_HEADERS} ${ENGINE_RESOURCES} )
 install_multiplatform( enginegl "${SRCDIR}/game" )
 
-target_compile_definitions( enginegl PRIVATE "$<${GLQUAKE}:GLQUAKE>" )
+target_compile_definitions( enginegl PRIVATE "$<${GLQUAKE}:GLQUAKE>" "$<${QUIVER}:QUIVER_QUAKE_COMPAT>" "$<${QUIVER}:QUIVER>" ) # "$<${QUIVER}:QUAKE2>"
 target_include_directories( enginegl PRIVATE "${SRCDIR}/engine/scitech/include" "${SRCDIR}/engine/dxsdk/sdk/inc" )
 target_link_libraries( enginegl PRIVATE dxguid winmm wsock32 opengl32 glu32 gdi32 comctl32 )

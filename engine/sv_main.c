@@ -284,7 +284,10 @@ void SV_ConnectClient (int clientnum)
 	else
 	{
 	// call the progs to get default spawn parms for the new client
+		PR_ExecuteProgramFromDLL (4);
+#if defined( QUIVER_QUAKE_COMPAT )
 		PR_ExecuteProgram (pr_global_struct->SetNewParms);
+#endif
 		for (i=0 ; i<NUM_SPAWN_PARMS ; i++)
 			client->spawn_parms[i] = (&pr_global_struct->parm1)[i];
 	}
@@ -1025,7 +1028,10 @@ void SV_SaveSpawnparms (void)
 
 	// call the progs to get default spawn parms for the new client
 		pr_global_struct->self = EDICT_TO_PROG(host_client->edict);
+		PR_ExecuteProgramFromDLL (5);
+#if defined( QUIVER_QUAKE_COMPAT )
 		PR_ExecuteProgram (pr_global_struct->SetChangeParms);
+#endif
 		for (j=0 ; j<NUM_SPAWN_PARMS ; j++)
 			host_client->spawn_parms[j] = (&pr_global_struct->parm1)[j];
 	}

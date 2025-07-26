@@ -361,7 +361,10 @@ void SV_DropClient (qboolean crash)
 		// this will set the body to a dead frame, among other things
 			saveSelf = pr_global_struct->self;
 			pr_global_struct->self = EDICT_TO_PROG(host_client->edict);
+			PR_ExecuteProgramFromDLL (0);
+#if defined( QUIVER_QUAKE_COMPAT )
 			PR_ExecuteProgram (pr_global_struct->ClientDisconnect);
+#endif
 			pr_global_struct->self = saveSelf;
 		}
 
@@ -952,5 +955,7 @@ void Host_Shutdown(void)
 	{
 		VID_Shutdown();
 	}
+
+	ReleaseEntityDlls();
 }
 
