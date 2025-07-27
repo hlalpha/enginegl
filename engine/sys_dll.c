@@ -113,7 +113,7 @@ enginefuncs_t g_engfuncsExportedToDlls =
 	PF_WriteAngle_I,
 	PF_WriteCoord_I,
 	PF_WriteString_I,
-	PF_WriteWord_I,
+	PF_WriteEntity_I,
 
 	CVarGetFloat,
 	CVarGetString,
@@ -149,6 +149,14 @@ enginefuncs_t g_engfuncsExportedToDlls =
 extensiondll_t g_rgextdll[50];
 int g_iextdllMac;
 
+
+/*
+===========
+GetDispatchFuncById
+
+Get exported QC func from game DLL
+===========
+*/
 DISPATCHFUNC GetDispatchFuncById( edict_t *ent, int dllFunc )
 {
 	switch ( dllFunc )
@@ -165,6 +173,14 @@ DISPATCHFUNC GetDispatchFuncById( edict_t *ent, int dllFunc )
 	// don't return null here, OG enginegl.exe returns some random memory
 }
 
+
+/*
+===========
+CallDispatchFunc
+
+Call an exported QC func from game DLL
+===========
+*/
 void CallDispatchFunc( edict_t *ent, int dllFunc, void *funcArg )
 {
 	DISPATCHFUNC func;
@@ -180,8 +196,22 @@ void CallDispatchFunc( edict_t *ent, int dllFunc, void *funcArg )
 	}
 }
 
+
+/*
+===========
+ED_FreePrivateData
+===========
+*/
 // ED_FreePrivateData ??
 
+
+/*
+===========
+ED_SetGameDLLVars
+
+Set custom progdefs for entity
+===========
+*/
 void ED_SetGameDLLVars( edict_t *ent ) // TODO(SanyaSho): Better name?
 {
 	// TODO: Quiver progdefs
@@ -189,6 +219,14 @@ void ED_SetGameDLLVars( edict_t *ent ) // TODO(SanyaSho): Better name?
 	//ent->v.pSystemGlobals = pr_global_struct;
 }
 
+
+/*
+===========
+ED_AllocatePrivateData
+
+Allocate a entity private data
+===========
+*/
 void *ED_AllocatePrivateData( edict_t *pEdict, int size )
 {
 	void *pData;
@@ -204,11 +242,27 @@ void *ED_AllocatePrivateData( edict_t *pEdict, int size )
 	return pData;
 }
 
+
+/*
+===========
+ED_GetPrivateData
+
+Get engine-allocated entity private data
+===========
+*/
 void *ED_GetPrivateData( edict_t *pEdict )
 {
 	return pEdict->pvPrivateData;
 }
 
+
+/*
+===========
+ED_FreePrivateData
+
+Free engine-allocated entity private data
+===========
+*/
 void ED_FreePrivateData( edict_t *pEdict )
 {
 	if ( pEdict->pvPrivateData )
@@ -217,65 +271,167 @@ void ED_FreePrivateData( edict_t *pEdict )
 	pEdict->pvPrivateData = 0;
 }
 
+
+/*
+===========
+PEntityOfEntOffset
+
+Get entity edict_t from offset
+===========
+*/
 edict_t *PEntityOfEntOffset( int iEntOffset )
 {
 	return sv.edicts + iEntOffset;
 }
 
+
+/*
+===========
+EntOffsetOfPEntity
+
+Get global entity offset from and edict_t
+===========
+*/
 int EntOffsetOfPEntity( edict_t *pEdict )
 {
 	return pEdict - sv.edicts;
 }
 
+
+/*
+===========
+IndexOfEdict
+===========
+*/
 // IndexOfEdict
 
+
+/*
+===========
+SzFromIndex
+
+Get engine-allocated string from the pool
+===========
+*/
 char *SzFromIndex( int iString )
 {
 	return (char *)(pr_strings + iString);
 }
 
+
+/*
+===========
+GetVarsOfEnt
+
+Get entvars_t from edict_t
+===========
+*/
 entvars_t *GetVarsOfEnt( edict_t *ent )
 {
 	return &ent->v;
 }
 
+
+/*
+===========
+PEntityOfEntIndex
+===========
+*/
 // PEntityOfEntIndex
 
+
+/*
+===========
+GetDispatchFuncById_I
+
+Wrapper for GetDispatchFuncById
+===========
+*/
 void *GetDispatchFuncById_I( edict_t *ent, int dllFunc ) // FIXME: I don't want to move DISPATCHFUNC to the extdll.h header
 {
 	return (void *(__cdecl *)(edict_t *, int))GetDispatchFuncById( ent, dllFunc );
 }
 
+
+/*
+===========
+ChangeMethod
+===========
+*/
 void ChangeMethod( void ) // TODO(SanyaSho): What is this?
 {
 	Sys_Error( "CAN'T CHANGE METHODS HERE!" );
 }
 
+
+/*
+===========
+CVarGetFloat
+
+Wrapper for Cvar_VariableValue
+===========
+*/
 float CVarGetFloat( char *name )
 {
 	return Cvar_VariableValue( name );
 }
 
+
+/*
+===========
+CVarGetString
+
+Wrapper for Cvar_VariableString
+===========
+*/
 char *CVarGetString( char *name )
 {
 	return Cvar_VariableString( name );
 }
 
+
+/*
+===========
+CVarSetFloat
+
+Wrapper for Cvar_SetValue
+===========
+*/
 void CVarSetFloat( char *name, float value )
 {
 	Cvar_SetValue( name, value );
 }
 
+
+/*
+===========
+CVarSetString
+
+Wrapper for Cvar_Set
+===========
+*/
 void CVarSetString( char *name, char *value )
 {
 	Cvar_Set( name, value );
 }
 
+
+/*
+===========
+AllocEngineString
+===========
+*/
 int AllocEngineString( char *string )
 {
 	return ED_NewString (string) - pr_strings;
 }
 
+
+/*
+===========
+SaveSpawnParams
+===========
+*/
 void SaveSpawnParams( edict_t *e )
 {
 	int ent;
@@ -292,11 +448,27 @@ void SaveSpawnParams( edict_t *e )
 		client->spawn_parms[i] = (&pr_global_struct->parm1)[i];
 }
 
+
+/*
+===========
+GetModelPtr
+
+Wrapper for Mod_Extradata
+===========
+*/
 void *GetModelPtr( edict_t *pEdict )
 {
 	return Mod_Extradata( sv.models[ (int)pEdict->v.modelindex ] );
 }
 
+
+/*
+===========
+FunctionFromName
+
+Check if any of game DLLs have the entity classname exported
+===========
+*/
 DISPATCHFUNC FunctionFromName( LPCSTR lpProcName )
 {
 	int i;
@@ -314,6 +486,14 @@ DISPATCHFUNC FunctionFromName( LPCSTR lpProcName )
 	return NULL;
 }
 
+
+/*
+===========
+LoadServerDLL
+
+Find and load all game DLLs from the game folder
+===========
+*/
 void LoadServerDLL( const char *pBaseDir )
 {
 	intptr_t hFindHandle;
@@ -325,14 +505,14 @@ void LoadServerDLL( const char *pBaseDir )
 	g_iextdllMac = 0;
 	memset( g_rgextdll, 0, sizeof( g_rgextdll ) );
 
-	sprintf( searchpath, "%s\\%s\\*.dll", pBaseDir, "valve\\dlls" );
+	sprintf( searchpath, "%s\\%s\\*.dll", pBaseDir, GAMENAME"\\dlls" );
 
 	hFindHandle = _findfirst( searchpath, &c_file );
 	if ( hFindHandle != -1 )
 	{
 		do
 		{
-			sprintf( libname, "%s\\%s\\%s", pBaseDir, "valve\\dlls", c_file.name );
+			sprintf( libname, "%s\\%s\\%s", pBaseDir, GAMENAME"\\dlls", c_file.name );
 			LoadThisDll( libname );
 		}
 		while ( _findnext( hFindHandle, &c_file ) == 0 );
@@ -354,6 +534,14 @@ void LoadServerDLL( const char *pBaseDir )
 	}
 }
 
+
+/*
+===========
+LoadThisDll
+
+Load game DLL, export the enginefuncs_t and check for any QC exports
+===========
+*/
 void LoadThisDll( LPCSTR lpLibFileName )
 {
 	HMODULE hDLL;
@@ -410,6 +598,14 @@ ignoreThisDLL:
 	}
 }
 
+
+/*
+===========
+ReleaseEntityDlls
+
+Free game DLL handles
+===========
+*/
 void ReleaseEntityDlls()
 {
 	extensiondll_t *pextdllFirst;
@@ -427,6 +623,12 @@ void ReleaseEntityDlls()
 	}
 }
 
+
+/*
+===========
+EngineFprintf
+===========
+*/
 int EngineFprintf( FILE *f, char *format, ... )
 {
 	static char buf[1024];
@@ -439,6 +641,14 @@ int EngineFprintf( FILE *f, char *format, ... )
 	return fprintf( f, buf );
 }
 
+
+/*
+===========
+AlertMessage
+
+Throws an alert to the console
+===========
+*/
 void AlertMessage( int atype, const char *szFmt, ... )
 {
 	va_list argptr;
@@ -488,6 +698,14 @@ void AlertMessage( int atype, const char *szFmt, ... )
 	}
 }
 
+
+/*
+===========
+PR_ExecuteProgramFromDLL
+
+Calls an exported QC func from external game DLLs
+===========
+*/
 void PR_ExecuteProgramFromDLL( int nProgram )
 {
 	qccwrap_t *wrap;

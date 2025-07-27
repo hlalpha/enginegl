@@ -51,7 +51,7 @@ void PF_WriteLong_I (int dest, int c);
 void PF_WriteAngle_I (int dest, float f);
 void PF_WriteCoord_I (int dest, float f);
 void PF_WriteString_I (int dest, char *s);
-void PF_WriteWord_I (int dest, int c);
+void PF_WriteEntity_I (int dest, int c);
 
 void PF_makestatic_I (edict_t *ent);
 void PF_setspawnparms_I (edict_t *ent);

@@ -1730,13 +1730,11 @@ void PF_WriteString (void)
 	MSG_WriteString (WriteDest(), G_STRING(OFS_PARM1));
 }
 
-
 void PF_WriteEntity (void)
 {
 	MSG_WriteShort (WriteDest(), G_EDICTNUM(OFS_PARM1));
 }
 
-#if defined( QUIVER )
 void PF_WriteByte_I (int dest, int c)
 {
 	MSG_WriteByte (WriteDest_I(dest), c);
@@ -1772,11 +1770,10 @@ void PF_WriteString_I (int dest, char *s)
 	MSG_WriteString (WriteDest_I(dest), s);
 }
 
-void PF_WriteWord_I (int dest, int c)
+void PF_WriteEntity_I (int dest, int c)
 {
-	MSG_WriteShort (WriteDest_I(dest), c); // NOTE: Should actually call MSG_WriteWord
+	MSG_WriteShort (WriteDest_I(dest), c);
 }
-#endif
 
 //=============================================================================
 
