@@ -19,17 +19,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // comndef.h  -- general definitions
 
-#if !defined BYTE_DEFINED
-typedef unsigned char 		byte;
-#define BYTE_DEFINED 1
-#endif
-
-#undef true
-#undef false
-
-typedef enum {false, true}	qboolean;
-
 //============================================================================
+
+#include "port.h"
 
 typedef struct sizebuf_s
 {

@@ -120,6 +120,9 @@ set( ENGINE_SOURCES # "Source Files"
 
 set( ENGINE_HEADERS # "Header Files"
 	"${SRCDIR}/public/extdll.h"
+	"${SRCDIR}/public/port.h"
+	"${SRCDIR}/public/qlimits.h"
+	"${SRCDIR}/public/edict.h"
 
 	"anorm_dots.h"
 	"anorms.h"
