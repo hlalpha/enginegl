@@ -828,7 +828,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 
 	SuckOutClassname (data, ent);
 
-	classname = pr_strings + ent->v.classname;
+	classname = &pr_strings[ent->v.classname];
 	func = FunctionFromName( classname );
 	if ( func )
 	{
@@ -874,7 +874,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 		if (keyname[0] == '_')
 			continue;
 
-		classname = pr_strings + ent->v.classname;
+		classname = &pr_strings[ent->v.classname];
 		if ( !classname || strcmp( classname, com_token ) )
 		{
 			// anglehack is to allow QuakeEd to write single scalar angles
@@ -898,7 +898,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 			}
 
 			kvdata.szKeyName = keyname;
-			kvdata.szClassName = pr_strings + ent->v.classname;
+			kvdata.szClassName = &pr_strings[ent->v.classname];
 			kvdata.fHandled = FALSE;
 			kvdata.szValue = com_token;
 
@@ -906,7 +906,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 
 			if ( !kvdata.fHandled )
 			{
-				Con_DPrintf ("'%s' not a field of '%s'\n", keyname, pr_strings + ent->v.classname);
+				Con_DPrintf ("'%s' not a field of '%s'\n", keyname, &pr_strings[ent->v.classname]);
 			}
 		}
 	}
@@ -1000,20 +1000,13 @@ void ED_LoadFromFile (char *data)
 #if !defined( QUIVER ) || defined( QUIVER_QUAKE_COMPAT )
 	// look for the spawn function
 		func = ED_FindFunction ( pr_strings + ent->v.classname );
-
-		if (!func)
-		{
-			Con_Printf ("No spawn function for:\n");
-			ED_Print (ent);
-			ED_Free (ent);
-			continue;
-		}
 #endif
 
 		pr_global_struct->self = EDICT_TO_PROG(ent);
 		CallDispatchFunc (ent, 0, NULL);
 #if defined( QUIVER_QUAKE_COMPAT )
-		PR_ExecuteProgram (func - pr_functions);
+		if (func)
+			PR_ExecuteProgram (func - pr_functions);
 #endif
 	}	
 
