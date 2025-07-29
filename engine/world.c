@@ -287,7 +287,7 @@ void SV_TouchLinks ( edict_t *ent, areanode_t *node )
 		touch = EDICT_FROM_AREA(l);
 		if (touch == ent)
 			continue;
-		if (!touch->v.touch || touch->v.solid != SOLID_TRIGGER)
+		if (touch->v.solid != SOLID_TRIGGER)
 			continue;
 		if (ent->v.absmin[0] > touch->v.absmax[0]
 		|| ent->v.absmin[1] > touch->v.absmax[1]
@@ -304,7 +304,8 @@ void SV_TouchLinks ( edict_t *ent, areanode_t *node )
 		pr_global_struct->time = sv.time;
 		CallDispatchFunc (touch, 2, NULL);
 #if defined( QUIVER_QUAKE_COMPAT )
-		PR_ExecuteProgram (touch->v.touch);
+		if (touch->v.touch)
+			PR_ExecuteProgram (touch->v.touch);
 #endif
 
 		pr_global_struct->self = old_self;

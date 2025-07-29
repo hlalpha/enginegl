@@ -161,23 +161,25 @@ void SV_Impact (edict_t *e1, edict_t *e2)
 	old_other = pr_global_struct->other;
 	
 	pr_global_struct->time = sv.time;
-	if (e1->v.touch && e1->v.solid != SOLID_NOT)
+	if (e1->v.solid != SOLID_NOT)
 	{
 		pr_global_struct->self = EDICT_TO_PROG(e1);
 		pr_global_struct->other = EDICT_TO_PROG(e2);
 		CallDispatchFunc (e1, 2, NULL);
 #if defined( QUIVER_QUAKE_COMPAT )
-		PR_ExecuteProgram (e1->v.touch);
+		if (e1->v.touch)
+			PR_ExecuteProgram (e1->v.touch);
 #endif
 	}
 	
-	if (e2->v.touch && e2->v.solid != SOLID_NOT)
+	if (e2->v.solid != SOLID_NOT)
 	{
 		pr_global_struct->self = EDICT_TO_PROG(e2);
 		pr_global_struct->other = EDICT_TO_PROG(e1);
 		CallDispatchFunc (e2, 2, NULL);
 #if defined( QUIVER_QUAKE_COMPAT )
-		PR_ExecuteProgram (e2->v.touch);
+		if (e2->v.touch)
+			PR_ExecuteProgram (e2->v.touch);
 #endif
 	}
 
