@@ -779,7 +779,7 @@ void Host_InitVCR (quakeparms_t *parms)
 		if (com_argc != 2)
 			Sys_Error("No other parameters allowed with -playback\n");
 
-		Sys_FileOpenRead("quake.vcr", &vcrFile);
+		Sys_FileOpenRead("halflife.vcr", &vcrFile);
 		if (vcrFile == -1)
 			Sys_Error("playback file not found\n");
 
@@ -804,7 +804,7 @@ void Host_InitVCR (quakeparms_t *parms)
 
 	if ( (n = COM_CheckParm("-record")) != 0)
 	{
-		vcrFile = Sys_FileOpenWrite("quake.vcr");
+		vcrFile = Sys_FileOpenWrite("halflife.vcr");
 
 		i = VCR_SIGNATURE;
 		Sys_FileWrite(vcrFile, &i, sizeof(int));
@@ -910,14 +910,12 @@ void Host_Init (quakeparms_t *parms)
 #endif
 	}
 
-	Cbuf_InsertText ("exec quake.rc\n");
+	Cbuf_InsertText ("exec valve.rc\n");
 
 	Hunk_AllocName (0, "-HOST_HUNKLEVEL-");
 	host_hunklevel = Hunk_LowMark ();
 
 	host_initialized = true;
-	
-	Sys_Printf ("========Quake Initialized=========\n");	
 }
 
 

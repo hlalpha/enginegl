@@ -790,6 +790,7 @@ void CL_ParseServerMessage (void)
 			Host_EndGame ("Server disconnected\n");
 
 		case svc_print:
+			Con_Printf ("Half-Life, by valve L.L.C");
 			Con_Printf ("%s", MSG_ReadString ());
 			break;
 			

@@ -232,8 +232,8 @@ qboolean VID_SetWindowedMode (int modenum)
 	// Create the DIB window
 	dibwindow = CreateWindowEx (
 		 ExWindowStyle,
-		 "WinQuake",
-		 "GLQuake",
+		 "HalfLife",
+		 "HalfLife GL",
 		 WindowStyle,
 		 rect.left, rect.top,
 		 width,
@@ -323,8 +323,8 @@ qboolean VID_SetFullDIBMode (int modenum)
 	// Create the DIB window
 	dibwindow = CreateWindowEx (
 		 ExWindowStyle,
-		 "WinQuake",
-		 "GLQuake",
+		 "HalfLife",
+		 "HalfLife GL",
 		 WindowStyle,
 		 rect.left, rect.top,
 		 width,
@@ -1321,7 +1321,7 @@ void VID_InitDIB (HINSTANCE hInstance)
     wc.hCursor       = LoadCursor (NULL,IDC_ARROW);
 	wc.hbrBackground = NULL;
     wc.lpszMenuName  = 0;
-    wc.lpszClassName = "WinQuake";
+    wc.lpszClassName = "HalfLife";
 
     if (!RegisterClass (&wc) )
 		Sys_Error ("Couldn't register window class");
