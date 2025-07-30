@@ -1744,8 +1744,8 @@ void PF_WaterMove (void)
 		if (flags & FL_INWATER)
 		{	
 			// play leave water sound
-//			sound (self, CHAN_BODY, "misc/outwater.wav", 1, ATTN_NORM);
-			SV_StartSound (self, CHAN_BODY, "misc/outwater.wav", 255, ATTN_NORM);
+//			sound (self, CHAN_BODY, "common/outwater.wav", 1, ATTN_NORM);
+			SV_StartSound (self, CHAN_BODY, "common/outwater.wav", 255, ATTN_NORM);
 			self->v.flags = (float)(flags &~FL_INWATER);
 		}
 		self->v.air_finished = sv.time + 12.0;

@@ -701,12 +701,12 @@ void VID_MenuKey (int key)
 	switch (key)
 	{
 	case K_ESCAPE:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound ("common/menu1.wav");
 		M_Menu_Options_f ();
 		break;
 
 	case K_UPARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound ("common/menu1.wav");
 		vid_line--;
 
 		if (vid_line < 0)
@@ -714,7 +714,7 @@ void VID_MenuKey (int key)
 		break;
 
 	case K_DOWNARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound ("common/menu1.wav");
 		vid_line++;
 
 		if (vid_line >= vid_wmodes)
@@ -722,7 +722,7 @@ void VID_MenuKey (int key)
 		break;
 
 	case K_LEFTARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound ("common/menu1.wav");
 		vid_line -= vid_column_size;
 
 		if (vid_line < 0)
@@ -736,7 +736,7 @@ void VID_MenuKey (int key)
 		break;
 
 	case K_RIGHTARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound ("common/menu1.wav");
 		vid_line += vid_column_size;
 
 		if (vid_line >= vid_wmodes)
@@ -750,13 +750,13 @@ void VID_MenuKey (int key)
 		break;
 
 	case K_ENTER:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound ("common/menu1.wav");
 		VID_SetMode (modedescs[vid_line].modenum, vid_current_palette);
 		break;
 
 	case 'T':
 	case 't':
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound ("common/menu1.wav");
 		if (VID_SetMode (modedescs[vid_line].modenum, vid_current_palette))
 		{
 			vid_testingmode = 1;
@@ -766,7 +766,7 @@ void VID_MenuKey (int key)
 
 	case 'D':
 	case 'd':
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound ("common/menu1.wav");
 		firstupdate = 0;
 		Cvar_SetValue ("_vid_default_mode", vid_modenum);
 		break;
