@@ -188,9 +188,9 @@ void CallDispatchFunc( edict_t *ent, int dllFunc, void *funcArg )
 	func = GetDispatchFuncById( ent, dllFunc );
 	if ( func )
 	{
-		func(&ent->v, funcArg);
+		func( &ent->v, funcArg );
 	}
-	else if ( !dllFunc )
+	else if ( dllFunc == 0 )
 	{
 		Con_Printf( "ASSERT FAILURE: entity method (spawn) is null" );
 	}
@@ -281,7 +281,7 @@ Get entity edict_t from offset
 */
 edict_t *PEntityOfEntOffset( int iEntOffset )
 {
-	return sv.edicts + iEntOffset;
+	return PROG_TO_EDICT( iEntOffset );
 }
 
 
@@ -294,7 +294,7 @@ Get global entity offset from and edict_t
 */
 int EntOffsetOfPEntity( edict_t *pEdict )
 {
-	return pEdict - sv.edicts;
+	return EDICT_TO_PROG( pEdict );
 }
 
 
