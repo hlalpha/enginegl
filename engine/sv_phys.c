@@ -138,7 +138,7 @@ qboolean SV_RunThink (edict_t *ent)
 	ent->v.nextthink = 0;
 	pr_global_struct->time = thinktime;
 	pr_global_struct->self = EDICT_TO_PROG(ent);
-	pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
+	pr_global_struct->other = 0;
 	CallDispatchFunc (ent, 1, NULL);
 	return !ent->free;
 }
@@ -732,7 +732,7 @@ void SV_Physics_Pusher (edict_t *ent)
 		ent->v.nextthink = 0;
 		pr_global_struct->time = sv.time;
 		pr_global_struct->self = EDICT_TO_PROG(ent);
-		pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
+		pr_global_struct->other = 0;
 		CallDispatchFunc (ent, 1, NULL);
 		if (ent->free)
 			return;
@@ -1509,7 +1509,7 @@ void SV_Physics (void)
 
 // let the progs know that a new frame has started
 	pr_global_struct->self = EDICT_TO_PROG(sv.edicts);
-	pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
+	pr_global_struct->other = 0;
 	pr_global_struct->time = sv.time;
 	PR_ExecuteProgramFromDLL (3);
 
