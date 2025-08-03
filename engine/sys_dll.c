@@ -31,9 +31,10 @@ DISPATCHFUNC g_pfnDispatchBlocked;
 // sys_dll.c
 edict_t *PEntityOfEntOffset( int iEntOffset );
 int EntOffsetOfPEntity( edict_t *pEdict );
-//
+int IndexOfEdict( int ent );
 char *SzFromIndex( int iString );
 entvars_t *GetVarsOfEnt( edict_t *ent );
+edict_t *FindEntityByVars( entvars_t *pEntVars );
 
 void *GetDispatchFuncById_I( edict_t *ent, int dllFunc );
 void ChangeMethod( void );
@@ -142,8 +143,8 @@ enginefuncs_t g_engfuncsExportedToDlls =
 	GetVarsOfEnt,
 	PEntityOfEntOffset,
 	EntOffsetOfPEntity,
-	NULL, // IndexOfEdict
-	NULL, // PEntityOfEntIndex
+	IndexOfEdict,
+	FindEntityByVars,
 
 	GetModelPtr,
 
@@ -289,14 +290,12 @@ Allocate a entity private data
 */
 void *ED_AllocatePrivateData( edict_t *pEdict, int size )
 {
-	void *pData;
-
 	ED_FreePrivateData( pEdict );
 
 	if ( size <= 0 )
 		return NULL;
 
-	pData = calloc( 1, size );
+	void *pData = calloc( 1, size );
 	pEdict->pvPrivateData = pData;
 
 	return pData;
@@ -349,7 +348,7 @@ edict_t *PEntityOfEntOffset( int iEntOffset )
 ===========
 EntOffsetOfPEntity
 
-Get global entity offset from and edict_t
+Get global entity offset from edict_t
 ===========
 */
 int EntOffsetOfPEntity( edict_t *pEdict )
@@ -361,9 +360,15 @@ int EntOffsetOfPEntity( edict_t *pEdict )
 /*
 ===========
 IndexOfEdict
+
+Weird version of NUM_FOR_EDICT
 ===========
 */
-// IndexOfEdict
+int IndexOfEdict( int ent ) // TODO: Should this be edict_t* ? 
+{
+	// TODO: Check if we're OOB?
+	return ent / pr_edict_size;
+}
 
 
 /*
@@ -394,10 +399,26 @@ entvars_t *GetVarsOfEnt( edict_t *ent )
 
 /*
 ===========
-PEntityOfEntIndex
+FindEntityByVars
 ===========
 */
-// PEntityOfEntIndex
+edict_t *FindEntityByVars( entvars_t *pEntVars )
+{
+	// Nothing is watching
+	if ( sv.num_edicts <= 0 )
+		return NULL;
+
+	for (int i = 0; i < sv.num_edicts; i++)
+	{
+		edict_t *ed = EDICT_NUM(i);
+		if ( &ed->v == pEntVars ) // NOTE: OG enginegl.exe is trying to subtract ed and entvars to check if it's equal -120 (offset to entvars)
+		{
+			return ed;
+		}
+	}
+
+	return NULL;
+}
 
 
 /*

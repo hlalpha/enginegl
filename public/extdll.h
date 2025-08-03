@@ -102,7 +102,7 @@ typedef struct enginefuncs_s
 	struct edict_s*		(*pfnPEntityOfEntOffset)		( int iEntOffset );
 	int					(*pfnEntOffsetOfPEntity)		( struct edict_s *pEdict );
 	int					(*pfnIndexOfEdict)				( int ent ); // TODO
-	struct edict_s*		(*pfnPEntityOfEntIndex)			( int iEntIndex ); // TODO
+	struct edict_s*		(*pfnFindEntityByVars)			( struct entvars_s *pEntVars );
 
 	void*				(*pfnGetModelPtr)				( struct edict_s *pEdict );
 
