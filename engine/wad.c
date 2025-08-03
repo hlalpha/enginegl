@@ -81,8 +81,8 @@ void W_LoadWadFile (char *filename)
 	if (header->identification[0] != 'W'
 	|| header->identification[1] != 'A'
 	|| header->identification[2] != 'D'
-	|| header->identification[3] != '2')
-		Sys_Error ("Wad file %s doesn't have WAD2 id\n",filename);
+	|| header->identification[3] != '3')
+		Sys_Error ("Wad file %s doesn't have WAD3 id\n",filename);
 		
 	wad_numlumps = LittleLong(header->numlumps);
 	infotableofs = LittleLong(header->infotableofs);
@@ -104,7 +104,7 @@ void W_LoadWadFile (char *filename)
 W_GetLumpinfo
 =============
 */
-lumpinfo_t	*W_GetLumpinfo (char *name)
+lumpinfo_t	*W_GetLumpinfo (char *name, qboolean crash)
 {
 	int		i;
 	lumpinfo_t	*lump_p;
@@ -118,7 +118,8 @@ lumpinfo_t	*W_GetLumpinfo (char *name)
 			return lump_p;
 	}
 	
-	Sys_Error ("W_GetLumpinfo: %s not found", name);
+	if (crash)
+		Sys_Error ("W_GetLumpinfo: %s not found", name);
 	return NULL;
 }
 
@@ -126,7 +127,7 @@ void *W_GetLumpName (char *name)
 {
 	lumpinfo_t	*lump;
 	
-	lump = W_GetLumpinfo (name);
+	lump = W_GetLumpinfo (name, true);
 	
 	return (void *)(wad_base + lump->filepos);
 }

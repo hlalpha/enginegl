@@ -35,6 +35,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	TYP_QPIC		66
 #define	TYP_SOUND		67
 #define	TYP_MIPTEX		68
+#define	TYP_COLORMAP	69
+#define	TYP_FONT		70
 
 typedef struct
 {
@@ -68,7 +70,7 @@ extern	byte		*wad_base;
 
 void	W_LoadWadFile (char *filename);
 void	W_CleanupName (char *in, char *out);
-lumpinfo_t	*W_GetLumpinfo (char *name);
+lumpinfo_t	*W_GetLumpinfo (char *name, qboolean crash);
 void	*W_GetLumpName (char *name);
 void	*W_GetLumpNum (int num);
 
