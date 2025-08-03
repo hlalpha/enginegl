@@ -937,9 +937,6 @@ void ED_LoadFromFile (char *data)
 {	
 	edict_t		*ent;
 	int			inhibit;
-#if !defined( QUIVER ) || defined( QUIVER_QUAKE_COMPAT )
-	dfunction_t	*func;
-#endif
 
 	ent = NULL;
 	inhibit = 0;
@@ -997,17 +994,8 @@ void ED_LoadFromFile (char *data)
 			continue;
 		}
 
-#if !defined( QUIVER ) || defined( QUIVER_QUAKE_COMPAT )
-	// look for the spawn function
-		func = ED_FindFunction ( pr_strings + ent->v.classname );
-#endif
-
 		pr_global_struct->self = EDICT_TO_PROG(ent);
 		CallDispatchFunc (ent, 0, NULL);
-#if defined( QUIVER_QUAKE_COMPAT )
-		if (func)
-			PR_ExecuteProgram (func - pr_functions);
-#endif
 	}	
 
 	Con_DPrintf ("%i entities inhibited\n", inhibit);
