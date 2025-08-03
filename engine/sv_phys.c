@@ -140,9 +140,6 @@ qboolean SV_RunThink (edict_t *ent)
 	pr_global_struct->self = EDICT_TO_PROG(ent);
 	pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
 	CallDispatchFunc (ent, 1, NULL);
-#if defined( QUIVER_QUAKE_COMPAT )
-	PR_ExecuteProgram (ent->v.think);
-#endif
 	return !ent->free;
 }
 
@@ -166,10 +163,6 @@ void SV_Impact (edict_t *e1, edict_t *e2)
 		pr_global_struct->self = EDICT_TO_PROG(e1);
 		pr_global_struct->other = EDICT_TO_PROG(e2);
 		CallDispatchFunc (e1, 2, NULL);
-#if defined( QUIVER_QUAKE_COMPAT )
-		if (e1->v.touch)
-			PR_ExecuteProgram (e1->v.touch);
-#endif
 	}
 	
 	if (e2->v.solid != SOLID_NOT)
@@ -177,10 +170,6 @@ void SV_Impact (edict_t *e1, edict_t *e2)
 		pr_global_struct->self = EDICT_TO_PROG(e2);
 		pr_global_struct->other = EDICT_TO_PROG(e1);
 		CallDispatchFunc (e2, 2, NULL);
-#if defined( QUIVER_QUAKE_COMPAT )
-		if (e2->v.touch)
-			PR_ExecuteProgram (e2->v.touch);
-#endif
 	}
 
 	pr_global_struct->self = old_self;
@@ -551,12 +540,6 @@ void SV_PushMove (edict_t *pusher, float movetime)
 				pr_global_struct->self = EDICT_TO_PROG(pusher);
 				pr_global_struct->other = EDICT_TO_PROG(check);
 				CallDispatchFunc (pusher, 4, NULL);
-#if defined( QUIVER_QUAKE_COMPAT )
-				if (pusher->v.blocked)
-				{
-					PR_ExecuteProgram (pusher->v.blocked);
-				}
-#endif
 			}
 			
 		// move back any entities we already moved
@@ -689,12 +672,6 @@ void SV_PushRotate (edict_t *pusher, float movetime)
 				pr_global_struct->self = EDICT_TO_PROG(pusher);
 				pr_global_struct->other = EDICT_TO_PROG(check);
 				CallDispatchFunc (pusher, 4, NULL);
-#if defined( QUIVER_QUAKE_COMPAT )
-				if (pusher->v.blocked)
-				{
-					PR_ExecuteProgram (pusher->v.blocked);
-				}
-#endif
 			}
 			
 		// move back any entities we already moved
@@ -757,9 +734,6 @@ void SV_Physics_Pusher (edict_t *ent)
 		pr_global_struct->self = EDICT_TO_PROG(ent);
 		pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
 		CallDispatchFunc (ent, 1, NULL);
-#if defined( QUIVER_QUAKE_COMPAT )
-		PR_ExecuteProgram (ent->v.think);
-#endif
 		if (ent->free)
 			return;
 	}
@@ -1091,9 +1065,6 @@ void SV_Physics_Client (edict_t	*ent, int num)
 	pr_global_struct->time = sv.time;
 	pr_global_struct->self = EDICT_TO_PROG(ent);
 	PR_ExecuteProgramFromDLL (1);
-#if defined( QUIVER_QUAKE_COMPAT )
-	PR_ExecuteProgram (pr_global_struct->PlayerPreThink);
-#endif
 
 //
 // do a move
@@ -1155,9 +1126,6 @@ void SV_Physics_Client (edict_t	*ent, int num)
 	pr_global_struct->time = sv.time;
 	pr_global_struct->self = EDICT_TO_PROG(ent);
 	PR_ExecuteProgramFromDLL (2);
-#if defined( QUIVER_QUAKE_COMPAT )
-	PR_ExecuteProgram (pr_global_struct->PlayerPostThink);
-#endif
 }
 
 //============================================================================
@@ -1544,9 +1512,6 @@ void SV_Physics (void)
 	pr_global_struct->other = EDICT_TO_PROG(sv.edicts);
 	pr_global_struct->time = sv.time;
 	PR_ExecuteProgramFromDLL (3);
-#if defined( QUIVER_QUAKE_COMPAT )
-	PR_ExecuteProgram (pr_global_struct->StartFrame);
-#endif
 
 //SV_CheckAllEnts ();
 

@@ -59,6 +59,13 @@ void pfnRegisterCvar ( cvar_t *cvar )
 }
 #endif
 
+
+int	STUB_pfnPFDecalIndex( int idx, char *name )
+{
+	Con_Printf( "DecalIndex( %d, %s )\n", idx, name );
+	return 0;
+}
+
 enginefuncs_t g_engfuncsExportedToDlls =
 {
 	PF_precache_model_I,
@@ -75,7 +82,7 @@ enginefuncs_t g_engfuncsExportedToDlls =
 	PF_vectoyaw_I,
 	PF_vectoangles_I,
 	SV_MoveToGoal_I,
-	NULL,
+	NULL, // SV_MoveToOrigin_I
 	PF_changeyaw_I,
 #if defined( QUAKE2 )
 	PF_changepitch_I,
@@ -83,7 +90,7 @@ enginefuncs_t g_engfuncsExportedToDlls =
 	NULL,
 #endif
 	FindEntityByString,
-	NULL,
+	NULL, // GetEntityIllum
 	PF_findradius_I,
 	PF_checkclient_I,
 	PF_makevectors_I,
@@ -96,14 +103,14 @@ enginefuncs_t g_engfuncsExportedToDlls =
 	PF_setorigin_I,
 	PF_sound_I,
 	PF_ambientsound_I,
-	NULL,
-	NULL,
+	NULL, // TraceLine
+	NULL, // TraceToss
 	PF_aim_I,
 	PF_localcmd_I,
 	PF_stuffcmd_I,
 	PF_particle_I,
 	PF_lightstyle_I,
-	NULL,
+	STUB_pfnPFDecalIndex, // DecalIndex
 	PF_pointcontents_I,
 
 	PF_WriteByte_I,
@@ -135,7 +142,7 @@ enginefuncs_t g_engfuncsExportedToDlls =
 	GetVarsOfEnt,
 	PEntityOfEntOffset,
 	EntOffsetOfPEntity,
-	NULL,
+	NULL, // IndexOfEdict
 	NULL, // PEntityOfEntIndex
 
 	GetModelPtr,
@@ -194,6 +201,34 @@ void CallDispatchFunc( edict_t *ent, int dllFunc, void *funcArg )
 	{
 		Con_Printf( "ASSERT FAILURE: entity method (spawn) is null" );
 	}
+
+#if defined( QUIVER_QUAKE_COMPAT )
+	switch ( dllFunc )
+	{
+	//case 0: // Spawn: can't call spawn from here without changing the function signature
+	//	break;
+	case 1: // Think:
+		if (ent->v.think)
+			PR_ExecuteProgram (ent->v.think);
+		break;
+	case 2: // Touch:
+		if (ent->v.touch)
+			PR_ExecuteProgram (ent->v.touch);
+		break;
+	//case 3: // Use: not used anywhere
+	//	break;
+	case 4: // Blocked:
+		if (ent->v.blocked)
+			PR_ExecuteProgram (ent->v.blocked);
+		break;
+	//case 5: // KeyValue: used only by extDLL
+	//	break;
+	//case 6: // Save: used only by extDLL
+	//	break;
+	//case 7: // Restore?: in theory must be a Restore function for the saverestore system
+	//	break;
+	};
+#endif
 }
 
 
@@ -720,13 +755,11 @@ void PR_ExecuteProgramFromDLL( int nProgram )
 		//ed->v.pSystemGlobals = pr_global_struct;
 
 		wrap->func( pr_global_struct );
+#if !defined( QUIVER_QUAKE_COMPAT )
+		// In QCVM compat mode we want both extDLL and QC functions to be called
 		return;
-	}
-
-#if defined( QUIVER_QUAKE_COMPAT )
-	// In QCVM compat mode we're calling the PR_ExecuteProgram right after PR_ExecuteProgramFromDLL
-	return;
 #endif
+	}
 
 	switch ( nProgram )
 	{

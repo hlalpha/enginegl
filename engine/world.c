@@ -303,10 +303,6 @@ void SV_TouchLinks ( edict_t *ent, areanode_t *node )
 		pr_global_struct->other = EDICT_TO_PROG(ent);
 		pr_global_struct->time = sv.time;
 		CallDispatchFunc (touch, 2, NULL);
-#if defined( QUIVER_QUAKE_COMPAT )
-		if (touch->v.touch)
-			PR_ExecuteProgram (touch->v.touch);
-#endif
 
 		pr_global_struct->self = old_self;
 		pr_global_struct->other = old_other;
