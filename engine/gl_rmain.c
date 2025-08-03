@@ -85,7 +85,6 @@ cvar_t	r_wateralpha = {"r_wateralpha","1"};
 cvar_t	r_dynamic = {"r_dynamic","1"};
 cvar_t	r_novis = {"r_novis","0"};
 
-cvar_t	gl_finish = {"gl_finish","0"};
 cvar_t	gl_clear = {"gl_clear","0"};
 cvar_t	gl_cull = {"gl_cull","1"};
 cvar_t	gl_texsort = {"gl_texsort","1"};
@@ -1121,9 +1120,6 @@ void R_RenderView (void)
 	}
 
 	mirror = false;
-
-	if (gl_finish.value)
-		glFinish ();
 
 	R_Clear ();
 

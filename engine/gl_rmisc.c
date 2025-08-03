@@ -171,7 +171,6 @@ R_Init
 void R_Init (void)
 {	
 	extern byte *hunk_base;
-	extern cvar_t gl_finish;
 
 	Cmd_AddCommand ("timerefresh", R_TimeRefresh_f);	
 	Cmd_AddCommand ("envmap", R_Envmap_f);	
@@ -189,7 +188,6 @@ void R_Init (void)
 	Cvar_RegisterVariable (&r_novis);
 	Cvar_RegisterVariable (&r_speeds);
 
-	Cvar_RegisterVariable (&gl_finish);
 	Cvar_RegisterVariable (&gl_clear);
 	Cvar_RegisterVariable (&gl_texsort);
 
