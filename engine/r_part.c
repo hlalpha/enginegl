@@ -655,14 +655,17 @@ void R_DrawParticles (void)
 	float			time1;
 	float			dvel;
 	float			frametime;
+	byte			color[4];
 	
 #ifdef GLQUAKE
 	vec3_t			up, right;
 	float			scale;
 
     GL_Bind(particletexture);
+	glEnable (GL_ALPHA_TEST);
 	glEnable (GL_BLEND);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBegin (GL_TRIANGLES);
 
 	VectorScale (vup, 1.5, up);
@@ -717,7 +720,9 @@ void R_DrawParticles (void)
 			scale = 1;
 		else
 			scale = 1 + scale * 0.004;
-		glColor3ubv ((byte *)&d_8to24table[(int)p->color]);
+		memcpy ( color, &host_basepal[(int)p->color * 3], sizeof(color));
+		color[3] = 255;
+		glColor3ubv (color);
 		glTexCoord2f (0,0);
 		glVertex3fv (p->org);
 		glTexCoord2f (1,0);
@@ -792,6 +797,7 @@ void R_DrawParticles (void)
 #ifdef GLQUAKE
 	glEnd ();
 	glDisable (GL_BLEND);
+	glDisable (GL_ALPHA_TEST);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 #else
 	D_EndParticles ();

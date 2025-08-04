@@ -186,7 +186,7 @@ void SCR_DrawCenterString (void)
 			if (start[l] == '\n' || !start[l])
 				break;
 		x = (vid.width - l*8)/2;
-		for (j=0 ; j<l ; j++, x+=8)
+		for (j=0 ; j<l ; j++, x+=8) // TODO(SanyaSho): Add support for custom fonts
 		{
 			Draw_Character (x, y, start[j]);	
 			if (!remaining--)
@@ -387,9 +387,9 @@ void SCR_Init (void)
 	Cmd_AddCommand ("sizeup",SCR_SizeUp_f);
 	Cmd_AddCommand ("sizedown",SCR_SizeDown_f);
 
-	scr_ram = Draw_PicFromWad ("ram");
-	scr_net = Draw_PicFromWad ("net");
-	scr_turtle = Draw_PicFromWad ("turtle");
+	scr_ram = Draw_PicFromWad ("lambda");
+	scr_net = Draw_PicFromWad ("lambda");
+	scr_turtle = Draw_PicFromWad ("lambda");
 
 	scr_initialized = true;
 }
@@ -459,17 +459,13 @@ DrawPause
 */
 void SCR_DrawPause (void)
 {
-	qpic_t	*pic;
-
 	if (!scr_showpause.value)		// turn off for screenshots
 		return;
 
 	if (!cl.paused)
 		return;
 
-	pic = Draw_CachePic ("gfx/pause.lmp");
-	Draw_Pic ( (vid.width - pic->width)/2, 
-		(vid.height - 48 - pic->height)/2, pic);
+	Draw_BeginDisc();
 }
 
 
@@ -481,14 +477,10 @@ SCR_DrawLoading
 */
 void SCR_DrawLoading (void)
 {
-	qpic_t	*pic;
-
 	if (!scr_drawloading)
 		return;
 		
-	pic = Draw_CachePic ("gfx/loading.lmp");
-	Draw_Pic ( (vid.width - pic->width)/2, 
-		(vid.height - 48 - pic->height)/2, pic);
+	Draw_BeginDisc();
 }
 
 
@@ -668,7 +660,6 @@ void SCR_BeginLoadingPlaque (void)
 	scr_fullupdate = 0;
 	Sbar_Changed ();
 	SCR_UpdateScreen ();
-	scr_drawloading = false;
 
 	scr_disabled_for_loading = true;
 	scr_disabled_time = realtime;
@@ -685,6 +676,7 @@ void SCR_EndLoadingPlaque (void)
 {
 	scr_disabled_for_loading = false;
 	scr_fullupdate = 0;
+	scr_drawloading = false;
 	Con_ClearNotify ();
 }
 
@@ -780,7 +772,7 @@ void SCR_BringDownConsole (void)
 		SCR_UpdateScreen ();
 
 	cl.cshifts[0].percent = 0;		// no area contents palette on next frame
-	VID_SetPalette (host_basepal);
+	//VID_SetPalette (host_basepal);
 }
 
 void SCR_TileClear (void)

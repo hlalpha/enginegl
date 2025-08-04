@@ -32,7 +32,7 @@ int		lightmap_bytes;		// 1, 2, or 4
 
 int		lightmap_textures;
 
-unsigned		blocklights[18*18];
+colorVec		blocklights[18*18];
 
 #define	BLOCK_WIDTH		128
 #define	BLOCK_HEIGHT	128
@@ -75,6 +75,8 @@ void R_AddDynamicLights (msurface_t *surf)
 	int			i;
 	int			smax, tmax;
 	mtexinfo_t	*tex;
+	byte		*color;
+	colorVec	*bl;
 
 	smax = (surf->extents[0]>>4)+1;
 	tmax = (surf->extents[1]>>4)+1;
@@ -85,6 +87,9 @@ void R_AddDynamicLights (msurface_t *surf)
 		if ( !(surf->dlightbits & (1<<lnum) ) )
 			continue;		// not lit by this light
 
+		bl = blocklights;
+
+		color = cl_dlights[lnum].color;
 		rad = cl_dlights[lnum].radius;
 		dist = DotProduct (cl_dlights[lnum].origin, surf->plane->normal) -
 				surf->plane->dist;
@@ -111,7 +116,7 @@ void R_AddDynamicLights (msurface_t *surf)
 			td = local[1] - t*16;
 			if (td < 0)
 				td = -td;
-			for (s=0 ; s<smax ; s++)
+			for (s=0 ; s<smax ; s++, bl++)
 			{
 				sd = local[0] - s*16;
 				if (sd < 0)
@@ -121,7 +126,11 @@ void R_AddDynamicLights (msurface_t *surf)
 				else
 					dist = td + (sd>>1);
 				if (dist < minlight)
-					blocklights[t*smax + s] += (rad - dist)*256;
+				{
+					bl->r += (int)(color[0] * (rad - dist)*256) >> 8;
+					bl->g += (int)(color[1] * (rad - dist)*256) >> 8;
+					bl->b += (int)(color[2] * (rad - dist)*256) >> 8;
+				}
 			}
 		}
 	}
@@ -144,7 +153,7 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 	unsigned	scale;
 	int			maps;
 	int			lightadj[4];
-	unsigned	*bl;
+	colorVec	*bl;
 
 	surf->cached_dlight = (surf->dlightframe == r_framecount);
 
@@ -156,14 +165,23 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 // set to full bright if no light data
 	if (r_fullbright.value || !cl.worldmodel->lightdata)
 	{
-		for (i=0 ; i<size ; i++)
-			blocklights[i] = 255*256;
+		for (i=0, bl=blocklights ; i<size ; i++, bl++)
+		{
+			bl->r = 255*256;
+			bl->g = 255*256;
+			bl->b = 255*256;
+		}
+
 		goto store;
 	}
 
 // clear to no light
-	for (i=0 ; i<size ; i++)
-		blocklights[i] = 0;
+	for (i=0, bl=blocklights ; i<size ; i++, bl++)
+	{
+		bl->r = 0;
+		bl->g = 0;
+		bl->b = 0;
+	}
 
 // add all the lightmaps
 	if (lightmap)
@@ -172,9 +190,13 @@ void R_BuildLightMap (msurface_t *surf, byte *dest, int stride)
 		{
 			scale = d_lightstylevalue[surf->styles[maps]];
 			surf->cached_light[maps] = scale;	// 8.8 fraction
-			for (i=0 ; i<size ; i++)
-				blocklights[i] += lightmap[i] * scale;
-			lightmap += size;	// skip to next lightmap
+			for ( i = 0, bl = blocklights; i<size; i++, bl++, lightmap += 3 )
+			{
+				bl->r += lightmap[0] * scale;
+				bl->g += lightmap[1] * scale;
+				bl->b += lightmap[2] * scale;
+			}
+			//lightmap += size * 3;	// skip to next lightmap // TODO: Must use this code!
 		}
 
 // add all the dynamic lights
@@ -190,13 +212,26 @@ store:
 		bl = blocklights;
 		for (i=0 ; i<tmax ; i++, dest += stride)
 		{
-			for (j=0 ; j<smax ; j++)
+			for (j=0 ; j<smax ; ++j)
 			{
-				t = *bl++;
-				t >>= 7;
-				if (t > 255)
-					t = 255;
-				dest[3] = 255-t;
+				// NOTE: I'm not sure about this place here, the OG enginegl.exe decompile is showing some for ( ... ) cycle which
+				// i can't use because my implementation of RGB lightmaps is using struct from the newer GoldSrc build.
+				int r = bl->r >> 6;
+				if (r > 1023)
+					r = 1023;
+				int g = bl->g >> 6;
+				if (g > 1023)
+					g = 1023;
+				int b = bl->b >> 6;
+				if (b > 1023)
+					b = 1023;
+
+				dest[0] = lightgammatable[r] >> 2;
+				dest[1] = lightgammatable[g] >> 2;
+				dest[2] = lightgammatable[b] >> 2;
+				dest[3] = 255;
+
+				bl++;
 				dest += 4;
 			}
 		}
@@ -209,8 +244,8 @@ store:
 		{
 			for (j=0 ; j<smax ; j++)
 			{
-				t = *bl++;
-				t >>= 7;
+				t = bl->r >> 8;
+				bl++;
 				if (t > 255)
 					t = 255;
 				dest[j] = 255-t;
@@ -230,10 +265,27 @@ R_TextureAnimation
 Returns the proper texture for a given time and base texture
 ===============
 */
-texture_t *R_TextureAnimation (texture_t *base)
+texture_t *R_TextureAnimation (msurface_t *surf)
 {
-	int		reletive;
-	int		count;
+	int				reletive;
+	int				count;
+	static int		randbuf[20][20];
+	int				i, j;
+	int				tx, ty;
+	texture_t		*base;
+
+	base = surf->texinfo->texture;
+
+	// fill the randtable for custom textures
+	if (!randbuf[0][0])
+	{
+		// Magic '97 number!
+		srand( 4819 );
+
+		for (i=0 ; i<20 ; i++)
+			for (j=0 ; j<20 ; j++)
+				randbuf[i][j] = rand();
+	}
 
 	if (currententity->frame)
 	{
@@ -244,7 +296,17 @@ texture_t *R_TextureAnimation (texture_t *base)
 	if (!base->anim_total)
 		return base;
 
-	reletive = (int)(cl.time*10) % base->anim_total;
+	if (base->name[0] == '-')
+	{
+		tx = (int)(((base->width  << 16) + surf->texturemins[0]) / base->width)  % 20;
+		ty = (int)(((base->height << 16) + surf->texturemins[1]) / base->height) % 20;
+
+		reletive = randbuf[tx][ty] % base->anim_total;
+	}
+	else
+	{
+		reletive = (int)(cl.time*10) % base->anim_total;
+	}
 
 	count = 0;	
 	while (base->anim_min > reletive || base->anim_max <= reletive)
@@ -324,7 +386,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 	{
 		p = s->polys;
 
-		t = R_TextureAnimation (s->texinfo->texture);
+		t = R_TextureAnimation (s);
 		GL_Bind (t->gl_texturenum);
 		glBegin (GL_POLYGON);
 		v = p->verts[0];
@@ -389,7 +451,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 	//
 	p = s->polys;
 
-	t = R_TextureAnimation (s->texinfo->texture);
+	t = R_TextureAnimation (s);
 	GL_Bind (t->gl_texturenum);
 	DrawGLWaterPoly (p);
 
@@ -428,7 +490,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 		if (gl_mtexable) {
 			p = s->polys;
 
-			t = R_TextureAnimation (s->texinfo->texture);
+			t = R_TextureAnimation (s);
 			// Binds world to texture env 0
 			GL_SelectTexture(TEXTURE0_SGIS);
 			GL_Bind (t->gl_texturenum);
@@ -463,7 +525,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 		} else {
 			p = s->polys;
 
-			t = R_TextureAnimation (s->texinfo->texture);
+			t = R_TextureAnimation (s);
 			GL_Bind (t->gl_texturenum);
 			glBegin (GL_POLYGON);
 			v = p->verts[0];
@@ -516,11 +578,13 @@ void R_DrawSequentialPoly (msurface_t *s)
 		EmitSkyPolys (s);
 
 		glEnable (GL_BLEND);
+		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		GL_Bind (alphaskytexture);
 		speedscale = realtime*16;
 		speedscale -= (int)speedscale & ~127;
 		EmitSkyPolys (s);
-
+		if (gl_lightmap_format == GL_LUMINANCE)
+			glBlendFunc (0, GL_ONE_MINUS_SRC_COLOR);
 		glDisable (GL_BLEND);
 		return;
 	}
@@ -532,7 +596,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 	if (gl_mtexable) {
 		p = s->polys;
 
-		t = R_TextureAnimation (s->texinfo->texture);
+		t = R_TextureAnimation (s);
 		GL_SelectTexture(TEXTURE0_SGIS);
 		GL_Bind (t->gl_texturenum);
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -570,7 +634,7 @@ void R_DrawSequentialPoly (msurface_t *s)
 	} else {
 		p = s->polys;
 
-		t = R_TextureAnimation (s->texinfo->texture);
+		t = R_TextureAnimation (s);
 		GL_Bind (t->gl_texturenum);
 		DrawGLWaterPoly (p);
 
@@ -678,13 +742,21 @@ void R_BlendLightmaps (void)
 
 	glDepthMask (0);		// don't bother writing Z
 
-	if (gl_lightmap_format == GL_LUMINANCE)
-		glBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
-	else if (gl_lightmap_format == GL_INTENSITY)
+	switch (gl_lightmap_format)
 	{
+	case GL_LUMINANCE:
+		glBlendFunc (GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+		break;
+	case GL_INTENSITY:
 		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		glColor4f (0,0,0,1);
 		glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		break;
+	case GL_RGBA:
+		glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+		glBlendFunc (GL_DST_COLOR, GL_SRC_COLOR);
+		glColor4f (0.66666669, 0.66666669, 0.66666669, 1.0); // ?
+		break;
 	}
 
 	if (!r_lightmap.value)
@@ -767,7 +839,7 @@ void R_RenderBrushPoly (msurface_t *fa)
 		return;
 	}
 		
-	t = R_TextureAnimation (fa->texinfo->texture);
+	t = R_TextureAnimation (fa);
 	GL_Bind (t->gl_texturenum);
 
 	if (fa->flags & SURF_DRAWTURB)
@@ -1599,7 +1671,6 @@ void GL_BuildLightmaps (void)
 {
 	int		i, j;
 	model_t	*m;
-	extern qboolean isPermedia;
 
 	memset (allocated, 0, sizeof(allocated));
 
@@ -1611,10 +1682,7 @@ void GL_BuildLightmaps (void)
 		texture_extension_number += MAX_LIGHTMAPS;
 	}
 
-	gl_lightmap_format = GL_LUMINANCE;
-	// default differently on the Permedia
-	if (isPermedia)
-		gl_lightmap_format = GL_RGBA;
+	gl_lightmap_format = GL_RGBA; // Use GL_RGBA by default for HL
 
 	if (COM_CheckParm ("-lm_1"))
 		gl_lightmap_format = GL_LUMINANCE;

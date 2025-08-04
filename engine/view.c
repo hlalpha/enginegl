@@ -256,9 +256,13 @@ cshift_t	cshift_water = { {130,80,50}, 128 };
 cshift_t	cshift_slime = { {0,25,5}, 150 };
 cshift_t	cshift_lava = { {255,80,0}, 150 };
 
-cvar_t		v_gamma = {"gamma", "1", true};
+cvar_t		v_gamma = {"gamma", "2.5", true};
+cvar_t		v_lightgamma = {"lightgamma", "2.5"};
+cvar_t		v_texgamma = {"texgamma", "1.8"};
+cvar_t		v_brightness = {"brightness", "0.0", true};
 
-byte		gammatable[256];	// palette is sent through this
+byte		texgammatable[256];	// palette is sent through this
+int			lightgammatable[1024];
 
 #ifdef	GLQUAKE
 byte		ramps[3][256];
@@ -267,23 +271,50 @@ float		v_blend[4];		// rgba 0.0 - 1.0
 
 void BuildGammaTable (float g)
 {
-	int		i, inf;
-	
-	if (g == 1.0)
+	int		i, j;
+	int		inf;
+	float	inf2, r;
+	float	texgamma, lightgamma;
+
+	if (g > 1.0)
 	{
-		for (i=0 ; i<256 ; i++)
-			gammatable[i] = i;
-		return;
+		// limit maximum gamma value to 3
+		if (g > 3.0)
+			g = 3.0;
+
+		texgamma = v_texgamma.value / g;
+		lightgamma = v_brightness.value > 0.0 ? v_brightness.value <= 1.0f ? 0.125f - v_brightness.value * v_brightness.value * 0.075f : 0.05f : 0.125f;
+	}
+	else
+	{
+		texgamma = g;
+		lightgamma = 0.125f;
 	}
 	
 	for (i=0 ; i<256 ; i++)
 	{
-		inf = 255 * pow ( (i+0.5)/255.5 , g ) + 0.5;
+		inf = 255 * pow ( i/255.0, texgamma );
 		if (inf < 0)
 			inf = 0;
 		if (inf > 255)
 			inf = 255;
-		gammatable[i] = inf;
+		texgammatable[i] = inf;
+	}
+
+	for (j=0; j<1024; j++)
+	{
+		inf2 = pow ( j/1023.0, v_lightgamma.value );
+		if (lightgamma <= inf2)
+			r = (inf2 - lightgamma) / (1.0 - lightgamma) * 0.875 + 0.125;
+		else
+			r = inf2 / lightgamma * 0.125;
+
+		inf = 1023 * pow ( r, 1.0 / v_gamma.value );
+		if (inf < 0)
+			inf = 0;
+		if (inf > 1023)
+			inf = 1023;
+		lightgammatable[j] = inf;
 	}
 }
 
@@ -295,12 +326,18 @@ V_CheckGamma
 qboolean V_CheckGamma (void)
 {
 	static float oldgammavalue;
+	static float oldlightgammavalue;
+	static float oldbrightnessvalue;
 	
-	if (v_gamma.value == oldgammavalue)
+	if (v_gamma.value == oldgammavalue && v_lightgamma.value == oldlightgammavalue && v_brightness.value == oldbrightnessvalue)
 		return false;
+
 	oldgammavalue = v_gamma.value;
+	oldlightgammavalue = v_lightgamma.value;
+	oldbrightnessvalue = v_brightness.value;
 	
 	BuildGammaTable (v_gamma.value);
+	D_FlushCaches();
 	vid.recalc_refdef = 1;				// force a surface cache flush
 	
 	return true;
@@ -587,9 +624,9 @@ void V_UpdatePalette (void)
 		if (ib > 255)
 			ib = 255;
 
-		ramps[0][i] = gammatable[ir];
-		ramps[1][i] = gammatable[ig];
-		ramps[2][i] = gammatable[ib];
+		ramps[0][i] = texgammatable[ir];
+		ramps[1][i] = texgammatable[ig];
+		ramps[2][i] = texgammatable[ib];
 	}
 
 	basepal = host_basepal;
@@ -1106,8 +1143,11 @@ void V_Init (void)
 	Cvar_RegisterVariable (&v_kickroll);
 	Cvar_RegisterVariable (&v_kickpitch);	
 	
-	BuildGammaTable (1.0);	// no gamma yet
+	BuildGammaTable (2.5);	// no gamma yet
 	Cvar_RegisterVariable (&v_gamma);
+	Cvar_RegisterVariable (&v_lightgamma);
+	Cvar_RegisterVariable (&v_texgamma);
+	Cvar_RegisterVariable (&v_brightness);
 }
 
 

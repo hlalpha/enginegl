@@ -96,8 +96,6 @@ static int	windowed_default;
 unsigned char	vid_curpal[256*3];
 static qboolean fullsbardraw = false;
 
-static float vid_gamma = 1.0;
-
 HGLRC	baseRC;
 HDC		maindc;
 
@@ -108,10 +106,6 @@ cvar_t	gl_ztrick = {"gl_ztrick","1"};
 HWND WINAPI InitializeWindow (HINSTANCE hInstance, int nCmdShow);
 
 viddef_t	vid;				// global video state
-
-unsigned short	d_8to16table[256];
-unsigned	d_8to24table[256];
-unsigned char d_15to8table[65536];
 
 float		gldepthmin, gldepthmax;
 
@@ -134,8 +128,6 @@ PROC glVertexPointerEXT;
 
 typedef void (APIENTRY *lp3DFXFUNC) (int, int, int, int, int, const void*);
 lp3DFXFUNC glColorTableEXT;
-qboolean is8bit = false;
-qboolean isPermedia = false;
 qboolean gl_mtexable = false;
 
 //====================================
@@ -441,7 +433,6 @@ int VID_SetMode (int modenum, unsigned char *palette)
 // ourselves at the top of the z order, then grab the foreground again,
 // Who knows if it helps, but it probably doesn't hurt
 	SetForegroundWindow (mainwindow);
-	VID_SetPalette (palette);
 	vid_modenum = modenum;
 	Cvar_SetValue ("vid_mode", (float)vid_modenum);
 
@@ -464,8 +455,6 @@ int VID_SetMode (int modenum, unsigned char *palette)
 
 	if (!msg_suppress_1)
 		Con_SafePrintf ("Video mode %s initialized.\n", VID_GetModeDescription (vid_modenum));
-
-	VID_SetPalette (palette);
 
 	vid.recalc_refdef = 1;
 
@@ -613,9 +602,6 @@ void GL_Init (void)
     if (strnicmp(gl_renderer,"PowerVR",7)==0)
          fullsbardraw = true;
 
-    if (strnicmp(gl_renderer,"Permedia",8)==0)
-         isPermedia = true;
-
 	CheckTextureExtensions ();
 	CheckMultiTextureExtensions ();
 
@@ -698,66 +684,6 @@ void GL_EndRendering (void)
 	}
 	if (fullsbardraw)
 		Sbar_Changed();
-}
-
-void	VID_SetPalette (unsigned char *palette)
-{
-	byte	*pal;
-	unsigned r,g,b;
-	unsigned v;
-	int     r1,g1,b1;
-	int		j,k,l,m;
-	unsigned short i;
-	unsigned	*table;
-	FILE *f;
-	char s[255];
-	HWND hDlg, hProgress;
-	float gamma;
-
-//
-// 8 8 8 encoding
-//
-	pal = palette;
-	table = d_8to24table;
-	for (i=0 ; i<256 ; i++)
-	{
-		r = pal[0];
-		g = pal[1];
-		b = pal[2];
-		pal += 3;
-		
-//		v = (255<<24) + (r<<16) + (g<<8) + (b<<0);
-//		v = (255<<0) + (r<<8) + (g<<16) + (b<<24);
-		v = (255<<24) + (r<<0) + (g<<8) + (b<<16);
-		*table++ = v;
-	}
-	d_8to24table[255] &= 0xffffff;	// 255 is transparent
-
-	// JACK: 3D distance calcs - k is last closest, l is the distance.
-	// FIXME: Precalculate this and cache to disk.
-	for (i=0; i < (1<<15); i++) {
-		/* Maps
-			000000000000000
-			000000000011111 = Red  = 0x1F
-			000001111100000 = Blue = 0x03E0
-			111110000000000 = Grn  = 0x7C00
-		*/
-		r = ((i & 0x1F) << 3)+4;
-		g = ((i & 0x03E0) >> 2)+4;
-		b = ((i & 0x7C00) >> 7)+4;
-		pal = (unsigned char *)d_8to24table;
-		for (v=0,k=0,l=10000*10000; v<256; v++,pal+=4) {
-			r1 = r-pal[0];
-			g1 = g-pal[1];
-			b1 = b-pal[2];
-			j = (r1*r1)+(g1*g1)+(b1*b1);
-			if (j<l) {
-				k=v;
-				l=j;
-			}
-		}
-		d_15to8table[i]=k;
-	}
 }
 
 BOOL	gammaworks;
@@ -1503,68 +1429,6 @@ void VID_InitFullDIB (HINSTANCE hInstance)
 		Con_SafePrintf ("No fullscreen DIB modes found\n");
 }
 
-qboolean VID_Is8bit() {
-	return is8bit;
-}
-
-#define GL_SHARED_TEXTURE_PALETTE_EXT 0x81FB
-
-void VID_Init8bitPalette() 
-{
-	// Check for 8bit Extensions and initialize them.
-	int i;
-	char thePalette[256*3];
-	char *oldPalette, *newPalette;
-
-	glColorTableEXT = (void *)wglGetProcAddress("glColorTableEXT");
-    if (!glColorTableEXT || strstr(gl_extensions, "GL_EXT_shared_texture_palette") ||
-		COM_CheckParm("-no8bit"))
-		return;
-
-	Con_SafePrintf("8-bit GL extensions enabled.\n");
-    glEnable( GL_SHARED_TEXTURE_PALETTE_EXT );
-	oldPalette = (char *) d_8to24table; //d_8to24table3dfx;
-	newPalette = thePalette;
-	for (i=0;i<256;i++) {
-		*newPalette++ = *oldPalette++;
-		*newPalette++ = *oldPalette++;
-		*newPalette++ = *oldPalette++;
-		oldPalette++;
-	}
-	glColorTableEXT(GL_SHARED_TEXTURE_PALETTE_EXT, GL_RGB, 256, GL_RGB, GL_UNSIGNED_BYTE,
-		(void *) thePalette);
-	is8bit = TRUE;
-}
-
-static void Check_Gamma (unsigned char *pal)
-{
-	float	f, inf;
-	unsigned char	palette[768];
-	int		i;
-
-	if ((i = COM_CheckParm("-gamma")) == 0) {
-		if ((gl_renderer && strstr(gl_renderer, "Voodoo")) ||
-			(gl_vendor && strstr(gl_vendor, "3Dfx")))
-			vid_gamma = 1;
-		else
-			vid_gamma = 0.7; // default to 0.7 on non-3dfx hardware
-	} else
-		vid_gamma = Q_atof(com_argv[i+1]);
-
-	for (i=0 ; i<768 ; i++)
-	{
-		f = pow ( (pal[i]+1)/256.0 , vid_gamma );
-		inf = f*255 + 0.5;
-		if (inf < 0)
-			inf = 0;
-		if (inf > 255)
-			inf = 255;
-		palette[i] = inf;
-	}
-
-	memcpy (pal, palette, sizeof(palette));
-}
-
 /*
 ===================
 VID_Init
@@ -1796,9 +1660,6 @@ void	VID_Init (unsigned char *palette)
 
 	DestroyWindow (hwnd_dialog);
 
-	Check_Gamma(palette);
-	VID_SetPalette (palette);
-
 	VID_SetMode (vid_default, palette);
 
     maindc = GetDC(mainwindow);
@@ -1816,9 +1677,6 @@ void	VID_Init (unsigned char *palette)
 	Sys_mkdir (gldir);
 
 	vid_realmode = vid_modenum;
-
-	// Check for 3DFX Extensions and initialize them.
-	VID_Init8bitPalette();
 
 	vid_menudrawfn = VID_MenuDraw;
 	vid_menukeyfn = VID_MenuKey;

@@ -138,7 +138,7 @@ void R_TransformFrustum (void);
 void R_SetSkyFrame (void);
 void R_DrawSurfaceBlock16 (void);
 void R_DrawSurfaceBlock8 (void);
-texture_t *R_TextureAnimation (texture_t *base);
+texture_t *R_TextureAnimation (msurface_t *surf);
 
 #if	id386
 

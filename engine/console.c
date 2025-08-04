@@ -479,7 +479,7 @@ The input line scrolls horizontally if typing goes beyond the right edge
 */
 void Con_DrawInput (void)
 {
-	int		y;
+	int		x, y;
 	int		i;
 	char	*text;
 
@@ -500,10 +500,11 @@ void Con_DrawInput (void)
 		text += 1 + key_linepos - con_linewidth;
 		
 // draw it
-	y = con_vislines-16;
+	x = 8;
+	y = con_vislines - draw_chars->rowheight - 2;
 
 	for (i=0 ; i<con_linewidth ; i++)
-		Draw_Character ( (i+1)<<3, con_vislines - 16, text[i]);
+		x += Draw_Character ( x, y, text[i]);
 
 // remove cursor
 	key_lines[edit_line][key_linepos] = 0;
@@ -521,7 +522,7 @@ void Con_DrawNotify (void)
 {
 	int		x, v;
 	char	*text;
-	int		i;
+	int		i, j;
 	float	time;
 	extern char chat_buffer[];
 
@@ -541,10 +542,11 @@ void Con_DrawNotify (void)
 		clearnotify = 0;
 		scr_copytop = 1;
 
-		for (x = 0 ; x < con_linewidth ; x++)
-			Draw_Character ( (x+1)<<3, v, text[x]);
+		x = 8;
+		for (j = 0 ; j < con_linewidth ; j++)
+			x += Draw_Character ( x, v, text[j]);
 
-		v += 8;
+		v += draw_chars->rowheight;
 	}
 
 
@@ -555,14 +557,14 @@ void Con_DrawNotify (void)
 	
 		x = 0;
 		
-		Draw_String (8, v, "say:");
+		j = Draw_String (8, v, "say:");
 		while(chat_buffer[x])
 		{
-			Draw_Character ( (x+5)<<3, v, chat_buffer[x]);
+			j += Draw_Character ( j, v, chat_buffer[x]);
 			x++;
 		}
-		Draw_Character ( (x+5)<<3, v, 10+((int)(realtime*con_cursorspeed)&1));
-		v += 8;
+		Draw_Character ( 8 * x + 40, v, 10+((int)(realtime*con_cursorspeed)&1));
+		v += draw_chars->rowheight;
 	}
 	
 	if (v > con_notifylines)
@@ -579,10 +581,11 @@ The typing input line at the bottom should only be drawn if typing is allowed
 */
 void Con_DrawConsole (int lines, qboolean drawinput)
 {
-	int				i, x, y;
+	int				i, x, y, k;
 	int				rows;
 	char			*text;
 	int				j;
+	int				rowheight;
 	
 	if (lines <= 0)
 		return;
@@ -593,18 +596,21 @@ void Con_DrawConsole (int lines, qboolean drawinput)
 // draw the text
 	con_vislines = lines;
 
-	rows = (lines-16)>>3;		// rows of text to draw
-	y = lines - 16 - (rows<<3);	// may start slightly negative
+	rowheight = draw_chars->rowheight;
 
-	for (i= con_current - rows + 1 ; i<=con_current ; i++, y+=8 )
+	rows = (lines-16) / rowheight;			// rows of text to draw
+	y = lines - 16 - (rows * rowheight);	// may start slightly negative
+
+	for (i= con_current - rows + 1 ; i<=con_current ; i++, y+=rowheight )
 	{
 		j = i - con_backscroll;
 		if (j<0)
 			j = 0;
 		text = con_text + (j % con_totallines)*con_linewidth;
 
-		for (x=0 ; x<con_linewidth ; x++)
-			Draw_Character ( (x+1)<<3, y, text[x]);
+		x = 8;
+		for (k=0; k<con_linewidth; k++)
+			x += Draw_Character ( x, y, text[k]);
 	}
 
 // draw the input prompt, user text, and cursor if desired

@@ -20,8 +20,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // view.h
 
 extern	cvar_t		v_gamma;
+extern	cvar_t		v_lightgamma;
+extern	cvar_t		v_texgamma;
+extern	cvar_t		v_brightness;
 
-extern	byte		gammatable[256];	// palette is sent through this
+extern	byte		texgammatable[256];	// palette is sent through this
+extern	int			lightgammatable[1024];
 extern	byte		ramps[3][256];
 extern float v_blend[4];
 

@@ -338,12 +338,13 @@ Mod_LoadTextures
 */
 void Mod_LoadTextures (lump_t *l)
 {
-	int		i, j, pixels, num, max, altmax;
+	int		i, j, pixels, palette, num, max, altmax;
 	miptex_t	*mt;
 	texture_t	*tx, *tx2;
 	texture_t	*anims[10];
 	texture_t	*altanims[10];
 	dmiptexlump_t *m;
+	unsigned char *pPal;
 
 	if (!l->filelen)
 	{
@@ -371,7 +372,8 @@ void Mod_LoadTextures (lump_t *l)
 		if ( (mt->width & 15) || (mt->height & 15) )
 			Sys_Error ("Texture %s is not 16 aligned", mt->name);
 		pixels = mt->width*mt->height/64*85;
-		tx = Hunk_AllocName (sizeof(texture_t) +pixels, loadname );
+		palette = *(unsigned short *)((byte *)mt + pixels + sizeof( miptex_t )) * 3;
+		tx = Hunk_AllocName ( sizeof(texture_t) + palette, loadname );
 		loadmodel->textures[i] = tx;
 
 		memcpy (tx->name, mt->name, sizeof(tx->name));
@@ -379,16 +381,17 @@ void Mod_LoadTextures (lump_t *l)
 		tx->height = mt->height;
 		for (j=0 ; j<MIPLEVELS ; j++)
 			tx->offsets[j] = mt->offsets[j] + sizeof(texture_t) - sizeof(miptex_t);
+		pPal = (byte *)mt + pixels + sizeof( miptex_t ) + 2;
+		tx->pPal = (byte *)(tx + 1);
 		// the pixels immediately follow the structures
-		memcpy ( tx+1, mt+1, pixels);
-		
+		memcpy ( tx+1, pPal, palette);
 
 		if (!Q_strncmp(mt->name,"sky",3))	
 			R_InitSky (tx);
 		else
 		{
 			texture_mode = GL_LINEAR_MIPMAP_NEAREST; //_LINEAR;
-			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(tx+1), true, false);
+			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(mt+1), true, 0, pPal);
 			texture_mode = GL_LINEAR;
 		}
 	}
@@ -399,7 +402,7 @@ void Mod_LoadTextures (lump_t *l)
 	for (i=0 ; i<m->nummiptex ; i++)
 	{
 		tx = loadmodel->textures[i];
-		if (!tx || tx->name[0] != '+')
+		if (!tx || (tx->name[0] != '+' && tx->name[0] != '-' ))
 			continue;
 		if (tx->anim_next)
 			continue;	// allready sequenced
@@ -432,7 +435,7 @@ void Mod_LoadTextures (lump_t *l)
 		for (j=i+1 ; j<m->nummiptex ; j++)
 		{
 			tx2 = loadmodel->textures[j];
-			if (!tx2 || tx2->name[0] != '+')
+			if (!tx2 || (tx2->name[0] != '+' && tx2->name[0] != '-'))
 				continue;
 			if (strcmp (tx2->name+2, tx->name+2))
 				continue;
@@ -458,7 +461,7 @@ void Mod_LoadTextures (lump_t *l)
 				Sys_Error ("Bad animating texture %s", tx->name);
 		}
 		
-#define	ANIM_CYCLE	2
+#define	ANIM_CYCLE	1
 	// link them all together
 		for (j=0 ; j<max ; j++)
 		{
@@ -808,16 +811,10 @@ void Mod_LoadFaces (lump_t *l)
 			continue;
 		}
 		
-		if (!Q_strncmp(out->texinfo->texture->name,"*",1))		// turbulent
+		if (out->texinfo->texture->name[0] == '!' || !strncmp(out->texinfo->texture->name,"laser",5)) // turbulent water and lasers
 		{
 			out->flags |= (SURF_DRAWTURB | SURF_DRAWTILED);
-			for (i=0 ; i<2 ; i++)
-			{
-				out->extents[i] = 16384;
-				out->texturemins[i] = -8192;
-			}
 			GL_SubdivideSurface (out);	// cut up polygon for warps
-			continue;
 		}
 
 	}
@@ -1340,8 +1337,6 @@ typedef struct
 	short		x, y;
 } floodfill_t;
 
-extern unsigned d_8to24table[];
-
 // must be a power of 2
 #define FLOODFILL_FIFO_SIZE 0x1000
 #define FLOODFILL_FIFO_MASK (FLOODFILL_FIFO_SIZE - 1)
@@ -1362,23 +1357,10 @@ void Mod_FloodFillSkin( byte *skin, int skinwidth, int skinheight )
 	byte				fillcolor = *skin; // assume this is the pixel to fill
 	floodfill_t			fifo[FLOODFILL_FIFO_SIZE];
 	int					inpt = 0, outpt = 0;
-	int					filledcolor = -1;
 	int					i;
 
-	if (filledcolor == -1)
-	{
-		filledcolor = 0;
-		// attempt to find opaque black
-		for (i = 0; i < 256; ++i)
-			if (d_8to24table[i] == (255 << 0)) // alpha 1.0
-			{
-				filledcolor = i;
-				break;
-			}
-	}
-
 	// can't fill to filled color or to transparent color (used as visited marker)
-	if ((fillcolor == filledcolor) || (fillcolor == 255))
+	if (fillcolor || (fillcolor == 255))
 	{
 		//printf( "not filling skin from %d to %d\n", fillcolor, filledcolor );
 		return;
@@ -1390,7 +1372,7 @@ void Mod_FloodFillSkin( byte *skin, int skinwidth, int skinheight )
 	while (outpt != inpt)
 	{
 		int			x = fifo[outpt].x, y = fifo[outpt].y;
-		int			fdc = filledcolor;
+		int			fdc = -1;
 		byte		*pos = &skin[x + skinwidth * y];
 
 		outpt = (outpt + 1) & FLOODFILL_FIFO_MASK;
@@ -1410,15 +1392,11 @@ Mod_LoadAllSkins
 */
 void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 {
-	int		i, j, k;
+	int		i;
 	char	name[32];
 	int		s;
-	byte	*copy;
 	byte	*skin;
-	byte	*texels;
-	daliasskingroup_t		*pinskingroup;
-	int		groupskins;
-	daliasskininterval_t	*pinskinintervals;
+	//byte	*texels;
 	
 	skin = (byte *)(pskintype + 1);
 
@@ -1429,51 +1407,24 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 
 	for (i=0 ; i<numskins ; i++)
 	{
-		if (pskintype->type == ALIAS_SKIN_SINGLE) {
-			Mod_FloodFillSkin( skin, pheader->skinwidth, pheader->skinheight );
+		Mod_FloodFillSkin( skin, pheader->skinwidth, pheader->skinheight );
 
-			// save 8 bit texels for the player model to remap
-	//		if (!strcmp(loadmodel->name,"progs/player.mdl")) {
-				texels = Hunk_AllocName(s, loadname);
-				pheader->texels[i] = texels - (byte *)pheader;
-				memcpy (texels, (byte *)(pskintype + 1), s);
-	//		}
-			sprintf (name, "%s_%i", loadmodel->name, i);
-			pheader->gl_texturenum[i][0] =
-			pheader->gl_texturenum[i][1] =
-			pheader->gl_texturenum[i][2] =
-			pheader->gl_texturenum[i][3] =
-				GL_LoadTexture (name, pheader->skinwidth, 
-				pheader->skinheight, (byte *)(pskintype + 1), true, false);
-			pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
-		} else {
-			// animating skin group.  yuck.
-			pskintype++;
-			pinskingroup = (daliasskingroup_t *)pskintype;
-			groupskins = LittleLong (pinskingroup->numskins);
-			pinskinintervals = (daliasskininterval_t *)(pinskingroup + 1);
+		// save 8 bit texels for the player model to remap
+		if (!strcmp(loadmodel->name,"progs/player.mdl")) {
+			if (s > 64000) // TODO(SanyaSho): What's 64000?
+				Sys_Error ("Player skin too large");
 
-			pskintype = (void *)(pinskinintervals + groupskins);
-
-			for (j=0 ; j<groupskins ; j++)
-			{
-					Mod_FloodFillSkin( skin, pheader->skinwidth, pheader->skinheight );
-					if (j == 0) {
-						texels = Hunk_AllocName(s, loadname);
-						pheader->texels[i] = texels - (byte *)pheader;
-						memcpy (texels, (byte *)(pskintype), s);
-					}
-					sprintf (name, "%s_%i_%i", loadmodel->name, i,j);
-					pheader->gl_texturenum[i][j&3] = 
-						GL_LoadTexture (name, pheader->skinwidth, 
-						pheader->skinheight, (byte *)(pskintype), true, false);
-					pskintype = (daliasskintype_t *)((byte *)(pskintype) + s);
-			}
-			k = j;
-			for (/* */; j < 4; j++)
-				pheader->gl_texturenum[i][j&3] = 
-				pheader->gl_texturenum[i][j - k]; 
+			// FIXME(SanyaSho): do we still need to memcpy texels data for R_TranslatePlayerSkin?
+			//memcpy (texels, (byte *)(pskintype + 1), s);
 		}
+		sprintf (name, "%s_%i", loadmodel->name, i);
+		pheader->gl_texturenum[i][0] =
+		pheader->gl_texturenum[i][1] =
+		pheader->gl_texturenum[i][2] =
+		pheader->gl_texturenum[i][3] =
+			GL_LoadTexture (name, pheader->skinwidth, 
+			pheader->skinheight, (byte *)(pskintype + 1), true, 0, NULL); // NOTE(SanyaSho): I'm not sure about this; GLQuake 1.07 sets all gl_texturenums but ValveGameEngine sets only one
+		pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
 	}
 
 	return (void *)pskintype;
@@ -1684,7 +1635,7 @@ void * Mod_LoadSpriteFrame (void * pin, mspriteframe_t **ppframe, int framenum)
 	pspriteframe->right = width + origin[0];
 
 	sprintf (name, "%s_%i", loadmodel->name, framenum);
-	pspriteframe->gl_texturenum = GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, true);
+	pspriteframe->gl_texturenum = GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, 1, NULL); // TODO(SanyaSho): Custom pallete support for sprites
 
 	return (void *)((byte *)pinframe + sizeof (dspriteframe_t) + size);
 }

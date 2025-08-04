@@ -185,6 +185,10 @@ void	VID_UnlockBuffer (void);
 // Use for multiplayer testing only - VERY dangerous!!!
 // #define IDGODS
 
+#if defined( QUIVER )
+#include "qfont.h"
+#endif
+
 #include "common.h"
 #include "bspfile.h"
 #include "vid.h"

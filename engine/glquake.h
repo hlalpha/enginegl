@@ -56,9 +56,9 @@ extern	int		texture_mode;
 
 extern	float	gldepthmin, gldepthmax;
 
-void GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, qboolean alpha);
-void GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, qboolean alpha);
-int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, qboolean alpha);
+void GL_Upload32 (unsigned *data, int width, int height,  qboolean mipmap, int iType);
+void GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, int iType, unsigned char *pPal);
+int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolean mipmap, int iType, unsigned char *pPal);
 int GL_FindTexture (char *identifier);
 
 typedef struct
@@ -97,7 +97,7 @@ extern	PROC glVertexPointerEXT;
 
 void R_TimeRefresh_f (void);
 void R_ReadPointFile_f (void);
-texture_t *R_TextureAnimation (texture_t *base);
+texture_t *R_TextureAnimation (msurface_t *surf);
 
 typedef struct surfcache_s
 {
@@ -249,3 +249,10 @@ extern qboolean gl_mtexable;
 
 void GL_DisableMultitexture(void);
 void GL_EnableMultitexture(void);
+
+// TODO: Find a better place for this!
+typedef struct
+{
+	unsigned int r, g, b;
+} colorVec;
+

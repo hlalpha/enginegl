@@ -123,6 +123,7 @@ set( ENGINE_HEADERS # "Header Files"
 	"${SRCDIR}/public/port.h"
 	"${SRCDIR}/public/qlimits.h"
 	"${SRCDIR}/public/edict.h"
+	"${SRCDIR}/public/qfont.h"
 
 	"anorm_dots.h"
 	"anorms.h"

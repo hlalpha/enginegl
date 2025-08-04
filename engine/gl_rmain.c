@@ -728,6 +728,8 @@ void R_PolyBlend (void)
 	glDisable (GL_DEPTH_TEST);
 	glDisable (GL_TEXTURE_2D);
 
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glLoadIdentity ();
 
     glRotatef (-90,  1, 0, 0);	    // put Z going up
