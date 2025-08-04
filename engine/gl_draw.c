@@ -686,6 +686,49 @@ void Draw_Pic (int x, int y, qpic_t *pic)
 
 /*
 =============
+Draw_HudPic
+=============
+*/
+void Draw_HudPic (int x, int y, int width, int height, qpic_t *pic)
+{
+	glpic_t		*gl;
+
+	if (!pic)
+		return;
+
+	if (scrap_dirty)
+		Scrap_Upload ();
+
+	glEnable (GL_TEXTURE_2D);
+	glDisable (GL_BLEND);
+	glEnable (GL_ALPHA_TEST);
+
+	glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+
+	gl = (glpic_t *)pic->data;
+
+	GL_Bind (gl->texnum);
+
+	glBegin (GL_POLYGON);
+
+	glTexCoord2f (gl->sl, gl->tl);
+	glVertex2f (x, y);
+
+	glTexCoord2f (gl->sh, gl->tl);
+	glVertex2f (x+width, y);
+
+	glTexCoord2f (gl->sh, gl->th);
+	glVertex2f (x+width, height+y-1);
+
+	glTexCoord2f (gl->sl, gl->th);
+	glVertex2f (x, height+y-1);
+
+	glEnd();
+}
+
+
+/*
+=============
 Draw_TransPic
 =============
 */
@@ -1246,4 +1289,84 @@ void GL_SelectTexture (GLenum target)
 	cnttextures[oldtarget-TEXTURE0_SGIS] = currenttexture;
 	currenttexture = cnttextures[target-TEXTURE0_SGIS];
 	oldtarget = target;
+}
+
+
+qpic_t *Draw_LoadPicFromWad (char *identifier)
+{
+	qpic_t *p;
+	int i, s, width, height;
+	gltexture_t *glt;
+	glpic_t *gl;
+	byte *pPal, d;
+	unsigned int *pic;
+
+	p = W_GetLumpName (identifier);
+	if (!p)
+	return NULL;
+
+	gl = (glpic_t *)p->data;
+	width = p->width;
+	height = p->height;
+
+	// see if the texture is allready present
+	if (identifier[0])
+	{
+		for (i=0, glt=gltextures ; i<numgltextures ; i++, glt++)
+		{
+			if (!strcmp (identifier, glt->identifier))
+			{
+				if (width == glt->width && height == glt->height )
+					return p; // TODO(SanyaSho): Use a gltextures array?
+			}
+		}
+	}
+	else {
+		glt = &gltextures[numgltextures];
+		numgltextures++;
+	}
+
+	strcpy (glt->identifier, identifier);
+	glt->texnum = texture_extension_number;
+	glt->width = width;
+	glt->height = height;
+	glt->mipmap = false;
+
+	GL_Bind (texture_extension_number);
+
+	s = p->width*p->height;
+
+	pic = (unsigned int *)malloc (4 * s);
+
+	pPal = &p->data[2 + s];
+
+	// Tweak the palette using our generated gamma table
+	for (i=0 ; i<768 ; i++)
+		pPal[i] = texgammatable[pPal[i]];
+
+	for (i=0 ; i<s ; i++)
+	{
+		d = p->data[i];
+
+		if (d == 255)
+		{
+			pic[i] = (*(unsigned int *)&pPal[d * 3] & 0xFFFFFF);
+		}
+		else
+		{
+			pic[i] = (*(unsigned int *)&pPal[d * 3] & 0xFFFFFF) | 0xFF000000;
+		}
+	}
+
+	GL_Upload32 (pic, p->width, p->height, false, 1);
+
+	gl->texnum = texture_extension_number++;
+	gl->sl = 0.0;
+	gl->sh = 1.0;
+	gl->tl = 0.0;
+	gl->th = 1.0;
+
+	free (pic);
+
+	return p;
 }

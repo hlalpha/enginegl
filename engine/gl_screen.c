@@ -80,7 +80,7 @@ float		scr_con_current;
 float		scr_conlines;		// lines of console to display
 
 float		oldscreensize, oldfov;
-cvar_t		scr_viewsize = {"viewsize","100", true};
+cvar_t		scr_viewsize = {"viewsize","120", true};
 cvar_t		scr_fov = {"fov","90"};	// 10 - 170
 cvar_t		scr_conspeed = {"scr_conspeed","300"};
 cvar_t		scr_centertime = {"scr_centertime","2"};
@@ -269,10 +269,7 @@ static void SCR_CalcRefdef (void)
 //========================================
 	
 // bound viewsize
-	if (scr_viewsize.value < 30)
-		Cvar_Set ("viewsize","30");
-	if (scr_viewsize.value > 120)
-		Cvar_Set ("viewsize","120");
+	scr_viewsize.value = 120; // TODO(SanyaSho): Use Cvar_Set here!
 
 // bound field of view
 	if (scr_fov.value < 10)
@@ -342,7 +339,7 @@ Keybinding command
 */
 void SCR_SizeUp_f (void)
 {
-	Cvar_SetValue ("viewsize",scr_viewsize.value+10);
+	Sbar_SizeUp ();
 	vid.recalc_refdef = 1;
 }
 
@@ -356,7 +353,7 @@ Keybinding command
 */
 void SCR_SizeDown_f (void)
 {
-	Cvar_SetValue ("viewsize",scr_viewsize.value-10);
+	Sbar_SizeDown ();
 	vid.recalc_refdef = 1;
 }
 
