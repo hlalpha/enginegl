@@ -821,6 +821,9 @@ void Draw_ConsoleBackground (int lines)
 
 	sprintf (msg, "Half-Life Alpha v%5.2f", (float)0.52);
 	Draw_String( vid.conwidth - Draw_StringLength(msg), 0, msg );
+
+	sprintf (msg, "Build %s %s", __DATE__, __TIME__);
+	Draw_String( vid.conwidth - Draw_StringLength(msg), draw_chars->width, msg );
 }
 
 
