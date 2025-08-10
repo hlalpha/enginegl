@@ -109,18 +109,17 @@ M_DrawCharacter
 Draws one solid graphics character
 ================
 */
-void M_DrawCharacter (int cx, int line, int num)
+int M_DrawCharacter (int cx, int line, int num)
 {
-	Draw_Character ( cx + ((vid.width - 320)>>1), line, num);
+	return Draw_Character ( cx + ((vid.width - 320)>>1), line, num);
 }
 
 void M_Print (int cx, int cy, char *str)
 {
 	while (*str)
 	{
-		M_DrawCharacter (cx, cy, (*str)+128);
+		cx += M_DrawCharacter (cx, cy, (*str)+128);
 		str++;
-		cx += 8;
 	}
 }
 
@@ -128,9 +127,8 @@ void M_PrintWhite (int cx, int cy, char *str)
 {
 	while (*str)
 	{
-		M_DrawCharacter (cx, cy, *str);
+		cx += M_DrawCharacter (cx, cy, *str);
 		str++;
-		cx += 8;
 	}
 }
 
@@ -420,7 +418,7 @@ void M_SinglePlayer_Key (int key)
 			if (sv.active)
 				Cbuf_AddText ("disconnect\n");
 			Cbuf_AddText ("maxplayers 1\n");
-			Cbuf_AddText ("map start\n");
+			Cbuf_AddText ("map warez_dm\n");
 			break;
 
 		case 1:
@@ -507,7 +505,7 @@ void M_Load_Draw (void)
 		M_Print (16, 32 + 8*i, m_filenames[i]);
 
 // line cursor
-	M_DrawCharacter (8, 32 + load_cursor*8, 12+((int)(realtime*4)&1));
+	M_DrawCharacter (8, 32 + load_cursor*8, 141);
 }
 
 
@@ -523,7 +521,7 @@ void M_Save_Draw (void)
 		M_Print (16, 32 + 8*i, m_filenames[i]);
 
 // line cursor
-	M_DrawCharacter (8, 32 + load_cursor*8, 12+((int)(realtime*4)&1));
+	M_DrawCharacter (8, 32 + load_cursor*8, 41); // FIXME(SanyaSho): Should this be 141?
 }
 
 
@@ -732,13 +730,13 @@ void M_Setup_Draw (void)
 	M_BuildTranslationTable(setup_top*16, setup_bottom*16);
 	M_DrawTransPicTranslate (172, 72, p);
 
-	M_DrawCharacter (56, setup_cursor_table [setup_cursor], 12+((int)(realtime*4)&1));
+	M_DrawCharacter (56, setup_cursor_table [setup_cursor], 141);
 
 	if (setup_cursor == 0)
-		M_DrawCharacter (168 + 8*strlen(setup_hostname), setup_cursor_table [setup_cursor], 10+((int)(realtime*4)&1));
+		M_DrawCharacter (168 + 8*strlen(setup_hostname), setup_cursor_table [setup_cursor], 141);
 
 	if (setup_cursor == 1)
-		M_DrawCharacter (168 + 8*strlen(setup_myname), setup_cursor_table [setup_cursor], 10+((int)(realtime*4)&1));
+		M_DrawCharacter (168 + 8*strlen(setup_myname), setup_cursor_table [setup_cursor], 141);
 }
 
 
@@ -1232,7 +1230,7 @@ void M_Options_Draw (void)
 #endif
 
 // cursor
-	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
+	M_DrawCharacter (200, 32 + options_cursor*8, 141);
 }
 
 
@@ -1439,7 +1437,7 @@ void M_Keys_Draw (void)
 	if (bind_grab)
 		M_DrawCharacter (130, 48 + keys_cursor*8, '=');
 	else
-		M_DrawCharacter (130, 48 + keys_cursor*8, 12+((int)(realtime*4)&1));
+		M_DrawCharacter (130, 48 + keys_cursor*8, 141);
 }
 
 
@@ -1580,52 +1578,6 @@ int		msgNumber;
 int		m_quit_prevstate;
 qboolean	wasInMenus;
 
-#ifndef	_WIN32
-char *quitMessage [] = 
-{
-/* .........1.........2.... */
-  "  Are you gonna quit    ",
-  "  this game just like   ",
-  "   everything else?     ",
-  "                        ",
- 
-  " Milord, methinks that  ",
-  "   thou art a lowly     ",
-  " quitter. Is this true? ",
-  "                        ",
-
-  " Do I need to bust your ",
-  "  face open for trying  ",
-  "        to quit?        ",
-  "                        ",
-
-  " Man, I oughta smack you",
-  "   for trying to quit!  ",
-  "     Press Y to get     ",
-  "      smacked out.      ",
- 
-  " Press Y to quit like a ",
-  "   big loser in life.   ",
-  "  Press N to stay proud ",
-  "    and successful!     ",
- 
-  "   If you press Y to    ",
-  "  quit, I will summon   ",
-  "  Satan all over your   ",
-  "      hard drive!       ",
- 
-  "  Um, Asmodeus dislikes ",
-  " his children trying to ",
-  " quit. Press Y to return",
-  "   to your Tinkertoys.  ",
- 
-  "  If you quit now, I'll ",
-  "  throw a blanket-party ",
-  "   for you next time!   ",
-  "                        "
-};
-#endif
-
 void M_Menu_Quit_f (void)
 {
 	if (m_state == m_quit)
@@ -1681,36 +1633,16 @@ void M_Quit_Draw (void)
 		m_state = m_quit;
 	}
 
-#ifdef _WIN32
-	M_DrawTextBox (0, 0, 38, 23);
-	M_PrintWhite (16, 12,  "  Quake version 1.09 by id Software\n\n");
-	M_PrintWhite (16, 28,  "Programming        Art \n");
-	M_Print (16, 36,  " John Carmack       Adrian Carmack\n");
-	M_Print (16, 44,  " Michael Abrash     Kevin Cloud\n");
-	M_Print (16, 52,  " John Cash          Paul Steed\n");
-	M_Print (16, 60,  " Dave 'Zoid' Kirsch\n");
-	M_PrintWhite (16, 68,  "Design             Biz\n");
-	M_Print (16, 76,  " John Romero        Jay Wilbur\n");
-	M_Print (16, 84,  " Sandy Petersen     Mike Wilson\n");
-	M_Print (16, 92,  " American McGee     Donna Jackson\n");
-	M_Print (16, 100,  " Tim Willits        Todd Hollenshead\n");
-	M_PrintWhite (16, 108, "Support            Projects\n");
-	M_Print (16, 116, " Barrett Alexander  Shawn Green\n");
-	M_PrintWhite (16, 124, "Sound Effects\n");
-	M_Print (16, 132, " Trent Reznor and Nine Inch Nails\n\n");
-	M_PrintWhite (16, 140, "Quake is a trademark of Id Software,\n");
-	M_PrintWhite (16, 148, "inc., (c)1996 Id Software, inc. All\n");
-	M_PrintWhite (16, 156, "rights reserved. NIN logo is a\n");
-	M_PrintWhite (16, 164, "registered trademark licensed to\n");
-	M_PrintWhite (16, 172, "Nothing Interactive, Inc. All rights\n");
-	M_PrintWhite (16, 180, "reserved. Press y to exit\n");
-#else
-	M_DrawTextBox (56, 76, 24, 4);
-	M_Print (64, 84,  quitMessage[msgNumber*4+0]);
-	M_Print (64, 92,  quitMessage[msgNumber*4+1]);
-	M_Print (64, 100, quitMessage[msgNumber*4+2]);
-	M_Print (64, 108, quitMessage[msgNumber*4+3]);
-#endif
+	if ( W_GetLumpinfo( "credits", false ) )
+	{
+		qpic_t *credits = W_GetLumpName( "credits" );
+		Draw_Pic ( (vid.width - credits->width) >> 1, (vid.height - credits->height) >> 2, credits );
+	}
+	else
+	{
+		M_DrawTextBox (56, 76, 24, 4);
+		M_Print (64, 92, "     press y to exit");
+	}
 }
 
 //=============================================================================
@@ -1828,10 +1760,10 @@ void M_SerialConfig_Draw (void)
 		M_Print (basex+8, serialConfig_cursor_table[5], "OK");
 	}
 
-	M_DrawCharacter (basex-8, serialConfig_cursor_table [serialConfig_cursor], 12+((int)(realtime*4)&1));
+	M_DrawCharacter (basex-8, serialConfig_cursor_table [serialConfig_cursor], 141);
 
 	if (serialConfig_cursor == 4)
-		M_DrawCharacter (168 + 8*strlen(serialConfig_phone), serialConfig_cursor_table [serialConfig_cursor], 10+((int)(realtime*4)&1));
+		M_DrawCharacter (168 + 8*strlen(serialConfig_phone), serialConfig_cursor_table [serialConfig_cursor], 141);
 
 	if (*m_return_reason)
 		M_PrintWhite (basex, 148, m_return_reason);
@@ -2043,19 +1975,19 @@ void M_ModemConfig_Draw (void)
 	M_DrawTextBox (basex, modemConfig_cursor_table[1]+4, 16, 1);
 	M_Print (basex+8, modemConfig_cursor_table[1]+12, modemConfig_clear);
 	if (modemConfig_cursor == 1)
-		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_clear), modemConfig_cursor_table[1]+12, 10+((int)(realtime*4)&1));
+		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_clear), modemConfig_cursor_table[1]+12, 141);
 
 	M_Print (basex, modemConfig_cursor_table[2], "Init");
 	M_DrawTextBox (basex, modemConfig_cursor_table[2]+4, 30, 1);
 	M_Print (basex+8, modemConfig_cursor_table[2]+12, modemConfig_init);
 	if (modemConfig_cursor == 2)
-		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_init), modemConfig_cursor_table[2]+12, 10+((int)(realtime*4)&1));
+		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_init), modemConfig_cursor_table[2]+12, 141);
 
 	M_Print (basex, modemConfig_cursor_table[3], "Hangup");
 	M_DrawTextBox (basex, modemConfig_cursor_table[3]+4, 16, 1);
 	M_Print (basex+8, modemConfig_cursor_table[3]+12, modemConfig_hangup);
 	if (modemConfig_cursor == 3)
-		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_hangup), modemConfig_cursor_table[3]+12, 10+((int)(realtime*4)&1));
+		M_DrawCharacter (basex+8 + 8*strlen(modemConfig_hangup), modemConfig_cursor_table[3]+12, 141);
 
 	M_DrawTextBox (basex, modemConfig_cursor_table[4]-8, 2, 1);
 	M_Print (basex+8, modemConfig_cursor_table[4], "OK");
@@ -2253,13 +2185,13 @@ void M_LanConfig_Draw (void)
 		M_Print (basex+8, lanConfig_cursor_table[1], "OK");
 	}
 
-	M_DrawCharacter (basex-8, lanConfig_cursor_table [lanConfig_cursor], 12+((int)(realtime*4)&1));
+	M_DrawCharacter (basex-8, lanConfig_cursor_table [lanConfig_cursor], 141);
 
 	if (lanConfig_cursor == 0)
-		M_DrawCharacter (basex+9*8 + 8*strlen(lanConfig_portname), lanConfig_cursor_table [0], 10+((int)(realtime*4)&1));
+		M_DrawCharacter (basex+9*8 + 8*strlen(lanConfig_portname), lanConfig_cursor_table [0], 141);
 
 	if (lanConfig_cursor == 2)
-		M_DrawCharacter (basex+16 + 8*strlen(lanConfig_joinname), lanConfig_cursor_table [2], 10+((int)(realtime*4)&1));
+		M_DrawCharacter (basex+16 + 8*strlen(lanConfig_joinname), lanConfig_cursor_table [2], 141);
 
 	if (*m_return_reason)
 		M_PrintWhite (basex, 148, m_return_reason);
@@ -2541,7 +2473,7 @@ void M_Menu_GameOptions_f (void)
 }
 
 
-int gameoptions_cursor_table[] = {40, 56, 64, 72, 80, 88, 96, 112, 120};
+int gameoptions_cursor_table[] = {40, 56, 64, 72, 80, 88, 96};
 #define	NUM_GAMEOPTIONS	9
 int		gameoptions_cursor;
 
@@ -2618,37 +2550,8 @@ void M_GameOptions_Draw (void)
 	else
 		M_Print (160, 96, va("%i minutes", (int)timelimit.value));
 
-	M_Print (0, 112, "         Episode");
-   //MED 01/06/97 added hipnotic episodes
-   if (hipnotic)
-      M_Print (160, 112, hipnoticepisodes[startepisode].description);
-   //PGM 01/07/97 added rogue episodes
-   else if (rogue)
-      M_Print (160, 112, rogueepisodes[startepisode].description);
-   else
-      M_Print (160, 112, episodes[startepisode].description);
-
-	M_Print (0, 120, "           Level");
-   //MED 01/06/97 added hipnotic episodes
-   if (hipnotic)
-   {
-      M_Print (160, 120, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].description);
-      M_Print (160, 128, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name);
-   }
-   //PGM 01/07/97 added rogue episodes
-   else if (rogue)
-   {
-      M_Print (160, 120, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].description);
-      M_Print (160, 128, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name);
-   }
-   else
-   {
-      M_Print (160, 120, levels[episodes[startepisode].firstLevel + startlevel].description);
-      M_Print (160, 128, levels[episodes[startepisode].firstLevel + startlevel].name);
-   }
-
 // line cursor
-	M_DrawCharacter (144, gameoptions_cursor_table[gameoptions_cursor], 12+((int)(realtime*4)&1));
+	M_DrawCharacter (144, gameoptions_cursor_table[gameoptions_cursor], 141);
 
 	if (m_serverInfoMessage)
 	{
@@ -2818,12 +2721,7 @@ void M_GameOptions_Key (int key)
 			Cbuf_AddText ( va ("maxplayers %u\n", maxplayers) );
 			SCR_BeginLoadingPlaque ();
 
-			if (hipnotic)
-				Cbuf_AddText ( va ("map %s\n", hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name) );
-			else if (rogue)
-				Cbuf_AddText ( va ("map %s\n", roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name) );
-			else
-				Cbuf_AddText ( va ("map %s\n", levels[episodes[startepisode].firstLevel + startlevel].name) );
+			Cbuf_AddText ( "map warez_dm\n" );
 
 			return;
 		}
@@ -2945,7 +2843,7 @@ void M_ServerList_Draw (void)
 			sprintf(string, "%-15.15s %-15.15s\n", hostcache[n].name, hostcache[n].map);
 		M_Print (16, 32 + 8*n, string);
 	}
-	M_DrawCharacter (0, 32 + slist_cursor*8, 12+((int)(realtime*4)&1));
+	M_DrawCharacter (0, 32 + slist_cursor*8, 141);
 
 	if (*m_return_reason)
 		M_PrintWhite (16, 148, m_return_reason);
