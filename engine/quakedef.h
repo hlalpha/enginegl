@@ -187,6 +187,7 @@ void	VID_UnlockBuffer (void);
 
 #if defined( QUIVER )
 #include "qfont.h"
+#include "rendermode.h"
 #endif
 
 #include "common.h"
@@ -235,6 +236,7 @@ void	VID_UnlockBuffer (void);
 #if defined( QUIVER )
 #include "sys_dll.h"
 #include "pr_cmds.h"
+#include "r_trans.h"
 #endif
 
 //=============================================================================

@@ -31,6 +31,8 @@ float	speedscale;		// for top sky and bottom sky
 
 msurface_t	*warpface;
 
+int		g_waterColor[3];
+
 extern cvar_t gl_subdivide_size;
 
 void BoundPoly (int numverts, float *verts, vec3_t mins, vec3_t maxs)
@@ -171,6 +173,19 @@ void GL_SubdivideSurface (msurface_t *fa)
 	}
 
 	SubdividePolygon (numverts, verts[0]);
+}
+
+void SetWaterColor (int r, int g, int b)
+{
+	extern cshift_t	cshift_water;
+
+	g_waterColor[0] = r;
+	g_waterColor[1] = g;
+	g_waterColor[2] = b;
+	cshift_water.destcolor[0] = r;
+	cshift_water.destcolor[1] = g;
+	cshift_water.destcolor[2] = b;
+	cshift_water.percent = 128;
 }
 
 //=========================================================

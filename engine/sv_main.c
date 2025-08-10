@@ -505,11 +505,39 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		if (ent->baseline.modelindex != ent->v.modelindex)
 			bits |= U_MODEL;
 
+#if 0
+		if (ent->v.animtime != 0.0)
+			bits |= U_SEQUENCE;
+
+		if (ent->v.framerate != 1.0)
+			bits |= U_CUSTOM_FRAMERATE;
+
+		if (ent->v.body != 0.0)
+			bits |= U_BODY;
+
+		if (ent->v.controller)
+			bits |= U_CONTROLLED;
+
+		if (ent->v.blending)
+			bits |= U_BLENDING;
+#endif
+
+		if (ent->baseline.rendermode != (int)ent->v.rendermode ||
+			ent->baseline.renderamt != (int)ent->v.renderamt ||
+			ent->baseline.renderfx != (int)ent->v.renderfx ||
+			ent->baseline.rendercolor[0] != (int)ent->v.rendercolor[0] ||
+			ent->baseline.rendercolor[1] != (int)ent->v.rendercolor[1] ||
+			ent->baseline.rendercolor[2] != (int)ent->v.rendercolor[2])
+			bits |= U_CUSTOM_RENDERER;
+
 		if (e >= 256)
 			bits |= U_LONGENTITY;
 			
 		if (bits >= 256)
 			bits |= U_MOREBITS;
+
+		if (bits >= 65536)
+			bits |= U_MOREMOREBITS;
 
 	//
 	// write the message
@@ -518,6 +546,8 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		
 		if (bits & U_MOREBITS)
 			MSG_WriteByte (msg, bits>>8);
+		if (bits & U_MOREMOREBITS)
+			MSG_WriteByte (msg, bits>>16);
 		if (bits & U_LONGENTITY)
 			MSG_WriteShort (msg,e);
 		else
@@ -545,6 +575,30 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			MSG_WriteCoord (msg, ent->v.origin[2]);
 		if (bits & U_ANGLE3)
 			MSG_WriteAngle(msg, ent->v.angles[2]);
+#if 0
+		if (bits & U_SEQUENCE)
+		{
+			MSG_WriteByte (msg, ent->v.sequence);
+			MSG_WriteByte (msg, (int)(ent->v.animtime * 100.0));
+		}
+		if (bits & U_CUSTOM_FRAMERATE)
+			MSG_WriteChar (msg, (int)(ent->v.framerate * 64.0));
+		if (bits & U_CONTROLLED)
+			MSG_WriteLong (msg, ent->v.controller);
+		if (bits & U_BLENDING)
+			MSG_WriteShort (msg, ent->v.blending);
+		if (bits & U_BODY)
+			MSG_WriteByte (msg, ent->v.body);
+#endif
+		if (bits & U_CUSTOM_RENDERER)
+		{
+			MSG_WriteByte (msg, (int)ent->v.rendermode);
+			MSG_WriteByte (msg, (int)ent->v.renderamt);
+			MSG_WriteByte (msg, (int)ent->v.rendercolor[0]);
+			MSG_WriteByte (msg, (int)ent->v.rendercolor[1]);
+			MSG_WriteByte (msg, (int)ent->v.rendercolor[2]);
+			MSG_WriteByte (msg, (int)ent->v.renderfx);
+		}
 	}
 }
 
@@ -955,6 +1009,13 @@ void SV_CreateBaseline (void)
 			svent->baseline.modelindex =
 				SV_ModelIndex(pr_strings + svent->v.model);
 		}
+
+		svent->baseline.rendermode = (int)svent->v.rendermode;
+		svent->baseline.renderamt = (int)svent->v.renderamt;
+		svent->baseline.rendercolor[0] = (int)svent->v.rendercolor[0];
+		svent->baseline.rendercolor[1] = (int)svent->v.rendercolor[1];
+		svent->baseline.rendercolor[2] = (int)svent->v.rendercolor[2];
+		svent->baseline.renderfx = (int)svent->v.renderfx;
 		
 	//
 	// add to the message
@@ -963,6 +1024,7 @@ void SV_CreateBaseline (void)
 		MSG_WriteShort (&sv.signon,entnum);
 
 		MSG_WriteByte (&sv.signon, svent->baseline.modelindex);
+		//MSG_WriteByte (&sv.signon, svent->baseline.sequence);
 		MSG_WriteByte (&sv.signon, svent->baseline.frame);
 		MSG_WriteByte (&sv.signon, svent->baseline.colormap);
 		MSG_WriteByte (&sv.signon, svent->baseline.skin);
@@ -970,6 +1032,16 @@ void SV_CreateBaseline (void)
 		{
 			MSG_WriteCoord(&sv.signon, svent->baseline.origin[i]);
 			MSG_WriteAngle(&sv.signon, svent->baseline.angles[i]);
+		}
+
+		MSG_WriteByte (&sv.signon, (int)svent->v.rendermode);
+		if (svent->v.rendermode != 0.0)
+		{
+			MSG_WriteByte (&sv.signon, (int)svent->v.renderamt);
+			MSG_WriteByte (&sv.signon, (int)svent->v.rendercolor[0]);
+			MSG_WriteByte (&sv.signon, (int)svent->v.rendercolor[1]);
+			MSG_WriteByte (&sv.signon, (int)svent->v.rendercolor[2]);
+			MSG_WriteByte (&sv.signon, (int)svent->v.renderfx);
 		}
 	}
 }

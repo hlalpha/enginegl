@@ -218,7 +218,29 @@ void R_DrawSpriteModel (entity_t *e)
 		right = vright;
 	}
 
-	glColor3f (1,1,1);
+	if (currententity->rendermode != kRenderModeNormal)
+	{
+		switch (currententity->rendermode)
+		{
+		case kRenderModeColor:
+			glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ALPHA);
+			break;
+		case kRenderModeAdditive:
+			glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+			glBlendFunc (GL_SRC_ALPHA, GL_ONE);
+			glColor4f (1,1,1,r_blend);
+			break;
+		default:
+			glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+			glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glColor4f (1,1,1,r_blend);
+		};
+
+		glEnable (GL_BLEND);
+	}
+	else
+		glColor3f (1,1,1);
 
 	GL_DisableMultitexture();
 
@@ -250,6 +272,12 @@ void R_DrawSpriteModel (entity_t *e)
 	glEnd ();
 
 	glDisable (GL_ALPHA_TEST);
+
+	if (currententity->rendermode != kRenderModeNormal)
+	{
+		glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		glDisable (GL_BLEND);
+	}
 }
 
 /*
@@ -610,18 +638,25 @@ void R_DrawEntitiesOnList (void)
 	{
 		currententity = cl_visedicts[i];
 
-		switch (currententity->model->type)
+		if (currententity->rendermode != kRenderModeNormal)
 		{
-		case mod_alias:
-			R_DrawAliasModel (currententity);
-			break;
+			AddTentity (currententity);
+		}
+		else
+		{
+			switch (currententity->model->type)
+			{
+			case mod_alias:
+				R_DrawAliasModel (currententity);
+				break;
 
-		case mod_brush:
-			R_DrawBrushModel (currententity);
-			break;
+			case mod_brush:
+				R_DrawBrushModel (currententity);
+				break;
 
-		default:
-			break;
+			default:
+				break;
+			}
 		}
 	}
 
@@ -964,6 +999,8 @@ void R_RenderScene (void)
 	R_DrawEntitiesOnList ();
 
 	GL_DisableMultitexture();
+
+	R_DrawTEntitiesOnList ();
 
 	R_RenderDlights ();
 

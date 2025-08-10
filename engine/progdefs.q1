@@ -87,6 +87,10 @@ typedef struct entvars_s
 	func_t	blocked;
 	float	nextthink;
 	int	groundentity;
+	float	rendermode;
+	float	renderamt;
+	vec3_t	rendercolor;
+	float	renderfx;
 	float	health;
 	float	frags;
 	float	weapon;
@@ -138,6 +142,8 @@ typedef struct entvars_s
 	string_t	noise1;
 	string_t	noise2;
 	string_t	noise3;
+	void*	pContainingEntity;
+	void*	pSystemGlobals;
 } entvars_t;
 
-#define PROGHEADER_CRC 5927
+#define PROGHEADER_CRC 10422

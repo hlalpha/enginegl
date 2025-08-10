@@ -58,6 +58,8 @@ byte		lightmaps[4*MAX_LIGHTMAPS*BLOCK_WIDTH*BLOCK_HEIGHT];
 msurface_t  *skychain = NULL;
 msurface_t  *waterchain = NULL;
 
+extern int		g_waterColor[3];
+
 void R_RenderDynamicLightmaps (msurface_t *fa);
 
 /*
@@ -722,6 +724,30 @@ void DrawGLPoly (glpoly_t *p)
 	glEnd ();
 }
 
+/*
+================
+DrawGLSolidPoly
+================
+*/
+void DrawGLSolidPoly (glpoly_t *p)
+{
+	int		i;
+	float	*v;
+
+	float r = (float)currententity->rendercolor[0] / 256.0;
+	float g = (float)currententity->rendercolor[1] / 256.0;
+	float b = (float)currententity->rendercolor[2] / 256.0;
+	glColor4f (r, g, b, r_blend);
+
+	glBegin (GL_POLYGON);
+	v = p->verts[0];
+	for (i=0 ; i<p->numverts ; i++, v+= VERTEXSIZE)
+	{
+		glVertex3fv (v);
+	}
+	glEnd ();
+}
+
 
 /*
 ================
@@ -851,10 +877,18 @@ void R_RenderBrushPoly (msurface_t *fa)
 	if (fa->flags & SURF_UNDERWATER)
 		DrawGLWaterPoly (fa->polys);
 	else
-		DrawGLPoly (fa->polys);
+	{
+		if (currententity->rendermode == kRenderModeColor)
+		{
+			glDisable (GL_TEXTURE_2D);
+			DrawGLSolidPoly (fa->polys);
+			glEnable (GL_TEXTURE_2D);
+		}
+		else
+			DrawGLPoly (fa->polys);
+	}
 
 	// add the poly to the proper lightmap chain
-
 	fa->polys->chain = lightmap_polys[fa->lightmaptexturenum];
 	lightmap_polys[fa->lightmaptexturenum] = fa->polys;
 
@@ -1214,8 +1248,32 @@ void R_DrawBrushModel (entity_t *e)
 
     glPushMatrix ();
 e->angles[0] = -e->angles[0];	// stupid quake bug
+e->angles[2] = -e->angles[2];	// stupid quake bug
 	R_RotateForEntity (e);
 e->angles[0] = -e->angles[0];	// stupid quake bug
+e->angles[2] = -e->angles[2];	// stupid quake bug
+
+	if (currententity->rendermode != kRenderModeNormal)
+	{
+		switch (currententity->rendermode)
+		{
+		case kRenderModeColor:
+			glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ALPHA);
+			break;
+		case kRenderModeAdditive:
+			glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND);
+			glBlendFunc (GL_SRC_ALPHA, GL_ONE);
+			glColor4f (1,1,1,r_blend);
+			break;
+		default:
+			glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_BLEND); // FIXME(SanyaSho): Calling this causes wrong colors on entities
+			glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glColor4f (1,1,1,r_blend);
+		};
+
+		glEnable (GL_BLEND);
+	}
 
 	//
 	// draw texture
@@ -1238,7 +1296,16 @@ e->angles[0] = -e->angles[0];	// stupid quake bug
 		}
 	}
 
-	R_BlendLightmaps ();
+	if (currententity->rendermode != kRenderModeNormal)
+	{
+		glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+		glDisable (GL_BLEND);
+	}
+
+	//R_DrawDecals ();
+
+	if (currententity->rendermode != kRenderModeAdditive)
+		R_BlendLightmaps ();
 
 	glPopMatrix ();
 }
@@ -1395,6 +1462,10 @@ void R_DrawWorld (void)
 	currententity = &ent;
 	currenttexture = -1;
 
+	ent.rendercolor[0] = g_waterColor[0];
+	ent.rendercolor[1] = g_waterColor[1];
+	ent.rendercolor[2] = g_waterColor[2];
+
 	glColor3f (1,1,1);
 	memset (lightmap_polys, 0, sizeof(lightmap_polys));
 #ifdef QUAKE2
@@ -1403,7 +1474,8 @@ void R_DrawWorld (void)
 
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
 
-	DrawTextureChains ();
+	if (gl_texsort.value)
+		DrawTextureChains ();
 
 	R_BlendLightmaps ();
 

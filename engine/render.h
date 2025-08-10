@@ -49,6 +49,10 @@ typedef struct entity_s
 	vec3_t					origin;
 	vec3_t					msg_angles[2];	// last two updates (0 is newest)
 	vec3_t					angles;	
+	int						rendermode;
+	int						renderamt;
+	byte					rendercolor[3];
+	int						renderfx;
 	struct model_s			*model;			// NULL = no model
 	struct efrag_s			*efrag;			// linked list of efrags
 	int						frame;

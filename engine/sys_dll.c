@@ -276,8 +276,8 @@ Set custom progdefs for entity
 void ED_SetGameDLLVars( edict_t *ent ) // TODO(SanyaSho): Better name?
 {
 	// TODO: Quiver progdefs
-	//ent->v.pContainingEntity = ent;
-	//ent->v.pSystemGlobals = pr_global_struct;
+	ent->v.pContainingEntity = ent;
+	ent->v.pSystemGlobals = pr_global_struct;
 }
 
 
@@ -797,8 +797,8 @@ void PR_ExecuteProgramFromDLL( int nProgram )
 	{
 		// TODO: Quiver progdefs
 		ed = PROG_TO_EDICT( pr_global_struct->self );
-		//ed->v.pContainingEntity = ed;
-		//ed->v.pSystemGlobals = pr_global_struct;
+		ed->v.pContainingEntity = ed;
+		ed->v.pSystemGlobals = pr_global_struct;
 
 		wrap->func( pr_global_struct );
 #if !defined( QUIVER_QUAKE_COMPAT )

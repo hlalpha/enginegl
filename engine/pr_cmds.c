@@ -1787,9 +1787,7 @@ void PF_makestatic_I (edict_t *ent)
 
 	MSG_WriteByte (&sv.signon, SV_ModelIndex(pr_strings + ent->v.model));
 
-#if defined( QUIVER ) && 0
-	MSG_WriteByte (&sv.signon, ent->v.sequence);
-#endif
+	//MSG_WriteByte (&sv.signon, ent->v.sequence);
 	MSG_WriteByte (&sv.signon, ent->v.frame);
 	MSG_WriteByte (&sv.signon, ent->v.colormap);
 	MSG_WriteByte (&sv.signon, ent->v.skin);
@@ -1799,18 +1797,16 @@ void PF_makestatic_I (edict_t *ent)
 		MSG_WriteAngle(&sv.signon, ent->v.angles[i]);
 	}
 
-#if defined( QUIVER ) && 0
 	MSG_WriteByte (&sv.signon, ent->v.rendermode);
 
 	if (ent->v.rendermode != 0.0)
 	{
-		MSG_WriteByte (&sv.signon, ent->v.renderamt);
-		MSG_WriteByte (&sv.signon, ent->v.rendercolor[0]);
-		MSG_WriteByte (&sv.signon, ent->v.rendercolor[1]);
-		MSG_WriteByte (&sv.signon, ent->v.rendercolor[2]);
-		MSG_WriteByte (&sv.signon, ent->v.renderfx);
+		MSG_WriteByte (&sv.signon, (int)ent->v.renderamt);
+		MSG_WriteByte (&sv.signon, (int)ent->v.rendercolor[0]);
+		MSG_WriteByte (&sv.signon, (int)ent->v.rendercolor[1]);
+		MSG_WriteByte (&sv.signon, (int)ent->v.rendercolor[2]);
+		MSG_WriteByte (&sv.signon, (int)ent->v.renderfx);
 	}
-#endif
 
 // throw the entity away now
 	ED_Free (ent);

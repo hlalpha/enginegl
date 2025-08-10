@@ -33,6 +33,9 @@ typedef unsigned char 		byte;
 #endif
 
 #if __cplusplus
+#define FALSE 0
+#define TRUE (!FALSE)
+
 typedef int qboolean;
 #else
 #undef true

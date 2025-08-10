@@ -113,6 +113,7 @@ set( ENGINE_SOURCES # "Source Files"
 	"zone.c"
 
 	"sys_dll.c"
+	"r_trans.c"
 
 	"progdefs.q1"
 	"progdefs.q2"
@@ -124,6 +125,7 @@ set( ENGINE_HEADERS # "Header Files"
 	"${SRCDIR}/public/qlimits.h"
 	"${SRCDIR}/public/edict.h"
 	"${SRCDIR}/public/qfont.h"
+	"${SRCDIR}/public/rendermode.h"
 
 	"anorm_dots.h"
 	"anorms.h"
@@ -178,6 +180,7 @@ set( ENGINE_HEADERS # "Header Files"
 	"zone.h"
 
 	"sys_dll.h"
+	"r_trans.h"
 )
 
 set( ENGINE_RESOURCES # "Resource Files"

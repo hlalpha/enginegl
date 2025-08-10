@@ -349,6 +349,12 @@ void CL_ParseUpdate (int bits)
 		bits |= (i<<8);
 	}
 
+	if (bits & U_MOREMOREBITS)
+	{
+		i = MSG_ReadByte ();
+		bits |= (i<<16);
+	}
+
 	if (bits & U_LONGENTITY)	
 		num = MSG_ReadShort ();
 	else
@@ -473,6 +479,80 @@ if (bits&(1<<i))
 	if ( bits & U_NOLERP )
 		ent->forcelink = true;
 
+#if 0
+	if ( bits & U_SEQUENCE )
+	{
+		// TODO(SanyaSho): studiorender
+	}
+	else
+	{
+		ent->sequence = ent->baseline.sequence;
+		ent->gap8 = cl.time;
+	}
+
+	if ( bits & U_CUSTOM_FRAMERATE )
+		ent->framerate = MSG_ReadChar() / 64.0;
+	else
+		ent->framerate = 1.0;
+
+	if ( bits & U_CONTROLLED )
+	{
+		ent->unk[0] = MSG_ReadByte();
+		ent->unk[1] = MSG_ReadByte();
+		ent->unk[2] = MSG_ReadByte();
+		ent->unk[3] = MSG_ReadByte();
+	}
+	else
+	{
+		ent->unk[0] = 0;
+		ent->unk[1] = 0;
+		ent->unk[2] = 0;
+		ent->unk[3] = 0;
+	}
+
+	if ( bits & U_BLENDING )
+	{
+		ent->unk[0] = MSG_ReadByte();
+		ent->unk[1] = MSG_ReadByte();
+	}
+	else
+	{
+		ent->unk[0] = 0;
+		ent->unk[1] = 0;
+	}
+
+	if ( bits & U_BODY )
+		ent->body = MSG_ReadByte();
+	else
+		ent->body = 0;
+#endif
+
+	if ( bits & U_CUSTOM_RENDERER )
+	{
+		ent->rendermode = MSG_ReadByte();
+		ent->renderamt = MSG_ReadByte();
+		ent->rendercolor[0] = MSG_ReadByte();
+		ent->rendercolor[1] = MSG_ReadByte();
+		ent->rendercolor[2] = MSG_ReadByte();
+		ent->renderfx = MSG_ReadByte();
+	}
+	else
+	{
+		ent->rendermode = ent->baseline.rendermode;
+		ent->renderamt = ent->baseline.renderamt;
+		ent->rendercolor[0] = ent->baseline.rendercolor[0];
+		ent->rendercolor[1] = ent->baseline.rendercolor[1];
+		ent->rendercolor[2] = ent->baseline.rendercolor[2];
+		ent->renderfx = ent->baseline.renderfx;
+	}
+
+#if 0
+	if ( bits & U_UNKNOWN9 )
+		ent->unknown_byte800k = 4;
+	else
+		ent->unknown_byte800k = 0;
+#endif
+
 	if ( forcelink )
 	{	// didn't have an update last message
 		VectorCopy (ent->msg_origins[0], ent->msg_origins[1]);
@@ -493,6 +573,7 @@ void CL_ParseBaseline (entity_t *ent)
 	int			i;
 	
 	ent->baseline.modelindex = MSG_ReadByte ();
+	//ent->baseline.sequence = MSG_ReadByte();
 	ent->baseline.frame = MSG_ReadByte ();
 	ent->baseline.colormap = MSG_ReadByte();
 	ent->baseline.skin = MSG_ReadByte();
@@ -500,6 +581,16 @@ void CL_ParseBaseline (entity_t *ent)
 	{
 		ent->baseline.origin[i] = MSG_ReadCoord ();
 		ent->baseline.angles[i] = MSG_ReadAngle ();
+	}
+
+	ent->baseline.rendermode = MSG_ReadByte();
+	if (ent->baseline.rendermode != kRenderModeNormal)
+	{
+		ent->baseline.renderamt = MSG_ReadByte();
+		ent->baseline.rendercolor[0] = MSG_ReadByte();
+		ent->baseline.rendercolor[1] = MSG_ReadByte();
+		ent->baseline.rendercolor[2] = MSG_ReadByte();
+		ent->baseline.renderfx = MSG_ReadByte();
 	}
 }
 

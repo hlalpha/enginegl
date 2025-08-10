@@ -39,6 +39,17 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	U_SKIN		(1<<12)
 #define	U_EFFECTS	(1<<13)
 #define	U_LONGENTITY	(1<<14)
+#define	U_MOREMOREBITS	(1<<15)
+#define	U_UNKNOWN2	(1<<16)
+#define	U_SEQUENCE	(1<<17)
+#define	U_CONTROLLED	(1<<18)
+#define	U_CUSTOM_RENDERER	(1<<19)
+#define	U_BLENDING	(1<<20)
+#define	U_BODY	(1<<21)
+#define	U_CUSTOM_FRAMERATE	(1<<22)
+#define	U_UNKNOWN9	(1<<23)
+#define	U_UNKNOWN10	(1<<24)
+#define	U_UNKNOWN11	(1<<25)
 
 
 #define	SU_VIEWHEIGHT	(1<<0)

@@ -44,9 +44,7 @@ typedef struct edict_s
 	
 	float		freetime;			// sv.time when the object was freed
 
-#ifdef QUIVER
 	void		*pvPrivateData;		// Alloced and freed by engine, used by DLLs
-#endif // QUIVER
 
 	entvars_t	v;					// C exported fields from progs
 // other fields from progs come immediately after
