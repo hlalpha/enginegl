@@ -174,4 +174,9 @@ void SNDDMA_Submit(void);
 void S_AmbientOff (void);
 void S_AmbientOn (void);
 
+#define	PAINTBUFFER_SIZE	512
+extern portable_samplepair_t paintbuffer[PAINTBUFFER_SIZE];
+
+#include "snd_dsp.h"
+
 #endif

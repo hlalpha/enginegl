@@ -998,9 +998,11 @@ void R_RenderScene (void)
 
 	R_DrawEntitiesOnList ();
 
+	R_DrawTEntitiesOnList ();
+
 	GL_DisableMultitexture();
 
-	R_DrawTEntitiesOnList ();
+	S_ExtraUpdate ();
 
 	R_RenderDlights ();
 
@@ -1184,6 +1186,8 @@ void R_RenderView (void)
 	R_Mirror ();
 
 	R_PolyBlend ();
+
+	S_ExtraUpdate ();
 
 	if (r_speeds.value)
 	{

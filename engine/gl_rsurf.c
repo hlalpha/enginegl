@@ -1131,7 +1131,7 @@ DrawTextureChains
 */
 void DrawTextureChains (void)
 {
-	int		i;
+	int		i, j;
 	msurface_t	*s;
 	texture_t	*t;
 
@@ -1146,7 +1146,7 @@ void DrawTextureChains (void)
 		return;
 	} 
 
-	for (i=0 ; i<cl.worldmodel->numtextures ; i++)
+	for (i=0, j=100 ; i<cl.worldmodel->numtextures ; i++)
 	{
 		t = cl.worldmodel->textures[i];
 		if (!t)
@@ -1170,6 +1170,11 @@ void DrawTextureChains (void)
 		}
 
 		t->texturechain = NULL;
+		if ( !j-- )
+		{
+			j = 100;
+			S_ExtraUpdate ();
+		}
 	}
 }
 
