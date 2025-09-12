@@ -23,10 +23,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "quakedef.h"
 
-#define GL_COLOR_INDEX8_EXT     0x80E5
-
-extern unsigned char d_15to8table[65536];
-
 cvar_t		gl_nobind = {"gl_nobind", "0"};
 cvar_t		gl_max_size = {"gl_max_size", "1024"};
 cvar_t		gl_round_down = {"gl_round_down", "3"};
@@ -489,7 +485,7 @@ void Draw_Init (void)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	gl = (glpic_t *)conback->data;
-	gl->texnum = GL_LoadTexture ("conback", conback->width, conback->height, ncdata, false, false, &ncdata[2 + conback->width*conback->height]);
+	gl->texnum = GL_LoadTexture ("conback", conback->width, conback->height, ncdata, false, 0, &ncdata[2 + conback->width*conback->height]);
 	gl->sl = 0;
 	gl->sh = 1;
 	gl->tl = 0;
@@ -724,6 +720,17 @@ void Draw_HudPic (int x, int y, int width, int height, qpic_t *pic)
 	glVertex2f (x, height+y-1);
 
 	glEnd();
+}
+
+
+/*
+=============
+Draw_HudPicRGB
+=============
+*/
+void Draw_HudPicRGB (int x, int y, int w, int h, int r, int g, int b)
+{
+	Draw_FillRGB (x, y, w, h, r, g, b);
 }
 
 
@@ -1306,7 +1313,7 @@ qpic_t *Draw_LoadPicFromWad (char *identifier)
 
 	p = W_GetLumpName (identifier);
 	if (!p)
-	return NULL;
+		return NULL;
 
 	gl = (glpic_t *)p->data;
 	width = p->width;
