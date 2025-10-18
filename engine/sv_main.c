@@ -516,7 +516,7 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 			bits |= U_BODY;
 
 		if (ent->v.controller)
-			bits |= U_CONTROLLED;
+			bits |= U_CONTROLLER;
 
 		if (ent->v.blending)
 			bits |= U_BLENDING;
@@ -583,7 +583,7 @@ void SV_WriteEntitiesToClient (edict_t	*clent, sizebuf_t *msg)
 		}
 		if (bits & U_CUSTOM_FRAMERATE)
 			MSG_WriteChar (msg, (int)(ent->v.framerate * 64.0));
-		if (bits & U_CONTROLLED)
+		if (bits & U_CONTROLLER)
 			MSG_WriteLong (msg, ent->v.controller);
 		if (bits & U_BLENDING)
 			MSG_WriteShort (msg, ent->v.blending);

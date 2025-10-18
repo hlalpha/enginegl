@@ -42,7 +42,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define	U_MOREMOREBITS	(1<<15)
 #define	U_UNKNOWN2	(1<<16)
 #define	U_SEQUENCE	(1<<17)
-#define	U_CONTROLLED	(1<<18)
+#define	U_CONTROLLER	(1<<18)
 #define	U_CUSTOM_RENDERER	(1<<19)
 #define	U_BLENDING	(1<<20)
 #define	U_BODY	(1<<21)

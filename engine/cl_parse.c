@@ -495,7 +495,7 @@ if (bits&(1<<i))
 	else
 		ent->framerate = 1.0;
 
-	if ( bits & U_CONTROLLED )
+	if ( bits & U_CONTROLLER )
 	{
 		ent->unk[0] = MSG_ReadByte();
 		ent->unk[1] = MSG_ReadByte();
