@@ -1,3 +1,0 @@
-[submodule "thirdparty/proqcc/proqcc"]
-	path = thirdparty/proqcc/proqcc
-	url = git@github.com:lbsmith/ProQCC.git
