@@ -610,7 +610,7 @@ void GL_Init (void)
 	glEnable(GL_TEXTURE_2D);
 
 	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.666);
+	glAlphaFunc(GL_NOTEQUAL, 0.0); // FIXME(SanyaSho): Idk why but someone decided to change this call. GLQuake 1.07: glAlphaFunc(GL_GREATER, 0.666);
 
 	glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
 	glShadeModel (GL_FLAT);
