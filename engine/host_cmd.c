@@ -302,6 +302,46 @@ void Host_Map_f (void)
 }
 
 /*
+======================
+Host_Maps_f
+
+FIXME(SanyaSho): Make a crossplatform version!
+======================
+*/
+void Host_Maps_f (void)
+{
+	char szFileName[64]; // TODO(SanyaSho): Replace 64 with MAX_PATH
+	HANDLE hFindHandle;
+	WIN32_FIND_DATA findFileData;
+
+	if (cmd_source != src_command)
+		return;
+
+	strcpy (szFileName, com_gamedir);
+	strcat (szFileName, "\\maps\\");
+
+	if (Cmd_Argc())
+		strcat (szFileName, Cmd_Argv(1));
+
+	if (szFileName[strlen(szFileName) - 1] != '\\')
+		strcat(szFileName, "\\");
+
+	strcat (szFileName, "*.bsp");
+
+	hFindHandle = FindFirstFile (szFileName, &findFileData);
+	if (hFindHandle == INVALID_HANDLE_VALUE)
+	{
+		Con_Printf ("No files at %s\n", szFileName);
+		return;
+	}
+
+	do
+	{
+		Con_Printf("     %s\n", findFileData.cFileName);
+	} while (FindNextFile(hFindHandle, &findFileData));
+}
+
+/*
 ==================
 Host_Changelevel_f
 
@@ -1888,6 +1928,7 @@ void Host_InitCommands (void)
 	Cmd_AddCommand ("notarget", Host_Notarget_f);
 	Cmd_AddCommand ("fly", Host_Fly_f);
 	Cmd_AddCommand ("map", Host_Map_f);
+	Cmd_AddCommand ("maps", Host_Maps_f);
 	Cmd_AddCommand ("restart", Host_Restart_f);
 	Cmd_AddCommand ("changelevel", Host_Changelevel_f);
 #ifdef QUAKE2
