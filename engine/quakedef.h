@@ -237,6 +237,7 @@ void	VID_UnlockBuffer (void);
 #include "sys_dll.h"
 #include "pr_cmds.h"
 #include "r_trans.h"
+#include "in_camera.h"
 #endif
 
 //=============================================================================

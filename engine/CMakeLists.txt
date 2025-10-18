@@ -115,6 +115,7 @@ set( ENGINE_SOURCES # "Source Files"
 	"sys_dll.c"
 	"r_trans.c"
 	"snd_dsp.c"
+	"in_camera.c"
 
 	"progdefs.q1"
 	"progdefs.q2"
@@ -183,6 +184,7 @@ set( ENGINE_HEADERS # "Header Files"
 	"sys_dll.h"
 	"r_trans.h"
 	"snd_dsp.h"
+	"in_camera.h"
 )
 
 set( ENGINE_RESOURCES # "Resource Files"

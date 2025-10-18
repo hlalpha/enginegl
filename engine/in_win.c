@@ -162,6 +162,9 @@ Force_CenterView_f
 */
 void Force_CenterView_f (void)
 {
+	if (cam_mousemove)
+		return;
+
 	cl.viewangles[PITCH] = 0;
 }
 
@@ -587,6 +590,9 @@ void IN_MouseMove (usercmd_t *cmd)
 	DWORD				dwElements;
 	HRESULT				hr;
 
+	if (cam_mousemove)
+		return;
+
 	if (!mouseactive)
 		return;
 
@@ -737,12 +743,17 @@ IN_Move
 */
 void IN_Move (usercmd_t *cmd)
 {
-
+	/*
 	if (ActiveApp && !Minimized)
 	{
 		IN_MouseMove (cmd);
 		IN_JoyMove (cmd);
 	}
+	*/
+	if (!cam_mousemove && mouseactive)
+		IN_MouseMove (cmd);
+	if (ActiveApp)
+		IN_JoyMove (cmd);
 }
 
 
@@ -755,6 +766,9 @@ void IN_Accumulate (void)
 {
 	int		mx, my;
 	HDC	hdc;
+
+	if (cam_mousemove)
+		return;
 
 	if (mouseactive)
 	{

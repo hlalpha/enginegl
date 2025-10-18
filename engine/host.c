@@ -693,6 +693,9 @@ void _Host_Frame (float time)
 		CL_ReadFromServer ();
 	}
 
+// update camera
+	CAM_Think ();
+
 // update video
 	if (host_speeds.value)
 		time1 = Sys_FloatTime ();

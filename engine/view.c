@@ -954,7 +954,21 @@ void V_CalcRefdef (void)
 			+ scr_ofsz.value*up[i];
 	
 	
-	V_BoundOffsets ();
+	//V_BoundOffsets ();
+
+	if (cam_thirdperson)
+	{
+		angles[PITCH] = cam_ofs[PITCH];
+		angles[YAW] = cam_ofs[YAW];
+		angles[ROLL] = 0.f;
+
+		AngleVectors (angles, forward, right, up);
+
+		for (i=0 ; i<3 ; i++)
+		{
+			r_refdef.vieworg[i] -= cam_ofs[ROLL] * forward[i];
+		}
+	}
 		
 // set up gun position
 	VectorCopy (cl.viewangles, view->angles);
@@ -1014,6 +1028,9 @@ if (cl.onground && ent->origin[2] - oldz > 0)
 }
 else
 	oldz = ent->origin[2];
+
+	if (cam_thirdperson)
+		VectorCopy(angles, r_refdef.viewangles);
 
 	if (chase_active.value)
 		Chase_Update ();

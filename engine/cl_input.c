@@ -444,5 +444,38 @@ void CL_InitInput (void)
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
 
+	// From in_camera.c:
+	Cmd_AddCommand ("+campitchup", CAM_CamPitchUpDown);
+	Cmd_AddCommand ("-campitchup", CAM_CamPitchUpUp);
+	Cmd_AddCommand ("+campitchdown", CAM_CamPitchDownDown);
+	Cmd_AddCommand ("-campitchdown", CAM_CamPitchDownUp);
+	Cmd_AddCommand ("+camyawleft", CAM_CamYawLeftDown);
+	Cmd_AddCommand ("-camyawleft", CAM_CamYawLeftUp);
+	Cmd_AddCommand ("+camyawright", CAM_CamYawRightDown);
+	Cmd_AddCommand ("-camyawright", CAM_CamYawRightUp);
+	Cmd_AddCommand ("+camin", CAM_CamInDown);
+	Cmd_AddCommand ("-camin", CAM_CamInUp);
+	Cmd_AddCommand ("+camout", CAM_CamOutDown);
+	Cmd_AddCommand ("-camout", CAM_CamOutUp);
+	Cmd_AddCommand ("thirdperson", CAM_ToThirdPerson);
+	Cmd_AddCommand ("firstperson", CAM_ToFirstPerson);
+	Cmd_AddCommand ("+cammousemove", CAM_StartMouseMove);
+	Cmd_AddCommand ("-cammousemove", CAM_EndMouseMove);
+	Cmd_AddCommand ("+camdistance", CAM_StartDistance);
+	Cmd_AddCommand ("-camdistance", CAM_EndDistance);
+	Cmd_AddCommand ("snapto", CAM_ToggleSnapto);
+
+	Cvar_RegisterVariable (&cam_command);
+	Cvar_RegisterVariable (&cam_snapto);
+	Cvar_RegisterVariable (&cam_idealyaw);
+	Cvar_RegisterVariable (&cam_idealpitch);
+	Cvar_RegisterVariable (&cam_idealdist);
+	Cvar_RegisterVariable (&cam_contain);
+	Cvar_RegisterVariable (&c_maxpitch);
+	Cvar_RegisterVariable (&c_minpitch);
+	Cvar_RegisterVariable (&c_maxyaw);
+	Cvar_RegisterVariable (&c_minyaw);
+	Cvar_RegisterVariable (&c_maxdistance);
+	Cvar_RegisterVariable (&c_mindistance);
 }
 
