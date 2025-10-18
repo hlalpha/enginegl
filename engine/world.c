@@ -37,7 +37,8 @@ typedef struct
 	vec3_t		mins2, maxs2;	// size when clipping against mosnters
 	float		*start, *end;
 	trace_t		trace;
-	int			type;
+	short		type;
+	short		ignoretrans;
 	edict_t		*passedict;
 } moveclip_t;
 
@@ -140,15 +141,20 @@ hull_t *SV_HullForEntity (edict_t *ent, vec3_t mins, vec3_t maxs, vec3_t offset)
 			Sys_Error ("SOLID_BSP without MOVETYPE_PUSH");
 
 		model = sv.models[ (int)ent->v.modelindex ];
+		if (!model)
+			Sys_Error ("Hit a %s with no model (%s)", pr_strings + ent->v.classname, pr_strings + ent->v.model);
 
-		if (!model || model->type != mod_brush)
+		if (model->type != mod_brush)
 			Sys_Error ("MOVETYPE_PUSH with a non bsp model");
 
 		VectorSubtract (maxs, mins, size);
 		if (size[0] < 3)
 			hull = &model->hulls[0];
-		else if (size[0] <= 32)
-			hull = &model->hulls[1];
+		else if (size[0] <= 36)
+			if (size[2] <= 36)
+				hull = &model->hulls[3];
+			else
+				hull = &model->hulls[1];
 		else
 			hull = &model->hulls[2];
 
@@ -832,6 +838,9 @@ void SV_ClipToLinks ( areanode_t *node, moveclip_t *clip )
 		if (clip->type == MOVE_NOMONSTERS && touch->v.solid != SOLID_BSP)
 			continue;
 
+		if (clip->ignoretrans && touch->v.rendermode != kRenderModeNormal)
+			continue;
+
 		if (clip->boxmins[0] > touch->v.absmax[0]
 		|| clip->boxmins[1] > touch->v.absmax[1]
 		|| clip->boxmins[2] > touch->v.absmax[2]
@@ -934,8 +943,10 @@ trace_t SV_Move (vec3_t start, vec3_t mins, vec3_t maxs, vec3_t end, int type, e
 	clip.end = end;
 	clip.mins = mins;
 	clip.maxs = maxs;
-	clip.type = type;
 	clip.passedict = passedict;
+
+	clip.type = type;
+	clip.ignoretrans = (type>>8);
 
 	if (type == MOVE_MISSILE)
 	{

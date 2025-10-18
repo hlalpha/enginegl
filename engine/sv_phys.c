@@ -107,9 +107,18 @@ void SV_CheckVelocity (edict_t *ent)
 			ent->v.origin[i] = 0;
 		}
 		if (ent->v.velocity[i] > sv_maxvelocity.value)
+		{
+			Con_Printf ("Got a velocity too high on %s\n", pr_strings + ent->v.classname); // TODO(SanyaSho): Use Con_DPrintf!
+
 			ent->v.velocity[i] = sv_maxvelocity.value;
+		}
 		else if (ent->v.velocity[i] < -sv_maxvelocity.value)
+		{
+			if (developer.value)
+				Con_Printf ("Got a velocity too low on %s\n", pr_strings + ent->v.classname); // TODO(SanyaSho): Use Con_DPrintf!
+
 			ent->v.velocity[i] = -sv_maxvelocity.value;
+		}
 	}
 }
 
@@ -882,6 +891,8 @@ void SV_WallFriction (edict_t *ent, trace_t *trace)
 	
 	ent->v.velocity[0] = side[0] * (1 + d);
 	ent->v.velocity[1] = side[1] * (1 + d);
+
+	SV_CheckVelocity (ent);
 }
 
 /*
@@ -928,7 +939,10 @@ int SV_TryUnstick (edict_t *ent, vec3_t oldvel)
 		ent->v.velocity[0] = oldvel[0];
 		ent->v. velocity[1] = oldvel[1];
 		ent->v. velocity[2] = 0;
+
+		SV_CheckVelocity (ent);
 		clip = SV_FlyMove (ent, 0.1, &steptrace);
+		SV_CheckVelocity (ent);
 
 		if ( fabs(oldorg[1] - ent->v.origin[1]) > 4
 		|| fabs(oldorg[0] - ent->v.origin[0]) > 4 )
@@ -962,6 +976,8 @@ void SV_WalkMove (edict_t *ent)
 	int			oldonground;
 	trace_t		steptrace, downtrace;
 	
+	steptrace.startsolid = 12345;
+
 //
 // do a regular slide move unless it looks like you ran into a step
 //
@@ -975,6 +991,13 @@ void SV_WalkMove (edict_t *ent)
 
 	if ( !(clip & 2) )
 		return;		// move didn't block on a step
+
+	// Will throw this if SV_FlyMove fails
+	if (steptrace.startsolid == 12345)
+	{
+		Con_Printf ("clip %d\n", clip);
+		SV_CheckVelocity (ent);
+	}
 
 	if (!oldonground && ent->v.waterlevel == 0)
 		return;		// don't stair up while jumping
@@ -1008,7 +1031,10 @@ void SV_WalkMove (edict_t *ent)
 	ent->v.velocity[0] = oldvel[0];
 	ent->v. velocity[1] = oldvel[1];
 	ent->v. velocity[2] = 0;
+
+	SV_CheckVelocity (ent);
 	clip = SV_FlyMove (ent, host_frametime, &steptrace);
+	SV_CheckVelocity (ent);
 
 // check for stuckness, possibly due to the limited precision of floats
 // in the clipping hulls
@@ -1043,6 +1069,7 @@ void SV_WalkMove (edict_t *ent)
 // cause the player to hop up higher on a slope too steep to climb	
 		VectorCopy (nosteporg, ent->v.origin);
 		VectorCopy (nostepvel, ent->v.velocity);
+		SV_CheckVelocity (ent);
 	}
 }
 
@@ -1090,7 +1117,10 @@ void SV_Physics_Client (edict_t	*ent, int num)
 #ifdef QUAKE2
 		VectorAdd (ent->v.velocity, ent->v.basevelocity, ent->v.velocity);
 #endif
+
+		SV_CheckVelocity (ent);
 		SV_WalkMove (ent);
+		SV_CheckVelocity (ent);
 
 #ifdef QUAKE2
 		VectorSubtract (ent->v.velocity, ent->v.basevelocity, ent->v.velocity);
@@ -1455,7 +1485,7 @@ void SV_Physics_Step (edict_t *ent)
 		if ((int)ent->v.flags & FL_ONGROUND)
 			if (!wasonground)
 				if (hitsound)
-					SV_StartSound (ent, 0, "demon/dland2.wav", 255, 1);
+					SV_StartSound (ent, 0, "common/thump.wav", 255, 1);
 	}
 
 // regular thinking

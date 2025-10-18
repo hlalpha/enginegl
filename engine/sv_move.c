@@ -65,7 +65,7 @@ realcheck:
 //
 // check it for real...
 //
-	start[2] = mins[2];
+	start[2] = mins[2] + STEPSIZE;
 	
 // the midpoint must be within 16 of the bottom
 	start[0] = stop[0] = (mins[0] + maxs[0])*0.5;
@@ -247,7 +247,7 @@ qboolean SV_StepDirection (edict_t *ent, float yaw, float dist)
 	if (SV_movestep (ent, move, false))
 	{
 		delta = ent->v.angles[YAW] - ent->v.ideal_yaw;
-		if (delta > 45 && delta < 315)
+		if (delta > 30 && delta < 330)
 		{		// not turned far enough, so don't take the step
 			VectorCopy (oldorigin, ent->v.origin);
 		}
@@ -415,8 +415,7 @@ void SV_MoveToGoal_I (edict_t *ent, float dist)
 		return;
 
 // bump around...
-	if ( (rand()&3)==1 ||
-	!SV_StepDirection (ent, ent->v.ideal_yaw, dist))
+	if (!SV_StepDirection (ent, ent->v.ideal_yaw, dist))
 	{
 		SV_NewChaseDir (ent, goal, dist);
 	}
