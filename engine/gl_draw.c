@@ -468,7 +468,7 @@ void Draw_Init (void)
 	// now turn them into textures
 	int conchars_width = 256;
 	int conchars_height = draw_chars->rowheight * draw_chars->height;
-	char_texture = GL_LoadTexture ("conchars", conchars_width, conchars_height, draw_chars->data, false, 1, &draw_chars->data[2 + conchars_width*conchars_height]);
+	char_texture = GL_LoadTexture ("conchars", conchars_width, conchars_height, draw_chars->data, false, TEX_TYPE_ALPHA, &draw_chars->data[2 + conchars_width*conchars_height]);
 
 #if 0
 	conback->width = vid.conwidth;
@@ -509,7 +509,7 @@ void Draw_Init (void)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
 	gl = (glpic_t *)conback->data;
-	gl->texnum = GL_LoadTexture ("conback", conback->width, conback->height, ncdata, false, 0, &ncdata[2 + conback->width*conback->height]);
+	gl->texnum = GL_LoadTexture ("conback", conback->width, conback->height, ncdata, false, TEX_TYPE_NONE, &ncdata[2 + conback->width*conback->height]);
 	gl->sl = 0;
 	gl->sh = 1;
 	gl->tl = 0;
@@ -1311,7 +1311,7 @@ GL_LoadPicTexture
 */
 int GL_LoadPicTexture (qpic_t *pic, char *name)
 {
-	return GL_LoadTexture (name, pic->width, pic->height, pic->data, false, 1, &pic->data[2 + pic->width*pic->height]);
+	return GL_LoadTexture (name, pic->width, pic->height, pic->data, false, TEX_TYPE_ALPHA, &pic->data[2 + pic->width*pic->height]);
 }
 
 /****************************************/
@@ -1450,12 +1450,12 @@ void Draw_MiptexTexture (cachewad_t *wad, byte *data)
 	if ( pPal[765] || pPal[766] || pPal[767] != 0xFF )
 	{
 		tex->name[0] = '}';
-		tex->gl_texturenum = GL_LoadTexture (tex->name, tex->width, tex->height, pData, true, 2, pPal);
+		tex->gl_texturenum = GL_LoadTexture (tex->name, tex->width, tex->height, pData, true, TEX_TYPE_LUM, pPal);
 	}
 	else
 	{
 		tex->name[0] = '{';
-		tex->gl_texturenum = GL_LoadTexture (tex->name, tex->width, tex->height, pData, true, 1, pPal);
+		tex->gl_texturenum = GL_LoadTexture (tex->name, tex->width, tex->height, pData, true, TEX_TYPE_ALPHA, pPal);
 	}
 }
 

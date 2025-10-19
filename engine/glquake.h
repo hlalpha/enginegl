@@ -94,6 +94,9 @@ extern	PROC glVertexPointerEXT;
 
 #define BACKFACE_EPSILON	0.01
 
+#define TEX_TYPE_NONE		0
+#define TEX_TYPE_ALPHA		1
+#define TEX_TYPE_LUM		2
 
 void R_TimeRefresh_f (void);
 void R_ReadPointFile_f (void);

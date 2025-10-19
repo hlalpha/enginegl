@@ -391,7 +391,7 @@ void Mod_LoadTextures (lump_t *l)
 		else
 		{
 			texture_mode = GL_LINEAR_MIPMAP_NEAREST; //_LINEAR;
-			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(mt+1), true, 0, pPal);
+			tx->gl_texturenum = GL_LoadTexture (mt->name, tx->width, tx->height, (byte *)(mt+1), true, TEX_TYPE_NONE, pPal);
 			texture_mode = GL_LINEAR;
 		}
 	}
@@ -1437,7 +1437,7 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 		pheader->gl_texturenum[i][2] =
 		pheader->gl_texturenum[i][3] =
 			GL_LoadTexture (name, pheader->skinwidth, 
-			pheader->skinheight, (byte *)(pskintype + 1), true, 0, NULL); // NOTE(SanyaSho): I'm not sure about this; GLQuake 1.07 sets all gl_texturenums but ValveGameEngine sets only one
+			pheader->skinheight, (byte *)(pskintype + 1), true, TEX_TYPE_NONE, NULL); // NOTE(SanyaSho): I'm not sure about this; GLQuake 1.07 sets all gl_texturenums but ValveGameEngine sets only one
 		pskintype = (daliasskintype_t *)((byte *)(pskintype+1) + s);
 	}
 
@@ -1649,7 +1649,7 @@ void * Mod_LoadSpriteFrame (void * pin, mspriteframe_t **ppframe, int framenum)
 	pspriteframe->right = width + origin[0];
 
 	sprintf (name, "%s_%i", loadmodel->name, framenum);
-	pspriteframe->gl_texturenum = GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, 1, NULL); // TODO(SanyaSho): Custom pallete support for sprites
+	pspriteframe->gl_texturenum = GL_LoadTexture (name, width, height, (byte *)(pinframe + 1), true, TEX_TYPE_ALPHA, NULL); // TODO(SanyaSho): Custom pallete support for sprites
 
 	return (void *)((byte *)pinframe + sizeof (dspriteframe_t) + size);
 }
