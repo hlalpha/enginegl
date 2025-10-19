@@ -169,7 +169,7 @@ void Scrap_Upload (void)
 
 	for (texnum=0 ; texnum<MAX_SCRAPS ; texnum++) {
 		GL_Bind(scrap_texnum + texnum);
-		GL_Upload8 (scrap_texels[texnum], BLOCK_WIDTH, BLOCK_HEIGHT, false, 1, NULL);
+		GL_Upload16 (scrap_texels[texnum], BLOCK_WIDTH, BLOCK_HEIGHT, false, 1, NULL);
 	}
 	scrap_dirty = false;
 }
@@ -1193,12 +1193,13 @@ done:
 GL_Upload8
 ===============
 */
-void GL_Upload8 (byte *data, int width, int height,  qboolean mipmap, int iType, unsigned char *pPal)
+void GL_Upload16 (byte *data, int width, int height,  qboolean mipmap, int iType, unsigned char *pPal)
 {
 static	unsigned	trans[640*480];		// FIXME, temporary
 	int			i, s;
 	qboolean	noalpha;
 	int			p;
+	unsigned char	*pb;
 
 	s = width*height;
 	
@@ -1217,12 +1218,16 @@ static	unsigned	trans[640*480];		// FIXME, temporary
 		for (i=0 ; i<s ; i++)
 		{
 			p = data[i];
-			/*if (iType == 2)
+			if (iType == 2)
 			{
 				noalpha = false;
-				trans[i] = ((*(unsigned int *)&pPal + 765) & 0xFFFFFF) | (p << 24);
+				pb = (byte *)&trans[i];
+				pb[0] = pPal[765];
+				pb[1] = pPal[766];
+				pb[2] = pPal[767];
+				pb[3] = p;
 			}
-			else*/ if (p == 255)
+			else if (p == 255)
 			{
 				noalpha = false;
 				trans[i] = 0;
@@ -1239,7 +1244,7 @@ static	unsigned	trans[640*480];		// FIXME, temporary
 	else
 	{
 		if (s&3)
-			Sys_Error ("GL_Upload8: s&3");
+			Sys_Error ("GL_Upload16: s&3");
 		for (i=0 ; i<s ; i+=4)
 		{
 			trans[i+0] = *(unsigned int *)&pPal[data[i+0] * 3] | 0xFF000000;
@@ -1292,7 +1297,7 @@ int GL_LoadTexture (char *identifier, int width, int height, byte *data, qboolea
 
 	GL_Bind(texture_extension_number );
 
-	GL_Upload8 (data, width, height, mipmap, iType, pPal);
+	GL_Upload16 (data, width, height, mipmap, iType, pPal);
 
 	texture_extension_number++;
 
