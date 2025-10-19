@@ -8,9 +8,8 @@
 #if defined( __cplusplus ) // no need to have these engine-side
 typedef int qboolean;
 typedef float vec_t;
+typedef vec_t vec3_t[3];
 #endif
-
-//#define QUIVER_TESTS
 
 /*
 	pfnAlertMessage:
@@ -28,6 +27,19 @@ typedef struct KeyValueData_s
 	char	*szValue;		// in: value of key
 	int		fHandled;		// out: DLL sets to true if key-value pair was understood
 } KeyValueData;
+
+typedef struct TraceResult_s
+{
+	int			fAllSolid;		// if true, plane is not valid
+	int			fStartSolid;	// if true, the initial point was in a solid area
+	int			fInOpen;
+	int			fInWater;
+	float		flFraction;		// time completed, 1.0 = didn't hit anything
+	vec3_t		vecEndPos;		// final position
+	float		flPlaneDist;
+	vec3_t		vecPlaneNormal;	// surface normal at impact
+	int			fHit;			// entity the surface is on
+} TraceResult;
 
 typedef struct enginefuncs_s
 {
@@ -62,8 +74,8 @@ typedef struct enginefuncs_s
 	void				(*pfnPFSetOrigin)				( struct edict_s *e, float *org );
 	void				(*pfnPFSound)					( struct edict_s *entity, int channel, char *sample, float volume, float attenuation );
 	void				(*pfnPFAmbientSound)			( float *pos, char *samp, float vol, float attenuation );
-	void				(*pfnPF_UNK_TraceLine)			( float *v1, float *v2, int nomonsters, struct edict_s *ent, struct trace_t *ptr ); // TODO
-	void				(*pfnPF_UNK_TraceToss)			( struct edict_s *ent, struct edict_s *ignore, struct trace_t *ptr ); // TODO
+	void				(*pfnPFTraceLine)				( float *v1, float *v2, int fNoMonsters, struct edict_s *pentToSkip, TraceResult *ptr );
+	void				(*pfnPFTraceToss)				( struct edict_s *ent, struct edict_s *ignore, TraceResult *ptr );
 	void				(*pfnPFAim)						( struct edict_s *ent, float speed, vec_t *out );
 	void				(*pfnPFLocalCmd)				( char *str );
 	void				(*pfnPFStuffCmd)				( struct edict_s *e, char *format, ... );

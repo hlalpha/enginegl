@@ -109,7 +109,10 @@ void PF_makevectors_I (float *angles)
 }
 void PF_makevectors (void)
 {
-	PF_makevectors_I (G_VECTOR(OFS_PARM0));
+	float	*vec;
+
+	vec = G_VECTOR(OFS_PARM0);
+	PF_makevectors_I (vec);
 }
 
 /*
@@ -226,7 +229,13 @@ void PF_setsize_I (edict_t *e, float *min, float *max)
 }
 void PF_setsize (void)
 {
-	PF_setsize_I (G_EDICT(OFS_PARM0), G_VECTOR(OFS_PARM1), G_VECTOR(OFS_PARM2));
+	edict_t	*e;
+	float	*min, *max;
+
+	e = G_EDICT(OFS_PARM0);
+	min = G_VECTOR(OFS_PARM1);
+	max = G_VECTOR(OFS_PARM2);
+	PF_setsize_I (e, min, max);
 }
 
 
@@ -268,7 +277,12 @@ int PF_modelindex_I (char *m)
 }
 void PF_setmodel (void)
 {
-	PF_setmodel_I (G_EDICT(OFS_PARM0), G_STRING(OFS_PARM1));
+	edict_t	*e;
+	char	*m;
+
+	e = G_EDICT(OFS_PARM0);
+	m = G_STRING(OFS_PARM1);
+	PF_setmodel_I (e, m);
 }
 
 /*
@@ -425,7 +439,13 @@ float PF_vectoyaw_I (float *value1)
 }
 void PF_vectoyaw (void)
 {
-	G_FLOAT(OFS_RETURN) = PF_vectoyaw_I (G_VECTOR(OFS_PARM0));
+	float	*value1;
+	float	yaw;
+
+	value1 = G_VECTOR(OFS_PARM0);
+
+	yaw = PF_vectoyaw_I (value1);
+	G_FLOAT(OFS_RETURN) = yaw;
 }
 
 
@@ -436,7 +456,7 @@ PF_vectoangles
 vector vectoangles(vector)
 =================
 */
-void PF_vectoangles_I (float *value1, vec_t *out)
+void PF_vectoangles_I (float *value1, vec_t *rgflVectorOut)
 {
 	float	forward;
 	float	yaw, pitch;
@@ -461,16 +481,18 @@ void PF_vectoangles_I (float *value1, vec_t *out)
 			pitch += 360;
 	}
 
-	out[0] = pitch;
-	out[1] = yaw;
-	out[2] = 0;
+	rgflVectorOut[0] = pitch;
+	rgflVectorOut[1] = yaw;
+	rgflVectorOut[2] = 0;
 }
 void PF_vectoangles (void)
 {
 	// TODO(SanyaSho): better way to get args from PF_vectoangles_I?
-	vec3_t out;
+	vec3_t	out;
+	float	*value1;
 
-	PF_vectoangles_I (G_VECTOR(OFS_PARM0), &out);
+	value1 = G_VECTOR(OFS_PARM0);
+	PF_vectoangles_I (value1, &out);
 	
 	G_FLOAT(OFS_RETURN+0) = out[0];
 	G_FLOAT(OFS_RETURN+1) = out[1];
@@ -556,7 +578,11 @@ void PF_ambientsound_I (float *pos, char *samp, float vol, float attenuation)
 }
 void PF_ambientsound (void)
 {
-	PF_ambientsound_I (G_VECTOR (OFS_PARM0), G_STRING(OFS_PARM1), G_FLOAT(OFS_PARM2), G_FLOAT(OFS_PARM3));
+	char		*samp;
+	float		*pos;
+	float 		vol, attenuation;
+
+	PF_ambientsound_I (pos, samp, vol, attenuation);
 }
 
 /*
@@ -631,15 +657,41 @@ traceline (vector1, vector2, tryents)
 */
 void PF_traceline (void)
 {
-	float	*v1, *v2;
-	trace_t	trace;
+	float* v1, * v2;
 	int		nomonsters;
-	edict_t	*ent;
+	edict_t* ent;
 
 	v1 = G_VECTOR(OFS_PARM0);
 	v2 = G_VECTOR(OFS_PARM1);
 	nomonsters = G_FLOAT(OFS_PARM2);
 	ent = G_EDICT(OFS_PARM3);
+
+	PF_traceline_I (v1, v2, nomonsters, ent);
+}
+void PF_traceline_DLL (float *v1, float *v2, int fNoMonsters, edict_t *pentToSkip, TraceResult *ptr)
+{
+	edict_t *ent;
+
+	if (pentToSkip)
+		ent = pentToSkip;
+	else
+		ent = sv.edicts;
+
+	PF_traceline_I (v1, v2, fNoMonsters, ent);
+
+	ptr->fAllSolid = pr_global_struct->trace_allsolid;
+	ptr->fStartSolid = pr_global_struct->trace_startsolid;
+	ptr->fInOpen = pr_global_struct->trace_inopen;
+	ptr->fInWater = pr_global_struct->trace_inwater;
+	ptr->flPlaneDist = pr_global_struct->trace_plane_dist;
+	ptr->flFraction = pr_global_struct->trace_fraction;
+	ptr->fHit = pr_global_struct->trace_ent;
+	VectorCopy (pr_global_struct->trace_endpos, ptr->vecEndPos);
+	VectorCopy (pr_global_struct->trace_plane_normal, ptr->vecPlaneNormal);
+}
+void PF_traceline_I (float* v1, float* v2, int nomonsters, edict_t* ent)
+{
+	trace_t	trace;
 
 	trace = SV_Move (v1, vec3_origin, vec3_origin, v2, nomonsters, ent);
 
@@ -654,21 +706,15 @@ void PF_traceline (void)
 	if (trace.ent)
 		pr_global_struct->trace_ent = EDICT_TO_PROG(trace.ent);
 	else
-		pr_global_struct->trace_ent = EDICT_TO_PROG(sv.edicts);
+		pr_global_struct->trace_ent = 0;
 }
-
 
 #ifdef QUAKE2
 extern trace_t SV_Trace_Toss (edict_t *ent, edict_t *ignore);
 
-void PF_TraceToss (void)
+void PF_TraceToss_I (edict_t *ent, edict_t *ignore)
 {
 	trace_t	trace;
-	edict_t	*ent;
-	edict_t	*ignore;
-
-	ent = G_EDICT(OFS_PARM0);
-	ignore = G_EDICT(OFS_PARM1);
 
 	trace = SV_Trace_Toss (ent, ignore);
 
@@ -683,7 +729,39 @@ void PF_TraceToss (void)
 	if (trace.ent)
 		pr_global_struct->trace_ent = EDICT_TO_PROG(trace.ent);
 	else
-		pr_global_struct->trace_ent = EDICT_TO_PROG(sv.edicts);
+		pr_global_struct->trace_ent = 0;
+}
+void PF_TraceToss_DLL (edict_t *ent, edict_t *ignore, TraceResult *ptr)
+{
+	edict_t* ent;
+
+	if (ignore)
+		ent = ignore;
+	else
+		ent = sv.edicts;
+
+	PF_TraceToss_I (ent, ignore);
+
+	ptr->fAllSolid = pr_global_struct->trace_allsolid;
+	ptr->fStartSolid = pr_global_struct->trace_startsolid;
+	ptr->fInOpen = pr_global_struct->trace_inopen;
+	ptr->fInWater = pr_global_struct->trace_inwater;
+	ptr->flPlaneDist = pr_global_struct->trace_plane_dist;
+	ptr->flFraction = pr_global_struct->trace_fraction;
+	ptr->fHit = pr_global_struct->trace_ent;
+	VectorCopy (pr_global_struct->trace_endpos, ptr->vecEndPos);
+	VectorCopy (pr_global_struct->trace_plane_normal, ptr->vecPlaneNormal);
+
+}
+void PF_TraceToss (void)
+{
+	edict_t	*ent;
+	edict_t	*ignore;
+
+	ent = G_EDICT(OFS_PARM0);
+	ignore = G_EDICT(OFS_PARM1);
+
+	PF_TraceToss_I(ent, ignore);
 }
 #endif
 
@@ -939,7 +1017,16 @@ edict_t *PF_findradius_I (float *org, float rad)
 }
 void PF_findradius (void)
 {
-	RETURN_EDICT (PF_findradius_I (G_VECTOR(OFS_PARM0), G_FLOAT(OFS_PARM1)));
+	float	rad;
+	float	*org;
+	edict_t	*chain;
+
+	org = G_VECTOR(OFS_PARM0);
+	rad = G_FLOAT(OFS_PARM1);
+
+	chain = PF_findradius_I (org, rad);
+
+	RETURN_EDICT(chain);
 }
 
 
@@ -990,11 +1077,15 @@ void PF_etos (void)
 
 edict_t *PF_Spawn_I (void)
 {
-	return ED_Alloc();
+	edict_t *ed;
+	ed = ED_Alloc();
+	return ed;
 }
 void PF_Spawn (void)
 {
-	RETURN_EDICT(PF_Spawn_I());
+	edict_t *ed;
+	ed = PF_Spawn_I();
+	RETURN_EDICT(ed);
 }
 
 void PF_Remove_I (edict_t *ed)
@@ -1003,7 +1094,10 @@ void PF_Remove_I (edict_t *ed)
 }
 void PF_Remove (void)
 {
-	PF_Remove_I (G_EDICT(OFS_PARM0));
+	edict_t *ed;
+
+	ed = G_EDICT(OFS_PARM0);
+	PF_Remove_I (ed);
 }
 
 
@@ -1177,6 +1271,7 @@ void PF_Find (void)
 	int		e;	
 	int		f;
 	char	*s;
+	edict_t	*ed;
 
 	e = G_EDICTNUM(OFS_PARM0);
 	f = G_INT(OFS_PARM1);
@@ -1185,7 +1280,9 @@ void PF_Find (void)
 	if (!s)
 		PR_RunError ("PF_Find: bad search string");
 
-	RETURN_EDICT (PF_Find_I (e, f, s));
+	ed = PF_Find_I (e, f, s);
+
+	RETURN_EDICT(ed);
 }
 
 void PR_CheckEmptyString (char *s)
@@ -1223,7 +1320,10 @@ int PF_precache_sound_I (char *s)
 }
 void PF_precache_sound (void)
 {
-	PF_precache_sound_I (G_STRING(OFS_PARM0));
+	char	*s;
+
+	s = G_STRING(OFS_PARM0);
+	PF_precache_sound_I (s);
 	G_INT(OFS_RETURN) = G_INT(OFS_PARM0);
 }
 
@@ -1252,7 +1352,10 @@ int PF_precache_model_I (char *s)
 }
 void PF_precache_model (void)
 {
-	PF_precache_model_I (G_STRING(OFS_PARM0));
+	char	*s;
+
+	s = G_STRING(OFS_PARM0);
+	PF_precache_model_I (s);
 	G_INT(OFS_RETURN) = G_INT(OFS_PARM0);
 }
 
@@ -1494,7 +1597,7 @@ vector aim(entity, missilespeed)
 =============
 */
 cvar_t	sv_aim = {"sv_aim", "0.93"};
-void PF_aim_I (edict_t *ent, float speed, vec_t *out)
+void PF_aim_I (edict_t *ent, float speed, vec_t *rgflReturn)
 {
 	edict_t	*check, *bestent;
 	vec3_t	start, dir, end, bestdir;
@@ -1512,7 +1615,7 @@ void PF_aim_I (edict_t *ent, float speed, vec_t *out)
 	if (tr.ent && tr.ent->v.takedamage == DAMAGE_AIM
 	&& (!teamplay.value || ent->v.team <=0 || ent->v.team != tr.ent->v.team) )
 	{
-		VectorCopy (pr_global_struct->v_forward, out);
+		VectorCopy (pr_global_struct->v_forward, rgflReturn);
 		return;
 	}
 
@@ -1554,24 +1657,28 @@ void PF_aim_I (edict_t *ent, float speed, vec_t *out)
 		VectorScale (pr_global_struct->v_forward, dist, end);
 		end[2] = dir[2];
 		VectorNormalize (end);
-		VectorCopy (end, out);	
+		VectorCopy (end, rgflReturn);
 	}
 	else
 	{
-		VectorCopy (bestdir, out);
+		VectorCopy (bestdir, rgflReturn);
 	}
 }
 void PF_aim (void)
 {
 	// TODO(SanyaSho): better way to get args from PF_aim_I?
-	vec3_t out;
+	vec3_t	out;
+	edict_t	*ent;
+	float	speed;
 
-	PF_aim_I (G_EDICT(OFS_PARM0), G_FLOAT(OFS_PARM1), &out);
+	ent = G_EDICT(OFS_PARM0);
+	speed = G_FLOAT(OFS_PARM1);
+
+	PF_aim_I (ent, speed, &out);
 
 	G_FLOAT(OFS_RETURN+0) = out[0];
 	G_FLOAT(OFS_RETURN+1) = out[1];
 	G_FLOAT(OFS_RETURN+2) = out[2];
-	//VectorCopy (out, G_VECTOR(OFS_RETURN));
 }
 
 /*
@@ -1617,7 +1724,10 @@ void PF_changeyaw_I (edict_t *ent)
 }
 void PF_changeyaw (void)
 {
-	PF_changeyaw_I (PROG_TO_EDICT(pr_global_struct->self));
+	edict_t		*ent;
+
+	ent = PROG_TO_EDICT(pr_global_struct->self);
+	PF_changeyaw_I (ent);
 }
 
 #ifdef QUAKE2
@@ -1662,7 +1772,10 @@ void PF_changepitch_I (edict_t *ent)
 }
 void PF_changepitch (void)
 {
-	PF_changepitch_I (G_EDICT(OFS_PARM0));
+	edict_t		*ent;
+
+	ent = G_EDICT(OFS_PARM0);
+	PF_changepitch_I (ent);
 }
 #endif
 
@@ -1711,7 +1824,10 @@ sizebuf_t *WriteDest_I (int dest)
 }
 sizebuf_t *WriteDest (void)
 {
-	return WriteDest_I (G_FLOAT(OFS_PARM0));
+	int		dest;
+
+	dest = G_FLOAT(OFS_PARM0);
+	return WriteDest_I (dest);
 }
 
 void PF_WriteByte (void)
@@ -1756,42 +1872,66 @@ void PF_WriteEntity (void)
 
 void PF_WriteByte_I (int dest, int c)
 {
-	MSG_WriteByte (WriteDest_I(dest), c);
+	sizebuf_t	*sb;
+
+	sb = WriteDest_I(dest);
+	MSG_WriteByte (sb, c);
 }
 
 void PF_WriteChar_I (int dest, int c)
 {
-	MSG_WriteChar (WriteDest_I(dest), c);
+	sizebuf_t	*sb;
+
+	sb = WriteDest_I(dest);
+	MSG_WriteChar (sb, c);
 }
 
 void PF_WriteShort_I (int dest, int c)
 {
-	MSG_WriteShort (WriteDest_I(dest), c);
+	sizebuf_t	*sb;
+
+	sb = WriteDest_I(dest);
+	MSG_WriteShort (sb, c);
 }
 
 void PF_WriteLong_I (int dest, int c)
 {
-	MSG_WriteLong (WriteDest_I(dest), c);
+	sizebuf_t	*sb;
+
+	sb = WriteDest_I(dest);
+	MSG_WriteLong (sb, c);
 }
 
 void PF_WriteAngle_I (int dest, float f)
 {
-	MSG_WriteAngle (WriteDest_I(dest), f);
+	sizebuf_t	*sb;
+
+	sb = WriteDest_I(dest);
+	MSG_WriteAngle (sb, f);
 }
 
 void PF_WriteCoord_I (int dest, float f)
 {
-	MSG_WriteCoord (WriteDest_I(dest), f);
+	sizebuf_t	*sb;
+
+	sb = WriteDest_I(dest);
+	MSG_WriteCoord (sb, f);
 }
 
 void PF_WriteString_I (int dest, char *s)
 {
-	MSG_WriteString (WriteDest_I(dest), s);
+	sizebuf_t	*sb;
+
+	sb = WriteDest_I(dest);
+	MSG_WriteString (sb, s);
 }
 
 void PF_WriteEntity_I (int dest, int c)
 {
-	MSG_WriteShort (WriteDest_I(dest), c);
+	sizebuf_t	*sb;
+
+	sb = WriteDest_I(dest);
+	MSG_WriteShort (sb, c);
 }
 
 //=============================================================================
@@ -1832,7 +1972,10 @@ void PF_makestatic_I (edict_t *ent)
 }
 void PF_makestatic (void)
 {
-	PF_makestatic_I (G_EDICT(OFS_PARM0));
+	edict_t	*ent;
+
+	ent = G_EDICT(OFS_PARM0);
+	PF_makestatic_I (ent);
 }
 
 //=============================================================================
@@ -1859,7 +2002,10 @@ void PF_setspawnparms_I (edict_t *ent)
 }
 void PF_setspawnparms (void)
 {
-	PF_setspawnparms_I (G_EDICT(OFS_PARM0));
+	edict_t	*ent;
+
+	ent = G_EDICT(OFS_PARM0);
+	PF_setspawnparms_I (ent);
 }
 
 /*
@@ -1874,6 +2020,7 @@ void PF_changelevel_I (char *s1, char *s2)
 		return;
 	svs.changelevel_issued = true;
 
+	Draw_BeginDisc ();
 	if ((int)pr_global_struct->serverflags & (SFL_NEW_UNIT | SFL_NEW_EPISODE))
 		Cbuf_AddText (va("changelevel %s %s\n",s1, s2));
 	else
@@ -1884,15 +2031,23 @@ void PF_changelevel_I (char *s1, char *s2)
 		return;
 	svs.changelevel_issued = true;
 	
+	Draw_BeginDisc ();
 	Cbuf_AddText (va("changelevel %s\n",s1));
 #endif
 }
 void PF_changelevel (void)
 {
 #if defined( QUAKE2 )
-	PF_changelevel_I (G_STRING(OFS_PARM0), G_STRING(OFS_PARM1));
+	char	*s1, *s2;
+
+	s1 = G_STRING(OFS_PARM0);
+	s2 = G_STRING(OFS_PARM1);
+	PF_changelevel_I (s1, s2);
 #else
-	PF_changelevel_I (G_STRING(OFS_PARM0), NULL);
+	char	*s;
+
+	s = G_STRING(OFS_PARM0);
+	PF_changelevel_I (s, NULL);
 #endif
 }
 

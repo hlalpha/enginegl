@@ -17,6 +17,14 @@ void PF_particle_I (float *org, float *dir, float color, float count);
 void PF_ambientsound_I (float *pos, char *samp, float vol, float attenuation);
 void PF_sound_I (edict_t *entity, int channel, char *sample, float volume, float attenuation);
 
+void PF_traceline_I (float* v1, float* v2, int nomonsters, edict_t* ent);
+void PF_traceline_DLL (float *v1, float *v2, int fNoMonsters, edict_t *pentToSkip, TraceResult *ptr);
+
+#if defined( QUAKE2 )
+void PF_TraceToss_I (edict_t *ent, edict_t *ignore);
+void PF_TraceToss_DLL (edict_t *ent, edict_t *ignore, TraceResult *ptr);
+#endif // QUAKE2
+
 edict_t *PF_checkclient_I (void);
 
 void PF_stuffcmd_I (edict_t *e, char *format, ...);

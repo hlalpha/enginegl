@@ -97,8 +97,12 @@ enginefuncs_t g_engfuncsExportedToDlls =
 	PF_setorigin_I,
 	PF_sound_I,
 	PF_ambientsound_I,
-	NULL, // TraceLine
-	NULL, // TraceToss
+	PF_traceline_DLL,
+#if defined( QUAKE2 )
+	PF_TraceToss_DLL,
+#else
+	NULL,
+#endif // QUAKE2
 	PF_aim_I,
 	PF_localcmd_I,
 	PF_stuffcmd_I,
