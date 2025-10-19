@@ -34,6 +34,8 @@ float PF_walkmove_I (edict_t *ent, float yaw, float dist);
 float PF_droptofloor_I (edict_t *ent);
 void PF_lightstyle_I (int style, char *val);
 
+int PF_DecalIndex_I (int idx, char *name);
+
 qboolean PF_checkbottom_I (edict_t *ent);
 int PF_pointcontents_I (float *v);
 void PF_aim_I (edict_t *ent, float speed, vec_t *out);

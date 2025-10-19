@@ -788,6 +788,8 @@ void Mod_LoadFaces (lump_t *l)
 
 		out->texinfo = loadmodel->texinfo + LittleShort (in->texinfo);
 
+		out->pdecals = NULL;
+
 		CalcSurfaceExtents (out);
 				
 	// lighting info

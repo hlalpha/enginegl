@@ -42,6 +42,27 @@ m*_t structures are in-memory
 /*
 ==============================================================================
 
+DECALS
+
+==============================================================================
+*/
+typedef struct decal_s
+{
+	struct decal_s *pnext;
+	struct msurface_s *psurface;
+	float dx;
+	float dy;
+	float scale;
+	short texture;
+	short flags;
+} decal_t;
+
+#define DECAL_PERMANENT	( 1 << 0 )	// map-placed decal
+
+
+/*
+==============================================================================
+
 BRUSH MODELS
 
 ==============================================================================
@@ -151,6 +172,9 @@ typedef struct msurface_s
 	int			cached_light[MAXLIGHTMAPS];	// values currently used in lightmap
 	qboolean	cached_dlight;				// true if dynamic light in cache
 	byte		*samples;		// [numstyles*surfsize]
+
+// decals info
+	decal_t		*pdecals;
 } msurface_t;
 
 typedef struct mnode_s

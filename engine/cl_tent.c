@@ -79,6 +79,10 @@ void CL_ParseBeam (model_t *m)
 	end[1] = MSG_ReadCoord ();
 	end[2] = MSG_ReadCoord ();
 
+#if defined( QUIVER_QUAKE_COMPAT )
+	R_DecalShoot(Draw_DecalIndex(rand() % 5), 0, end, 0);
+#endif // QUIVER_QUAKE_COMPAT
+
 // override any beam with the same entity
 	for (i=0, b=cl_beams ; i< MAX_BEAMS ; i++, b++)
 		if (b->entity == ent)
@@ -130,6 +134,9 @@ void CL_ParseTEnt (void)
 {
 	int		type;
 	vec3_t	pos;
+#if defined( QUIVER_QUAKE_COMPAT )
+	int		ent;
+#endif // QUIVER_QUAKE_COMPAT
 #ifdef QUAKE2
 	vec3_t	endpos;
 #endif
@@ -146,6 +153,12 @@ void CL_ParseTEnt (void)
 		pos[2] = MSG_ReadCoord ();
 		R_RunParticleEffect (pos, vec3_origin, 20, 30);
 		S_StartSound (-1, 0, cl_sfx_wizhit, pos, 1, 1);
+
+#if defined( QUIVER_QUAKE_COMPAT )
+		ent = MSG_ReadShort();
+		R_DecalShoot (Draw_DecalIndex(rand() % 5), ent, pos, 0);
+#endif // QUIVER_QUAKE_COMPAT
+
 		break;
 		
 	case TE_KNIGHTSPIKE:			// spike hitting wall
@@ -154,6 +167,12 @@ void CL_ParseTEnt (void)
 		pos[2] = MSG_ReadCoord ();
 		R_RunParticleEffect (pos, vec3_origin, 226, 20);
 		S_StartSound (-1, 0, cl_sfx_knighthit, pos, 1, 1);
+
+#if defined( QUIVER_QUAKE_COMPAT )
+		ent = MSG_ReadShort();
+		R_DecalShoot (Draw_DecalIndex(rand() % 5), ent, pos, 0);
+#endif // QUIVER_QUAKE_COMPAT
+
 		break;
 		
 	case TE_SPIKE:			// spike hitting wall
@@ -165,6 +184,12 @@ void CL_ParseTEnt (void)
 #else
 		R_RunParticleEffect (pos, vec3_origin, 0, 10);
 #endif
+
+#if defined( QUIVER_QUAKE_COMPAT )
+		ent = MSG_ReadShort();
+		R_DecalShoot (Draw_DecalIndex(rand() % 5), ent, pos, 0);
+#endif // QUIVER_QUAKE_COMPAT
+
 		if ( rand() % 5 )
 			S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
 		else
@@ -183,6 +208,11 @@ void CL_ParseTEnt (void)
 		pos[1] = MSG_ReadCoord ();
 		pos[2] = MSG_ReadCoord ();
 		R_RunParticleEffect (pos, vec3_origin, 0, 20);
+
+#if defined( QUIVER_QUAKE_COMPAT )
+		ent = MSG_ReadShort();
+		R_DecalShoot (Draw_DecalIndex(rand() % 5), ent, pos, 0);
+#endif // QUIVER_QUAKE_COMPAT
 
 		if ( rand() % 5 )
 			S_StartSound (-1, 0, cl_sfx_tink1, pos, 1, 1);
@@ -203,6 +233,11 @@ void CL_ParseTEnt (void)
 		pos[1] = MSG_ReadCoord ();
 		pos[2] = MSG_ReadCoord ();
 		R_RunParticleEffect (pos, vec3_origin, 0, 20);
+
+#if defined( QUIVER_QUAKE_COMPAT )
+		ent = MSG_ReadShort();
+		R_DecalShoot (Draw_DecalIndex(rand() % 5), ent, pos, 0);
+#endif // QUIVER_QUAKE_COMPAT
 		break;
 		
 	case TE_EXPLOSION:			// rocket explosion
@@ -216,6 +251,12 @@ void CL_ParseTEnt (void)
 		dl->die = cl.time + 0.5;
 		dl->decay = 300;
 		S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
+
+#if defined( QUIVER_QUAKE_COMPAT )
+		ent = MSG_ReadShort();
+		R_DecalShoot (Draw_DecalIndex(rand() % 5), ent, pos, 0);
+#endif // QUIVER_QUAKE_COMPAT
+
 		break;
 		
 	case TE_TAREXPLOSION:			// tarbaby explosion
@@ -273,6 +314,12 @@ void CL_ParseTEnt (void)
 		dl->die = cl.time + 0.5;
 		dl->decay = 300;
 		S_StartSound (-1, 0, cl_sfx_r_exp3, pos, 1, 1);
+
+#if defined( QUIVER_QUAKE_COMPAT )
+		ent = MSG_ReadShort();
+		R_DecalShoot (Draw_DecalIndex(rand() % 5), ent, pos, 0);
+#endif // QUIVER_QUAKE_COMPAT
+
 		break;
 		
 #ifdef QUAKE2

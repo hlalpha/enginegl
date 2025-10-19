@@ -60,13 +60,6 @@ void pfnRegisterCvar ( cvar_t *cvar )
 }
 #endif
 
-
-int	STUB_pfnPFDecalIndex( int idx, char *name )
-{
-	Con_Printf( "DecalIndex( %d, %s )\n", idx, name );
-	return 0;
-}
-
 enginefuncs_t g_engfuncsExportedToDlls =
 {
 	PF_precache_model_I,
@@ -111,7 +104,7 @@ enginefuncs_t g_engfuncsExportedToDlls =
 	PF_stuffcmd_I,
 	PF_particle_I,
 	PF_lightstyle_I,
-	STUB_pfnPFDecalIndex, // DecalIndex
+	PF_DecalIndex_I,
 	PF_pointcontents_I,
 
 	PF_WriteByte_I,

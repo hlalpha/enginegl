@@ -26,6 +26,9 @@ server_static_t	svs;
 
 char	localmodels[MAX_MODELS][5];			// inline model names for precache
 
+int sv_decalnamecount = 0;
+decalname_t sv_decalnames[512]; // TODO(SanyaSho): Recheck size!
+
 //============================================================================
 
 /*
@@ -290,6 +293,14 @@ void SV_ConnectClient (int clientnum)
 	}
 
 	SV_SendServerinfo (client);
+
+	// send server-generated decal pairs to the client
+	for (i=0; i<sv_decalnamecount; i++)
+	{
+		MSG_WriteChar (&client->message, svc_decalname);
+		MSG_WriteChar (&client->message, i); // index // TODO(SanyaSho): Use MSG_WriteByte?
+		MSG_WriteString (&client->message, sv_decalnames[i].name); // decal name
+	}
 }
 
 

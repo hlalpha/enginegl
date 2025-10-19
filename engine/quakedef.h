@@ -236,6 +236,7 @@ void	VID_UnlockBuffer (void);
 #if defined( QUIVER )
 #include "sys_dll.h"
 #include "pr_cmds.h"
+#include "decals.h"
 #include "r_trans.h"
 #include "in_camera.h"
 #endif

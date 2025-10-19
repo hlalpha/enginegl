@@ -383,6 +383,24 @@ void Draw_TextureMode_f (void)
 	}
 }
 
+#if defined( QUIVER_TESTS )
+void shootdecal_f(void)
+{
+	vec3_t forward, up, right;
+	AngleVectors (cl.viewangles, forward, right, up);
+
+	vec3_t dest;
+	VectorMA (r_refdef.vieworg, 4096, forward, dest);
+
+	trace_t	trace;
+	memset (&trace, 0, sizeof(trace));
+
+	SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, r_refdef.vieworg, dest, &trace);
+
+	R_DecalShoot ( Draw_DecalIndex( Cmd_Argc() > 1 ? atoi( Cmd_Args( 1 ) ) : 0 ), trace.ent, trace.endpos, 0 );
+}
+#endif // QUIVER_TESTS
+
 /*
 ===============
 Draw_Init
@@ -400,6 +418,12 @@ void Draw_Init (void)
 	byte	*ncdata;
 	int		f, fstep;
 
+	Draw_CacheWadInit( "decals.wad", 128, &decals_wad ); // TODO(SanyaSho): Does 128 mean MAX_WAD_DECALS/2?
+	Draw_CacheWadHandler( &decals_wad, Draw_MiptexTexture, 32 );
+
+#if defined( QUIVER_TESTS )
+	Cmd_AddCommand( "shootdecal", shootdecal_f );
+#endif // QUIVER_TESTS
 
 	Cvar_RegisterVariable (&gl_nobind);
 	Cvar_RegisterVariable (&gl_max_size);
@@ -1193,12 +1217,12 @@ static	unsigned	trans[640*480];		// FIXME, temporary
 		for (i=0 ; i<s ; i++)
 		{
 			p = data[i];
-			if (iType == 2)
+			/*if (iType == 2)
 			{
 				noalpha = false;
 				trans[i] = ((*(unsigned int *)&pPal + 765) & 0xFFFFFF) | (p << 24);
 			}
-			else if (p == 255)
+			else*/ if (p == 255)
 			{
 				noalpha = false;
 				trans[i] = 0;
@@ -1380,3 +1404,53 @@ qpic_t *Draw_LoadPicFromWad (char *identifier)
 
 	return p;
 }
+
+
+void Draw_MiptexTexture (cachewad_t *wad, byte *data)
+{
+	texture_t *tex;
+	miptex_t tmp;
+	int i;
+	int s;
+	int paloff;
+	byte *pPal, *pData;
+	int texture;
+
+	if (wad->cacheExtra != 32) // wow
+		Sys_Error ("Draw_MiptexTexture: Bad cached wad %s\n", wad->name);
+
+	memcpy (&tmp, data + wad->cacheExtra, sizeof (tmp));
+
+	tex = (texture_t *)data;
+
+	memcpy (tex->name, tmp.name, sizeof(tex->name));
+
+	tex->width = LittleLong (tmp.width);
+	tex->height = LittleLong (tmp.height);
+	tex->anim_total = tex->anim_min = tex->anim_max = 0;
+	tex->anim_next = tex->alternate_anims = NULL;
+
+	for (i = 0; i < MIPLEVELS; i++)
+		tex->offsets[i] = wad->cacheExtra + LittleLong (tmp.offsets[i]);
+
+	s = tex->width*tex->height;
+
+	paloff = (s >> 2) + (s >> 4) + (s >> 6) + s;
+
+	pPal = (byte *)tex + (tex->offsets[0] + paloff + 2);
+	tex->pPal = pPal; // TODO(SanyaSho): Should we store this?
+
+	pData = (byte *)tex + (tex->offsets[0]);
+
+	if ( pPal[765] || pPal[766] || pPal[767] != 0xFF )
+	{
+		tex->name[0] = '}';
+		tex->gl_texturenum = GL_LoadTexture (tex->name, tex->width, tex->height, pData, true, 2, pPal);
+	}
+	else
+	{
+		tex->name[0] = '{';
+		tex->gl_texturenum = GL_LoadTexture (tex->name, tex->width, tex->height, pData, true, 1, pPal);
+	}
+}
+

@@ -60,6 +60,19 @@ msurface_t  *waterchain = NULL;
 
 extern int		g_waterColor[3];
 
+decal_t gDecalPool[MAX_DECALS];
+vec3_t gDecalPos;
+int gDecalCount;
+texture_t *gDecalTexture;
+int gDecalFlags;
+int gDecalIndex;
+int gDecalSize;
+model_t *gDecalModel;
+int gDecalSurfCount;
+msurface_t *gDecalSurfs[MAX_DECALSURFS];
+
+extern cvar_t gl_ztrick;
+
 void R_RenderDynamicLightmaps (msurface_t *fa);
 
 /*
@@ -875,22 +888,32 @@ void R_RenderBrushPoly (msurface_t *fa)
 	}
 
 	if (fa->flags & SURF_UNDERWATER)
+	{
 		DrawGLWaterPoly (fa->polys);
+	}
+	else if (currententity->rendermode == kRenderModeColor)
+	{
+		glDisable (GL_TEXTURE_2D);
+		DrawGLSolidPoly (fa->polys);
+		glEnable (GL_TEXTURE_2D);
+	}
 	else
 	{
-		if (currententity->rendermode == kRenderModeColor)
-		{
-			glDisable (GL_TEXTURE_2D);
-			DrawGLSolidPoly (fa->polys);
-			glEnable (GL_TEXTURE_2D);
-		}
-		else
-			DrawGLPoly (fa->polys);
+		DrawGLPoly (fa->polys);
 	}
 
 	// add the poly to the proper lightmap chain
 	fa->polys->chain = lightmap_polys[fa->lightmaptexturenum];
 	lightmap_polys[fa->lightmaptexturenum] = fa->polys;
+
+	// add decals
+	if (fa->pdecals)
+	{
+		gDecalSurfs[gDecalSurfCount++] = fa;
+
+		if (gDecalSurfCount > MAX_DECALSURFS)
+			Sys_Error ("Too many decal surfaces!\n");
+	}
 
 	// check for lightmap modification
 	for (maps = 0 ; maps < MAXLIGHTMAPS && fa->styles[maps] != 255 ;
@@ -1307,7 +1330,7 @@ e->angles[2] = -e->angles[2];	// stupid quake bug
 		glDisable (GL_BLEND);
 	}
 
-	//R_DrawDecals ();
+	R_DrawDecals ();
 
 	if (currententity->rendermode != kRenderModeAdditive)
 		R_BlendLightmaps ();
@@ -1479,8 +1502,14 @@ void R_DrawWorld (void)
 
 	R_RecursiveWorldNode (cl.worldmodel->nodes);
 
+	gDecalSurfCount = 0;
+
 	if (gl_texsort.value)
 		DrawTextureChains ();
+
+	S_ExtraUpdate ();
+
+	R_DrawDecals ();
 
 	R_BlendLightmaps ();
 
@@ -1835,5 +1864,541 @@ void GL_BuildLightmaps (void)
  	if (!gl_texsort.value)
  		GL_SelectTexture(TEXTURE0_SGIS);
 
+}
+
+
+/*
+===============
+R_DecalInit
+===============
+*/
+void R_DecalInit (void)
+{
+	memset (gDecalPool, 0, sizeof(gDecalPool));
+	gDecalCount = 0;
+}
+
+
+/*
+===============
+R_DecalAlloc
+===============
+*/
+decal_t *R_DecalAlloc (decal_t *pdecal)
+{
+	 decal_t *pnewdecal = pdecal;
+
+	if (!pdecal)
+	{
+		for (int i = 0; i < MAX_DECALS; ++i)
+		{
+			if (++gDecalCount >= MAX_DECALS)
+				gDecalCount = 0;
+
+			pnewdecal = &gDecalPool[gDecalCount];
+
+			if ((pnewdecal->flags & DECAL_PERMANENT) == 0)
+				break;
+		}
+	}
+
+	if (pnewdecal->psurface)
+	{
+		msurface_t *psurface = pnewdecal->psurface;
+		decal_t *pdecals = psurface->pdecals;
+
+		if (pdecals == pnewdecal)
+		{
+			psurface->pdecals = pnewdecal->pnext;
+		}
+		else
+		{
+			if (!pdecals)
+				Sys_Error ("Bad decal list");
+
+			while (pdecals->pnext)
+			{
+				if (pdecals->pnext == pnewdecal)
+				{
+					pdecals->pnext = pnewdecal->pnext;
+					break;
+				}
+
+				pdecals = pdecals->pnext;
+			}
+		}
+	}
+
+	pnewdecal->psurface = NULL;
+	return pnewdecal;
+}
+
+
+/*
+===============
+R_DecalNode
+===============
+*/
+void R_DecalNode (mnode_t* node)
+{
+	mplane_t *splitplane;
+	float dist;
+	int w, h;
+	float s, t, scale;
+	msurface_t *surf;
+	int i;
+	mtexinfo_t *tex;
+	vec3_t cross, normal;
+	float face;
+
+	if (!node)
+		return;
+
+	if (node->contents < 0)
+		return;
+
+	splitplane = node->plane;
+	dist = DotProduct (gDecalPos, splitplane->normal) - splitplane->dist;
+
+	if (dist > gDecalSize)
+	{
+		R_DecalNode (node->children[0]);
+	}
+	else if (dist < -gDecalSize)
+	{
+		R_DecalNode (node->children[1]);
+	}
+	else
+	{
+		if (dist < 4.f && dist > -4.f)
+		{
+			surf = gDecalModel->surfaces + node->firstsurface;
+
+			for (i = 0; i < node->numsurfaces; i++, surf++)
+			{
+				tex = surf->texinfo;
+
+				scale = Length (tex->vecs[0]);
+				if (scale == 0)
+					continue;
+
+				s = DotProduct (gDecalPos, tex->vecs[0]) + tex->vecs[0][3] - surf->texturemins[0];
+				t = DotProduct (gDecalPos, tex->vecs[1]) + tex->vecs[1][3] - surf->texturemins[1];
+
+				w = gDecalTexture->width * scale;
+				h = gDecalTexture->height * scale;
+
+				s -= (w * 0.5);
+				t -= (h * 0.5);
+
+				if (s <= -w || t <= -h || s > (surf->extents[0] + w) || t > (surf->extents[1] + h))
+				{
+					continue;
+				}
+
+				scale = 1.0 / scale;
+				s = (s + surf->texturemins[0]) / (float)tex->texture->width;
+				t = (t + surf->texturemins[1]) / (float)tex->texture->height;
+
+				R_DecalCreate (surf, gDecalIndex, scale, s, t);
+			}
+		}
+
+		R_DecalNode (node->children[0]);
+		R_DecalNode (node->children[1]);
+	}
+}
+
+
+/*
+===============
+R_DecalShoot
+===============
+*/
+void R_DecalShoot (int textureIndex, int entity, vec_t *position, int flags)
+{
+	entity_t *ent;
+	texture_t *pdectex;
+	model_t *pdecmod;
+	vec3_t decalpos;
+	mnode_t *node;
+	vec3_t forward, right, up;
+	vec_t oldx, oldy;
+
+	ent = &cl_entities[entity];
+
+	// Store decal position
+	VectorCopy (position, gDecalPos);
+
+	pdectex = Draw_DecalTexture (textureIndex);
+
+	if (!ent || !(pdecmod = ent->model) || pdecmod->type != mod_brush || !pdectex)
+	{
+		Con_Printf ("Decals must hit mod_brush!\n");
+		return;
+	}
+
+	node = pdecmod->nodes;
+
+	// Check if we hit a brush-entity and not a worldspawn
+	if (entity)
+	{
+		VectorAdd (pdecmod->hulls[0].clip_mins, ent->origin, decalpos);
+		VectorAdd (position, decalpos, gDecalPos);
+
+		if (pdecmod->firstmodelsurface)
+		{
+			VectorAdd (ent->baseline.origin, position, gDecalPos);
+			VectorSubtract (gDecalPos, ent->origin, gDecalPos);
+
+			node += pdecmod->hulls[0].firstclipnode;
+		}
+
+		if (ent->angles[0] != 0.f && ent->angles[1] != 0.f && ent->angles[2] != 0.f)
+		{
+			AngleVectors (ent->angles, forward, right, up);
+
+			gDecalPos[0] = DotProduct (gDecalPos, forward);
+			gDecalPos[1] = -DotProduct (gDecalPos, right);
+			gDecalPos[2] = DotProduct (gDecalPos, up);
+		}
+	}
+
+	gDecalModel = ent->model;
+	gDecalTexture = pdectex;
+	gDecalIndex = textureIndex;
+	gDecalFlags = flags;
+	gDecalSize = pdectex->width / 2;
+
+	R_DecalNode (node);
+}
+
+
+/*
+===============
+R_DecalIntersect
+===============
+*/
+decal_t *R_DecalIntersect (msurface_t *psurf, int *pcount, float x, float y)
+{
+	*pcount = 0;
+
+	float lastArea = 65535;
+	float maxWidth = (float)(gDecalTexture->width) * 1.5;
+
+	decal_t *pdec, *plastdec;
+	texture_t *pdectex, *ptex;
+	float w, h;
+	int dx, dy;
+
+	plastdec = NULL;
+
+	ptex = psurf->texinfo->texture;
+
+	for (pdec = psurf->pdecals; pdec; pdec = pdec->pnext)
+	{
+		pdectex = Draw_DecalTexture (pdec->texture);
+
+		if (!pdec->flags & DECAL_PERMANENT)
+		{
+			if (maxWidth >= (float)pdectex->width)
+			{
+				w = abs((int)((gDecalTexture->width >> 1) + ptex->width * x - (ptex->width * pdec->dx + (pdectex->width >> 1))));
+				h = abs((int)((gDecalTexture->height >> 1) + ptex->height * y - (ptex->height * pdec->dy + (pdectex->height >> 1))));
+
+				if (h <= w)
+				{
+					dx = w;
+					dy = h;
+				}
+				else
+				{
+					dx = h;
+					dy = w;
+				}
+
+				float flArea = (float)dx + (float)dy * 0.5;
+				if ((flArea * pdec->scale) < 8)
+				{
+					*pcount += 1;
+
+					if (!plastdec || lastArea >= flArea)
+					{
+						lastArea = flArea;
+						plastdec = pdec;
+					}
+				}
+			}
+		}
+	}
+
+	return plastdec;
+}
+
+
+/*
+===============
+R_DecalCreate
+===============
+*/
+void R_DecalCreate (msurface_t *psurf, int textureIndex, float scale, float x, float y)
+{
+	decal_t *pintdec, *pdec, *pdectail;
+	int pcount;
+
+	pintdec = R_DecalIntersect (psurf, &pcount, x, y);
+	if (pcount < 4)
+		pintdec = NULL;
+
+	pdec = R_DecalAlloc (pintdec);
+	pdec->flags = gDecalFlags;
+	pdec->dx = x;
+	pdec->dy = y;
+	pdec->texture = textureIndex;
+	pdec->pnext = NULL;
+
+	if (!psurf->pdecals)
+	{
+		// First decal on a surface
+		psurf->pdecals = pdec;
+	}
+	else
+	{
+		// Add decal to tail
+		pdectail = psurf->pdecals;
+		while (pdectail->pnext)
+			pdectail = pdectail->pnext;
+
+		pdectail->pnext = pdec;
+	}
+
+	pdec->psurface = psurf;
+	pdec->scale = scale;
+}
+
+#define EDGE_LEFT	0
+#define EDGE_RIGHT	1
+#define EDGE_TOP	2
+#define EDGE_BOTTOM	3
+
+int Inside (float *vert, int edge)
+{
+	switch (edge)
+	{
+		case EDGE_LEFT:		return vert[3] > 0.0f;	// S > 0
+		case EDGE_RIGHT:	return vert[3] < 1.0f;	// S < 1
+		case EDGE_TOP:		return vert[4] > 0.0f;	// T > 0
+		case EDGE_BOTTOM:	return vert[4] < 1.0f;	// T < 1
+	}
+
+	return 0;
+}
+
+void Intersect (float *one, float *two, int edge, float *out)
+{
+	float	t;
+
+	// Determine interpolation factor 't' and set the clipped component
+	if ( edge < EDGE_TOP )
+	{
+		if ( edge == EDGE_LEFT )
+		{
+			// S = 0
+			t = ((one[3] - 0.0f) / (one[3] - two[3]));
+			out[3] = out[5] = 0.0f;
+		}
+		else
+		{
+			// S = 1
+			t = ((one[3] - 1.0f) / (one[3] - two[3]));
+			out[3] = out[5] = 1.0f;
+		}
+
+		out[4] = one[4] + (two[4] - one[4]) * t;
+		out[6] = one[6] + (two[6] - one[6]) * t;
+	}
+	else
+	{
+		if ( edge == EDGE_TOP )
+		{
+			// T = 0
+			t = ((one[4] - 0.0f) / (one[4] - two[4]));
+			out[4] = out[6] = 0.0f;
+		}
+		else
+		{
+			// T = 1
+			t = ((one[4] - 1.0f) / (one[4] - two[4]));
+			out[4] = out[6] = 1.0f;
+		}
+
+		out[3] = one[3] + (two[3] - one[3]) * t;
+		out[5] = one[5] + (two[4] - one[5]) * t;
+	}
+
+	// Interpolate x, y, z
+	out[0] = (two[0] - one[0]) * t + one[0];
+	out[1] = (two[1] - one[1]) * t + one[1];
+	out[2] = (two[2] - one[2]) * t + one[2];
+}
+
+int SHClip (float *vert, int vertCount, float *out, int edge)
+{
+	int i;
+	float *s, *p;
+
+	int outCount = 0;
+
+	// vert:
+	// 0 - X
+	// 1 - Y
+	// 2 - Z
+	// 3 - U
+	// 4 - V
+	// 5 - LM U
+	// 6 - LM V
+
+	s = &vert[(vertCount-1)*VERTEXSIZE];
+
+	for (int i = 0; i < vertCount; ++i)
+	{
+		p = &vert[i * VERTEXSIZE];
+
+		if (Inside (p, edge))
+		{
+			if (Inside (s, edge))
+			{
+				memcpy (out, p, sizeof(float)*VERTEXSIZE);
+				out += VERTEXSIZE;
+				outCount++;
+			}
+			else
+			{
+				Intersect (s, p, edge, out);
+				out += VERTEXSIZE;
+
+				memcpy (out, p, sizeof(float)*VERTEXSIZE);
+				out += VERTEXSIZE;
+				outCount += 2;
+			}
+		}
+		else if (Inside (s, edge))
+		{
+			Intersect (p, s, edge, out);
+			out += VERTEXSIZE;
+			outCount++;
+		}
+
+		s = p;
+	}
+
+	return outCount;
+}
+
+#define MAX_DECALCLIPVERT 20
+
+static float vert[MAX_DECALCLIPVERT][VERTEXSIZE];
+static float outvert[MAX_DECALCLIPVERT][VERTEXSIZE];
+
+/*
+===============
+R_DrawDecals
+===============
+*/
+void R_DrawDecals (void)
+{
+	int i, j, k, count;
+	msurface_t *pdecsurf;
+	decal_t *pdec;
+	texture_t *pdectex, *pdecsurftext;
+	glpoly_t *p;
+	float *v, *surfv;
+	float scalex, scaley;
+
+	if (!gDecalSurfCount)
+		return;
+
+	glEnable (GL_BLEND);
+	glEnable (GL_ALPHA_TEST);
+
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glDepthMask (GL_ZERO);
+
+	glEnable (GL_POLYGON_OFFSET_FILL);
+
+	if (!gl_ztrick.value || gldepthmin < 0.5f)
+	{
+		glPolygonOffset (1,-4);
+	}
+	else
+	{
+		glPolygonOffset (1,4);
+	}
+
+	for (i = 0; i < gDecalSurfCount; i++)
+	{
+		pdecsurf = gDecalSurfs[i];
+
+		// Draw all decals
+		for (pdec = pdecsurf->pdecals; pdec; pdec = pdec->pnext)
+		{
+			pdectex = Draw_DecalTexture (pdec->texture);
+			GL_Bind (pdectex->gl_texturenum);
+
+			glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+			glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+			{
+				pdecsurftext = pdecsurf->texinfo->texture;
+
+				scalex = (pdecsurftext->width * pdec->scale) / (float)pdectex->width;
+				scaley = (pdecsurftext->height * pdec->scale) / (float)pdectex->height;
+
+				v = pdecsurf->polys->verts[0];
+
+				for (j = 0; j < pdecsurf->polys->numverts; j++, v += VERTEXSIZE)
+				{
+					VectorCopy (v, vert[j]);
+					vert[j][3] = (v[3] - pdec->dx) * scalex;
+					vert[j][4] = (v[4] - pdec->dy) * scaley;
+				}
+
+				// clip
+				count = SHClip ((float*)&vert[0], pdecsurf->polys->numverts, (float*)&outvert[0], 0);
+				count = SHClip ((float*)&outvert[0], count, (float*)&vert[0], 1);
+				count = SHClip ((float*)&vert[0], count, (float*)&outvert[0], 2);
+				count = SHClip ((float*)&outvert[0], count, (float*)&vert[0], 3);
+
+				v = (float*)&vert[0];
+			}
+
+			if (count)
+			{
+				glBegin (GL_POLYGON);
+
+				for (k = 0; k < count; k++)
+				{
+					glTexCoord2f (v[3], v[4]);
+					glVertex3fv (v);
+					v += VERTEXSIZE;
+				}
+
+				glEnd ();
+			}
+
+			glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameterf (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		}
+	}
+
+	glDisable (GL_POLYGON_OFFSET_FILL);
+
+	glDisable (GL_ALPHA_TEST);
+	glDisable (GL_BLEND);
+
+	glDepthMask (GL_ONE);
+
+	gDecalSurfCount = 0;
 }
 

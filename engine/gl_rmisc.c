@@ -254,6 +254,8 @@ void R_NewMap (void)
 	r_viewleaf = NULL;
 	R_ClearParticles ();
 
+	R_DecalInit();
+
 	GL_BuildLightmaps ();
 
 	// identify sky texture

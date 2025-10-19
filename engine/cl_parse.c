@@ -64,7 +64,11 @@ char *svc_strings[] =
 	"svc_finale",			// [string] music [string] text
 	"svc_cdtrack",			// [byte] track [byte] looptrack
 	"svc_sellscreen",
-	"svc_cutscene"
+	"svc_cutscene",
+
+	"svc_weaponanim",
+	"svc_decalname",
+	//"svc_roomtype" // FIXME(SanyaSho): enginegl.exe doesn't have this line!
 };
 
 //=============================================================================
@@ -1044,6 +1048,21 @@ void CL_ParseServerMessage (void)
 			cl.completed_time = cl.time;
 			vid.recalc_refdef = true;	// go to full screen
 			SCR_CenterPrint (MSG_ReadString ());			
+			break;
+
+		case svc_weaponanim:
+			// TODO(SanyaSho): studiorender
+			//cl.animtime = cl.time;
+			//cl.sequence = MSG_ReadByte();
+			break;
+
+		case svc_decalname:
+			i = MSG_ReadByte ();
+			Draw_DecalSetName (i, MSG_ReadString ());
+			break;
+
+		case svc_roomtype:
+			Cvar_SetValue ("room_type", MSG_ReadShort ());
 			break;
 
 		case svc_sellscreen:

@@ -1402,6 +1402,25 @@ void PF_ceil (void)
 
 /*
 =============
+PF_DecalIndex_I
+=============
+*/
+int PF_DecalIndex_I (int idx, char *name)
+{
+	int nIndex;
+
+	nIndex = (int)strncpy(sv_decalnames[idx].name, name, sizeof(sv_decalnames[idx].name)-1);
+	sv_decalnames[idx].name[sizeof(sv_decalnames[idx].name)-1] = 0;
+
+	if (sv_decalnamecount < idx + 1)
+		sv_decalnamecount = idx + 1;
+
+	return nIndex;
+}
+
+
+/*
+=============
 PF_checkbottom
 =============
 */

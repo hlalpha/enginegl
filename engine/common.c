@@ -855,24 +855,24 @@ COM_FileBase
 */
 void COM_FileBase (char *in, char *out)
 {
-	char *s, *s2;
-	
-	s = in + strlen(in) - 1;
-	
-	while (s != in && *s != '.')
-		s--;
-	
-	for (s2 = s ; *s2 && *s2 != '/' ; s2--)
-	;
-	
-	if (s-s2 < 2)
-		strcpy (out,"?model?");
-	else
-	{
-		s--;
-		strncpy (out,s2+1, s-s2);
-		out[s-s2] = 0;
-	}
+	const char *start, *end;
+	int len;
+
+	end = in + strlen(in);
+	start = end;
+
+	while (start > in && *(start - 1) != '.')
+		start--;
+
+	if (start == in)
+		start = end;
+
+	while (start > in && *(start - 1) != '/')
+		start--;
+
+	len = end - start - ((end != start && *(end - 1) == '.') ? 1 : 0);
+	strncpy(out, start, len);
+	out[len] = '\0';
 }
 
 
