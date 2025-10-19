@@ -254,7 +254,7 @@ void CL_ParseTEnt (void)
 
 #if defined( QUIVER_QUAKE_COMPAT )
 		ent = MSG_ReadShort();
-		R_DecalShoot (Draw_DecalIndex(rand() % 5), ent, pos, 0);
+		R_DecalShoot (Draw_DecalIndex(13), ent, pos, 0);
 #endif // QUIVER_QUAKE_COMPAT
 
 		break;
@@ -317,7 +317,7 @@ void CL_ParseTEnt (void)
 
 #if defined( QUIVER_QUAKE_COMPAT )
 		ent = MSG_ReadShort();
-		R_DecalShoot (Draw_DecalIndex(rand() % 5), ent, pos, 0);
+		R_DecalShoot (Draw_DecalIndex(13), ent, pos, 0);
 #endif // QUIVER_QUAKE_COMPAT
 
 		break;
