@@ -582,6 +582,11 @@ void PF_ambientsound (void)
 	float		*pos;
 	float 		vol, attenuation;
 
+	pos = G_VECTOR (OFS_PARM0);			
+	samp = G_STRING(OFS_PARM1);
+	vol = G_FLOAT(OFS_PARM2);
+	attenuation = G_FLOAT(OFS_PARM3);
+
 	PF_ambientsound_I (pos, samp, vol, attenuation);
 }
 
@@ -1872,66 +1877,42 @@ void PF_WriteEntity (void)
 
 void PF_WriteByte_I (int dest, int c)
 {
-	sizebuf_t	*sb;
-
-	sb = WriteDest_I(dest);
-	MSG_WriteByte (sb, c);
+	MSG_WriteByte (WriteDest_I(dest), c);
 }
 
 void PF_WriteChar_I (int dest, int c)
 {
-	sizebuf_t	*sb;
-
-	sb = WriteDest_I(dest);
-	MSG_WriteChar (sb, c);
+	MSG_WriteChar (WriteDest_I(dest), c);
 }
 
 void PF_WriteShort_I (int dest, int c)
 {
-	sizebuf_t	*sb;
-
-	sb = WriteDest_I(dest);
-	MSG_WriteShort (sb, c);
+	MSG_WriteShort (WriteDest_I(dest), c);
 }
 
 void PF_WriteLong_I (int dest, int c)
 {
-	sizebuf_t	*sb;
-
-	sb = WriteDest_I(dest);
-	MSG_WriteLong (sb, c);
+	MSG_WriteLong (WriteDest_I(dest), c);
 }
 
 void PF_WriteAngle_I (int dest, float f)
 {
-	sizebuf_t	*sb;
-
-	sb = WriteDest_I(dest);
-	MSG_WriteAngle (sb, f);
+	MSG_WriteAngle (WriteDest_I(dest), f);
 }
 
 void PF_WriteCoord_I (int dest, float f)
 {
-	sizebuf_t	*sb;
-
-	sb = WriteDest_I(dest);
-	MSG_WriteCoord (sb, f);
+	MSG_WriteCoord (WriteDest_I(dest), f);
 }
 
 void PF_WriteString_I (int dest, char *s)
 {
-	sizebuf_t	*sb;
-
-	sb = WriteDest_I(dest);
-	MSG_WriteString (sb, s);
+	MSG_WriteString (WriteDest_I(dest), s);
 }
 
 void PF_WriteEntity_I (int dest, int c)
 {
-	sizebuf_t	*sb;
-
-	sb = WriteDest_I(dest);
-	MSG_WriteShort (sb, c);
+	MSG_WriteShort (WriteDest_I(dest), c);
 }
 
 //=============================================================================
