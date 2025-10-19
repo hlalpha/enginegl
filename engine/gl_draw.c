@@ -582,7 +582,7 @@ int Draw_Character (int x, int y, int num)
 	glEnable(GL_ALPHA_TEST);
 	glDisable(GL_BLEND);
 
-	GL_DisableMultitexture();
+	GL_DisableMultitexture(); // NOTE(SanyaSho): Was added after GLQuake 1.07
 
 	GL_Bind (char_texture);
 
@@ -1113,7 +1113,8 @@ void GL_Upload32 (unsigned *data, int width, int height, qboolean mipmap, int iT
 static	unsigned	scaled[1024*512];	// [512*256];
 	int			scaled_width, scaled_height;
 
-	++giTotalTextures;
+	giTotalTextures++;
+
 	giTotalTexBytes += 3 * width * height;
 
 	for (scaled_width = 1 ; scaled_width < width ; scaled_width<<=1)
@@ -1136,7 +1137,7 @@ static	unsigned	scaled[1024*512];	// [512*256];
 	if (scaled_width * scaled_height > sizeof(scaled)/4)
 		Sys_Error ("GL_LoadTexture: too big");
 
-	samples = iType ? gl_alpha_format : gl_solid_format;
+	samples = iType != TEX_TYPE_NONE ? gl_alpha_format : gl_solid_format;
 
 	if (scaled_width == width && scaled_height == height)
 	{
@@ -1190,7 +1191,7 @@ done:
 
 /*
 ===============
-GL_Upload8
+GL_Upload16
 ===============
 */
 void GL_Upload16 (byte *data, int width, int height,  qboolean mipmap, int iType, unsigned char *pPal)
@@ -1218,7 +1219,7 @@ static	unsigned	trans[640*480];		// FIXME, temporary
 		for (i=0 ; i<s ; i++)
 		{
 			p = data[i];
-			if (iType == 2)
+			if (iType == TEX_TYPE_LUM)
 			{
 				noalpha = false;
 				pb = (byte *)&trans[i];
@@ -1230,11 +1231,19 @@ static	unsigned	trans[640*480];		// FIXME, temporary
 			else if (p == 255)
 			{
 				noalpha = false;
-				trans[i] = 0;
+				pb = (byte *)&trans[i];
+				pb[0] = 0;
+				pb[1] = 0;
+				pb[2] = 0;
+				pb[3] = 0;
 			}
 			else
 			{
-				trans[i] = (*(unsigned int *)&pPal[p * 3] & 0xFFFFFF) | 0xFF000000;
+				pb = (byte *)&trans[i];
+				pb[0] = pPal[p*3+0];
+				pb[1] = pPal[p*3+1];
+				pb[2] = pPal[p*3+2];
+				pb[3] = 255;
 			}
 		}
 

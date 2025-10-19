@@ -2329,7 +2329,7 @@ void R_DrawDecals (void)
 
 	if (!gl_ztrick.value || gldepthmin < 0.5f)
 	{
-		glPolygonOffset (1,-4);
+		glPolygonOffset (1,-4); // NOTE(SanyaSho): Replace 1,-4 with -1,-4 to fix decal flickering in OpenGL
 	}
 	else
 	{
