@@ -747,15 +747,8 @@ void GrabFont(void)
 			if (y != yl)
 			{
 				for (y2 = y - header->rowheight; y2 < yh; y2++)
-				{
 					if (kFontMarker == (unsigned)SCRN(xl, y2))
 						break;
-
-#if 0
-					if (3 == SCRN(xl, y2))
-						break;
-#endif // 0
-				}
 
 				if (y2 == yh)
 					break;
@@ -767,15 +760,8 @@ void GrabFont(void)
 			{
 				// find next marker
 				for (x2 = x + 1; x2 < xh; x2++)
-				{
 					if (kFontMarker == (unsigned)SCRN(x2, y))
 						break;
-
-#if 0
-					if (3 == SCRN(x2, y))
-						break;
-#endif // 0
-				}
 
 				// check for end of row
 				if (x2 == xh)
