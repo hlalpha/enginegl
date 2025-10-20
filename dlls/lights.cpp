@@ -27,12 +27,13 @@ LINK_ENTITY_TO_CLASS( light, CLight );
 //
 void CLight::KeyValue( KeyValueData *pkvd )
 {
-	if ( !strcmp( pkvd->szKeyName, "style" ) )
+	if ( FStrEq( pkvd->szKeyName, "style" ) )
 	{
 		m_iStyle = atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
-	else if ( !strcmp( pkvd->szKeyName, "pitch" ) )
+
+	if ( FStrEq( pkvd->szKeyName, "pitch" ) )
 	{
 		pkvd->fHandled = TRUE;
 	}
@@ -46,10 +47,10 @@ If targeted, it will toggle between on or off.
 */
 void CLight::Spawn()
 {
-	if ( pev->targetname == 0 )
+	if ( FStringNull( pev->targetname ) )
 	{
 		// inert light
-		REMOVE_ENTITY( (edict_t *)pev->pContainingEntity );
+		REMOVE_ENTITY( ENT( pev ) );
 		return;
 	}
 

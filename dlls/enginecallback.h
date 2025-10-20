@@ -64,7 +64,7 @@ extern enginefuncs_t g_engfuncs;
 #define ENGINE_FPRINTF			(*g_engfuncs.pfnEngineFprintf)
 
 #define ALLOC_PRIVATE			(*g_engfuncs.pfnPvAllocEntPrivateData)
-#define GET_PRIVATE( pev )		(*g_engfuncs.pfnPvEntPrivateData)( (edict_t *)pev->pContainingEntity )
+#define GET_PRIVATE				(*g_engfuncs.pfnPvEntPrivateData)
 #define FREE_PRIVATE			(*g_engfuncs.pfnFreeEntPrivateData)
 
 #define DISPATCH_FUNC_BY_ID		(*g_engfuncs.pfnDispatchFuncById)

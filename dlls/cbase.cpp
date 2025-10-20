@@ -3,49 +3,49 @@
 // QC Wrapped Function
 extern "C" __declspec(dllexport) void DispatchSpawn( entvars_t *pev, void *funcArgs )
 {
-	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( pev );
+	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( ENT( pev ) );
 	if ( pBaseEntity )
 			pBaseEntity->Spawn();
 }
 
 extern "C" __declspec(dllexport) void DispatchThink( entvars_t *pev, void *funcArgs )
 {
-	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( pev );
+	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( ENT( pev ) );
 	if ( pBaseEntity )
 			pBaseEntity->Think( funcArgs );
 }
 
 extern "C" __declspec(dllexport) void DispatchUse( entvars_t *pev, void *funcArgs )
 {
-	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( pev );
+	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( ENT( pev ) );
 	if ( pBaseEntity )
 			pBaseEntity->Use( funcArgs );
 }
 
 extern "C" __declspec(dllexport) void DispatchTouch( entvars_t *pev, void *funcArgs )
 {
-	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( pev );
+	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( ENT( pev ) );
 	if ( pBaseEntity )
 			pBaseEntity->Touch( funcArgs );
 }
 
 extern "C" __declspec(dllexport) void DispatchSave( entvars_t *pev, void *funcArgs )
 {
-	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( pev );
+	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( ENT( pev ) );
 	if ( pBaseEntity )
 			pBaseEntity->Save( funcArgs );
 }
 
 extern "C" __declspec(dllexport) void DispatchRestore( entvars_t *pev, void *funcArgs )
 {
-	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( pev );
+	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( ENT( pev ) );
 	if ( pBaseEntity )
 			pBaseEntity->Restore( funcArgs );
 }
 
 extern "C" __declspec(dllexport) void DispatchKeyValue( entvars_t *pev, KeyValueData *pkvd )
 {
-	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( pev );
+	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( ENT( pev ) );
 	if ( pBaseEntity )
 			pBaseEntity->KeyValue( pkvd );
 
@@ -68,7 +68,7 @@ extern "C" __declspec(dllexport) void DispatchKeyValue( entvars_t *pev, KeyValue
 
 extern "C" __declspec(dllexport) void DispatchBlocked( entvars_t *pev, void *funcArgs )
 {
-	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( pev );
+	CBaseEntity *pBaseEntity = (CBaseEntity *)GET_PRIVATE( ENT( pev ) );
 	if ( pBaseEntity )
 		pBaseEntity->Blocked( funcArgs );
 }

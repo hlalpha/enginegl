@@ -6,6 +6,15 @@
 #endif
 
 
+// Use this to mark stub entity position in world
+#define MARK_STUB_ENTITY                                                 \
+	{                                                                    \
+		PRECACHE_MODEL( "progs/s_explod.spr" );                          \
+		SET_MODEL( ENT(pev), "progs/s_explod.spr" );                     \
+		ALERT( at_log, "Stub %s spawned!\n", STRING( pev->classname ) ); \
+	}
+
+
 #define ARRAYSIZE( p )					( sizeof( p ) / sizeof( p[0] ) )
 
 
@@ -37,9 +46,29 @@ typedef int EOFFSET;
 	void mapClassName( entvars_t *pev, void *funcArgs ) { GetClassPtr( (DLLClassName *)pev ); }
 
 
-#define VARS( ed )	(*g_engfuncs.pfnGetVarsOfEnt)( ed )
-#define ENT( ed )	( ed )
+#define VARS( ed )						(*g_engfuncs.pfnGetVarsOfEnt)( ed )
+#define ENT( ed )						( (edict_t *)ed->pContainingEntity )
 
 
-#define SF_LIGHT_START_OFF				1
+#define FStringNull( string )			( string == 0 )
+#define FStrEq( a, b )					( !strcmp( a, b ) )
+
+
+#define gpGlobals						( (globalvars_t *)pev->pSystemGlobals )
+
+
+#define SF_LIGHT_START_OFF				( 1 << 0 )
+
+
+#define SF_AMBIENT_SOUND_EVERYWHERE		( 1 << 0 )
+#define SF_AMBIENT_SOUND_START_SILENT	( 1 << 1 )
+
+
+extern void UTIL_EmitAmbientSound( float x, float y, float z, char *samp, float vol, float attenuation );
+
+extern float UTIL_RandomFloat( float flMin, float flMax );
+
+extern void _VectorCopy( vec_t *to, vec_t *from );
+
+extern void UTIL_TraceLine( float x1, float y1, float z1, float x2, float y2, float z2, int fNoMonsters, struct edict_s *pentToSkip, TraceResult *ptr );
 
