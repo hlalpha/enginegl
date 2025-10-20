@@ -65,5 +65,18 @@ template <class T> T * GetClassPtr( T *a )
 	return a;
 }
 
+// this moved here from world.cpp, to allow classes to be derived from it
+//=======================
+// CWorld
+//
+// This spawns first when each level begins.
+//=======================
+class CWorld : public CBaseEntity
+{
+public:
+	void Spawn();
+	void KeyValue( KeyValueData *pkvd );
+};
+
 #endif // CBASE_H
 

@@ -8,6 +8,7 @@ set( DLLS_SOURCES # "Source Files"
 	"util.cpp"
 	"cbase.cpp"
 	"lights.cpp"
+	"world.cpp"
 )
 
 set( DLLS_HEADERS # "Header Files"

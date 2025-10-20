@@ -6,6 +6,9 @@
 #endif
 
 
+#define ARRAYSIZE( p )					( sizeof( p ) / sizeof( p[0] ) )
+
+
 // More explicit than "int"
 typedef int EOFFSET;
 
@@ -14,6 +17,11 @@ typedef int EOFFSET;
 #define SetBits(flBitVector, bits)		((flBitVector) = (int)(flBitVector) | (bits))
 #define ClearBits(flBitVector, bits)	((flBitVector) = (int)(flBitVector) & ~(bits))
 #define FBitSet(flBitVector, bit)		((int)(flBitVector) & (bit))
+
+
+// Makes these more explicit, and easier to find
+#define FILE_GLOBAL static
+#define DLL_GLOBAL
 
 
 // Keeps clutter down a bit, when declaring external entity/global method prototypes
