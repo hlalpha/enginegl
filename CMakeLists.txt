@@ -57,3 +57,5 @@ endfunction()
 add_subdirectory( engine )
 add_subdirectory( engine/gas2masm )
 add_subdirectory( utils/qlumpy )
+add_subdirectory( dlls )
+
