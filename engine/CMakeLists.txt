@@ -128,7 +128,7 @@ set( ENGINE_HEADERS # "Header Files"
 	"${SRCDIR}/public/qlimits.h"
 	"${SRCDIR}/public/edict.h"
 	"${SRCDIR}/public/qfont.h"
-	"${SRCDIR}/public/rendermode.h"
+	"${SRCDIR}/common/const.h"
 
 	"anorm_dots.h"
 	"anorms.h"

@@ -27,22 +27,7 @@
 #define	MAX_MODELS		256			// these are sent over the net as bytes
 #define	MAX_SOUNDS		256			// so they cannot be blindly increased
 
-#if !defined BYTE_DEFINED
-typedef unsigned char 		byte;
-#define BYTE_DEFINED 1
-#endif
-
-#if __cplusplus
-#define FALSE 0
-#define TRUE (!FALSE)
-
-typedef int qboolean;
-#else
-#undef true
-#undef false
-
-typedef enum {false, true}	qboolean;
-#endif
+#include "const.h"
 
 #if __cplusplus
 #include "../engine/common.h"

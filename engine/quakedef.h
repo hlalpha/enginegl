@@ -186,8 +186,8 @@ void	VID_UnlockBuffer (void);
 // #define IDGODS
 
 #if defined( QUIVER )
+#include "const.h"
 #include "qfont.h"
-#include "rendermode.h"
 #endif
 
 #include "common.h"

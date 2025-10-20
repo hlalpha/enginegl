@@ -41,11 +41,6 @@ void SZ_Print (sizebuf_t *buf, char *data);	// strcats onto the sizebuf
 
 //============================================================================
 
-typedef struct link_s
-{
-	struct link_s	*prev, *next;
-} link_t;
-
 
 void ClearLink (link_t *l);
 void RemoveLink (link_t *l);

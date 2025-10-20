@@ -253,9 +253,4 @@ extern qboolean gl_mtexable;
 void GL_DisableMultitexture(void);
 void GL_EnableMultitexture(void);
 
-// TODO: Find a better place for this!
-typedef struct
-{
-	unsigned int r, g, b;
-} colorVec;
 
