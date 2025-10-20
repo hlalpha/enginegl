@@ -308,7 +308,7 @@ void SV_TouchLinks ( edict_t *ent, areanode_t *node )
 		pr_global_struct->self = EDICT_TO_PROG(touch);
 		pr_global_struct->other = EDICT_TO_PROG(ent);
 		pr_global_struct->time = sv.time;
-		CallDispatchFunc (touch, 2, NULL);
+		CallDispatchFunc (touch, DISPATCHFUNC_TOUCH, NULL);
 
 		pr_global_struct->self = old_self;
 		pr_global_struct->other = old_other;

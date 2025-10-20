@@ -361,7 +361,7 @@ IndexOfEdict
 Weird version of NUM_FOR_EDICT
 ===========
 */
-int IndexOfEdict( int ent ) // TODO: Should this be edict_t* ? 
+int IndexOfEdict( int ent )
 {
 	// TODO: Check if we're OOB?
 	return ent / pr_edict_size;

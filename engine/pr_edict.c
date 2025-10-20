@@ -526,7 +526,7 @@ void ED_Write (FILE *f, edict_t *ed)
 
 	fprintf (f, "}\n");
 
-	CallDispatchFunc( ed, 6, f );
+	CallDispatchFunc( ed, DISPATCHFUNC_SAVE, f );
 }
 
 void ED_PrintNum (int ent)
@@ -902,12 +902,10 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 			kvdata.fHandled = FALSE;
 			kvdata.szValue = com_token;
 
-			CallDispatchFunc (ent, 5, &kvdata);
+			CallDispatchFunc (ent, DISPATCHFUNC_KEYVALUE, &kvdata);
 
-			if ( !kvdata.fHandled )
-			{
+			if (!kvdata.fHandled)
 				Con_DPrintf ("'%s' not a field of '%s'\n", keyname, &pr_strings[ent->v.classname]);
-			}
 		}
 	}
 
@@ -995,7 +993,7 @@ void ED_LoadFromFile (char *data)
 		}
 
 		pr_global_struct->self = EDICT_TO_PROG(ent);
-		CallDispatchFunc (ent, 0, NULL);
+		CallDispatchFunc (ent, DISPATCHFUNC_SPAWN, NULL);
 	}	
 
 	Con_DPrintf ("%i entities inhibited\n", inhibit);

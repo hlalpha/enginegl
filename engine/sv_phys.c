@@ -148,7 +148,7 @@ qboolean SV_RunThink (edict_t *ent)
 	pr_global_struct->time = thinktime;
 	pr_global_struct->self = EDICT_TO_PROG(ent);
 	pr_global_struct->other = 0;
-	CallDispatchFunc (ent, 1, NULL);
+	CallDispatchFunc (ent, DISPATCHFUNC_THINK, NULL);
 	return !ent->free;
 }
 
@@ -171,14 +171,14 @@ void SV_Impact (edict_t *e1, edict_t *e2)
 	{
 		pr_global_struct->self = EDICT_TO_PROG(e1);
 		pr_global_struct->other = EDICT_TO_PROG(e2);
-		CallDispatchFunc (e1, 2, NULL);
+		CallDispatchFunc (e1, DISPATCHFUNC_TOUCH, NULL);
 	}
 	
 	if (e2->v.solid != SOLID_NOT)
 	{
 		pr_global_struct->self = EDICT_TO_PROG(e2);
 		pr_global_struct->other = EDICT_TO_PROG(e1);
-		CallDispatchFunc (e2, 2, NULL);
+		CallDispatchFunc (e2, DISPATCHFUNC_TOUCH, NULL);
 	}
 
 	pr_global_struct->self = old_self;
@@ -548,7 +548,7 @@ void SV_PushMove (edict_t *pusher, float movetime)
 			{
 				pr_global_struct->self = EDICT_TO_PROG(pusher);
 				pr_global_struct->other = EDICT_TO_PROG(check);
-				CallDispatchFunc (pusher, 4, NULL);
+				CallDispatchFunc (pusher, DISPATCHFUNC_BLOCKED, NULL);
 			}
 			
 		// move back any entities we already moved
@@ -680,7 +680,7 @@ void SV_PushRotate (edict_t *pusher, float movetime)
 			{
 				pr_global_struct->self = EDICT_TO_PROG(pusher);
 				pr_global_struct->other = EDICT_TO_PROG(check);
-				CallDispatchFunc (pusher, 4, NULL);
+				CallDispatchFunc (pusher, DISPATCHFUNC_BLOCKED, NULL);
 			}
 			
 		// move back any entities we already moved
@@ -742,7 +742,7 @@ void SV_Physics_Pusher (edict_t *ent)
 		pr_global_struct->time = sv.time;
 		pr_global_struct->self = EDICT_TO_PROG(ent);
 		pr_global_struct->other = 0;
-		CallDispatchFunc (ent, 1, NULL);
+		CallDispatchFunc (ent, DISPATCHFUNC_THINK, NULL);
 		if (ent->free)
 			return;
 	}

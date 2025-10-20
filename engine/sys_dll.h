@@ -26,6 +26,14 @@ typedef struct
 	QCCFUNC func;
 } qccwrap_t;
 
+#define DISPATCHFUNC_SPAWN 0
+#define DISPATCHFUNC_THINK 1
+#define DISPATCHFUNC_TOUCH 2
+#define DISPATCHFUNC_USE 3
+#define DISPATCHFUNC_BLOCKED 4
+#define DISPATCHFUNC_KEYVALUE 5
+#define DISPATCHFUNC_SAVE 6
+
 DISPATCHFUNC GetDispatchFuncById( edict_t *ent, int dllFunc );
 void CallDispatchFunc( edict_t *ent, int dllFunc, void *funcArg );
 
