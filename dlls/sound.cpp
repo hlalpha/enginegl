@@ -52,7 +52,7 @@ void CAmbientGeneric::Spawn()
 		VOL_AND_ATT( volume, attenuation );
 
 		vec3_t vecOrigin;
-		_VectorCopy( vecOrigin, pev->origin );
+		VectorCopy( pev->origin, vecOrigin );
 
 		UTIL_EmitAmbientSound( vecOrigin[0], vecOrigin[1], vecOrigin[2], sample, volume, attenuation );
 	}

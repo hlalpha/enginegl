@@ -64,11 +64,17 @@ typedef int EOFFSET;
 #define SF_AMBIENT_SOUND_START_SILENT	( 1 << 1 )
 
 
+extern void UTIL_SetSize( struct entvars_s *pent, float minx, float miny, float minz, float maxx, float maxy, float maxz );
+extern void UTIL_VecToYaw( float x, float y, float z );
+//extern UTIL_VecToAngles();
+extern void UTIL_MoveToOrigin( struct edict_s *pent, float x, float y, float z, float flDist, int iMoveType );
+extern struct edict_s *UTIL_FindRadius( float x, float y, float z, float flRadius );
+extern void UTIL_MakeVectors( float pitch, float yaw, float roll );
+extern void UTIL_SetOrigin( struct entvars_s *pev, float x, float y, float z );
 extern void UTIL_EmitAmbientSound( float x, float y, float z, char *samp, float vol, float attenuation );
-
-extern float UTIL_RandomFloat( float flMin, float flMax );
-
-extern void _VectorCopy( vec_t *to, vec_t *from );
-
 extern void UTIL_TraceLine( float x1, float y1, float z1, float x2, float y2, float z2, int fNoMonsters, struct edict_s *pentToSkip, TraceResult *ptr );
-
+//extern UTIL_GetAimVector;
+extern void UTIL_ParticleEffect( float orgx, float orgy, float orgz, float dirx, float diry, float dirz, unsigned int ulColor, unsigned int ulCount );
+extern float UTIL_RandomFloat( float flMin, float flMax );
+extern int UTIL_RandomLong( int nMin, int nMax );
+extern int UTIL_PointContents( float x, float y, float z );
