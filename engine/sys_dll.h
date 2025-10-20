@@ -1,7 +1,7 @@
 #if !defined( SYS_DLL_H )
 #define SYS_DLL_H
 
-#include "extdll.h"
+#include "eiface.h"
 
 typedef struct
 {

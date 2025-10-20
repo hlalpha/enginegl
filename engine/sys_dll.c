@@ -1,6 +1,6 @@
 #include "quakedef.h"
 
-#include "extdll.h"
+#include "eiface.h"
 
 #include "string.h"
 #include "io.h"

@@ -107,7 +107,7 @@ set( ENGINE_SOURCES # "Source Files"
 	"$<$<NOT:${GLQUAKE}>:vid_win.c>" # [!$GL]
 	"view.c"
 	"wad.c"
-	"winquake.rc"
+	#"winquake.rc"
 	"world.c"
 	#"worlda.s"
 	"zone.c"
@@ -123,7 +123,7 @@ set( ENGINE_SOURCES # "Source Files"
 )
 
 set( ENGINE_HEADERS # "Header Files"
-	"${SRCDIR}/public/extdll.h"
+	"eiface.h"
 	"${SRCDIR}/public/port.h"
 	"${SRCDIR}/public/qlimits.h"
 	"${SRCDIR}/public/edict.h"
@@ -196,6 +196,6 @@ set( ENGINE_RESOURCES # "Resource Files"
 add_executable( enginegl WIN32 ${ENGINE_SOURCES} ${ENGINE_HEADERS} ${ENGINE_RESOURCES} )
 install_multiplatform( enginegl "${SRCDIR}/game" )
 
-target_compile_definitions( enginegl PRIVATE "$<${GLQUAKE}:GLQUAKE>" "$<${QUIVER}:QUIVER_QUAKE_COMPAT>" "$<${QUIVER}:QUIVER>" ) # "$<${QUIVER}:QUAKE2>"
+target_compile_definitions( enginegl PRIVATE "$<${GLQUAKE}:GLQUAKE>" "$<${QUIVER}:QUIVER_QUAKE_COMPAT>" "$<${QUIVER}:QUIVER>" "$<${QUIVER}:QUIVER_TESTS>" ) # "$<${QUIVER}:QUAKE2>"
 target_include_directories( enginegl PRIVATE "${SRCDIR}/engine/scitech/include" "${SRCDIR}/engine/dxsdk/sdk/inc" )
 target_link_libraries( enginegl PRIVATE dxguid winmm wsock32 opengl32 glu32 gdi32 comctl32 )
