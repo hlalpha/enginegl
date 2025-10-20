@@ -31,3 +31,7 @@ typedef int EOFFSET;
 
 #define VARS( ed )	(*g_engfuncs.pfnGetVarsOfEnt)( ed )
 #define ENT( ed )	( ed )
+
+
+#define SF_LIGHT_START_OFF				1
+

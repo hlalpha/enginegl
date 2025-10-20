@@ -20,7 +20,7 @@ public:
 
 	virtual void Spawn();
 	virtual void KeyValue( KeyValueData *pkvd );
-	//virtual void UNKNOWN( void *funcArgs );
+	virtual void UNKNOWN( void *funcArgs );
 	virtual void Save( void *funcArgs );
 	virtual void Restore( void *funcArgs );
 	virtual void Think( void *funcArgs );

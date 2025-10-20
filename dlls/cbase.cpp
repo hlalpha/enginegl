@@ -90,9 +90,9 @@ void CBaseEntity::KeyValue( KeyValueData *pkvd )
 {
 }
 
-//void CBaseEntity::UNKNOWN( void *funcArgs )
-//{
-//}
+void CBaseEntity::UNKNOWN( void *funcArgs )
+{
+}
 
 void CBaseEntity::Save( void *funcArgs )
 {
