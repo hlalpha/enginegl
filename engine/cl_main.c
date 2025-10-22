@@ -76,8 +76,8 @@ void CL_ClearState (void)
 	memset (cl_entities, 0, sizeof(cl_entities));
 	memset (cl_dlights, 0, sizeof(cl_dlights));
 	memset (cl_lightstyle, 0, sizeof(cl_lightstyle));
-	memset (cl_temp_entities, 0, sizeof(cl_temp_entities));
-	memset (cl_beams, 0, sizeof(cl_beams));
+
+	CL_TempEntInit ();
 
 //
 // allocate the efrags and chain together into a free list
@@ -659,7 +659,7 @@ int CL_ReadFromServer (void)
 		Con_Printf ("\n");
 
 	CL_RelinkEntities ();
-	CL_UpdateTEnts ();
+	CL_TempEntUpdate ();
 
 //
 // bring the links up to date

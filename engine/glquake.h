@@ -132,7 +132,7 @@ typedef struct
 
 
 typedef enum {
-	pt_static, pt_grav, pt_slowgrav, pt_fire, pt_explode, pt_explode2, pt_blob, pt_blob2
+	pt_static, pt_grav, pt_slowgrav, pt_fire, pt_explode, pt_explode2, pt_blob, pt_blob2, pt_vox_slowgrav, pt_vox_grav
 } ptype_t;
 
 // !!! if this is changed, it must be changed in d_ifacea.h too !!!
@@ -194,6 +194,7 @@ extern	cvar_t	r_drawviewmodel;
 extern	cvar_t	r_speeds;
 extern	cvar_t	r_waterwarp;
 extern	cvar_t	r_fullbright;
+extern	cvar_t	r_decals;
 extern	cvar_t	r_lightmap;
 extern	cvar_t	r_shadows;
 extern	cvar_t	r_mirroralpha;

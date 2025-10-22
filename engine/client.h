@@ -85,16 +85,6 @@ typedef struct
 #endif
 } dlight_t;
 
-
-#define	MAX_BEAMS	24
-typedef struct
-{
-	int		entity;
-	struct model_s	*model;
-	float	endtime;
-	vec3_t	start, end;
-} beam_t;
-
 #define	MAX_EFRAGS		640
 
 #define	MAX_MAPSTRING	2048
@@ -271,8 +261,23 @@ extern	cvar_t	m_yaw;
 extern	cvar_t	m_forward;
 extern	cvar_t	m_side;
 
+extern	cvar_t	tracerSpeed;
+extern	cvar_t	tracerOffset;
+extern	cvar_t	tracerLength;
+extern	cvar_t	tracerRed;
+extern	cvar_t	tracerGreen;
+extern	cvar_t	tracerBlue;
+extern	cvar_t	tracerAlpha;
 
-#define	MAX_TEMP_ENTITIES	64			// lightning bolts, etc
+typedef struct tempent_s
+{
+	int flags;
+	float die;
+	struct tempent_s *next;
+	entity_t entity;
+} TEMPENTITY;
+
+#define	MAX_TEMP_ENTITIES	350			// lightning bolts, etc
 #define	MAX_STATIC_ENTITIES	128			// torches, etc
 
 extern	client_state_t	cl;
@@ -283,8 +288,6 @@ extern	entity_t		cl_entities[MAX_EDICTS];
 extern	entity_t		cl_static_entities[MAX_STATIC_ENTITIES];
 extern	lightstyle_t	cl_lightstyle[MAX_LIGHTSTYLES];
 extern	dlight_t		cl_dlights[MAX_DLIGHTS];
-extern	entity_t		cl_temp_entities[MAX_TEMP_ENTITIES];
-extern	beam_t			cl_beams[MAX_BEAMS];
 
 //=============================================================================
 
@@ -328,7 +331,8 @@ void CL_SendCmd (void);
 void CL_SendMove (usercmd_t *cmd);
 
 void CL_ParseTEnt (void);
-void CL_UpdateTEnts (void);
+void CL_TempEntInit (void);
+void CL_TempEntUpdate (void);
 
 void CL_ClearState (void);
 

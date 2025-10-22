@@ -2311,8 +2311,7 @@ void R_DrawDecals (void)
 	msurface_t *pdecsurf;
 	decal_t *pdec;
 	texture_t *pdectex, *pdecsurftext;
-	glpoly_t *p;
-	float *v, *surfv;
+	float *v;
 	float scalex, scaley;
 
 	if (!gDecalSurfCount)
@@ -2329,7 +2328,7 @@ void R_DrawDecals (void)
 
 	if (!gl_ztrick.value || gldepthmin < 0.5f)
 	{
-		glPolygonOffset (1,-4); // NOTE(SanyaSho): Replace 1,-4 with -1,-4 to fix decal flickering in OpenGL
+		glPolygonOffset (1,-4); // NOTE(SanyaSho): [glport] Replace 1,-4 with -1,-4 to fix decal flickering in OpenGL
 	}
 	else
 	{

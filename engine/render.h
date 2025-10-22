@@ -132,6 +132,7 @@ void R_NewMap (void);
 
 
 void R_ParseParticleEffect (void);
+void R_TracerParticles (vec_t *org, vec_t *vel, float life);
 void R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count);
 void R_RocketTrail (vec3_t start, vec3_t end, int type);
 
@@ -142,8 +143,12 @@ void R_EntityParticles (entity_t *ent);
 void R_BlobExplosion (vec3_t org);
 void R_ParticleExplosion (vec3_t org);
 void R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength);
+void R_SparkStreaks (vec3_t org);
 void R_LavaSplash (vec3_t org);
 void R_TeleportSplash (vec3_t org);
+void R_ShowLine (vec3_t startpos, vec3_t endpos);
+void R_BloodStream (vec3_t pos, vec3_t dir, int pcolor, int speed);
+void R_Blood (vec3_t pos, vec3_t dir, int pcolor, int speed);
 
 void R_PushDlights (void);
 

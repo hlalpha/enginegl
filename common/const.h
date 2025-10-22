@@ -85,37 +85,65 @@
 //
 // temp entity events
 //
-#define	TE_SPIKE			0
-#define	TE_SUPERSPIKE		1
-#define	TE_GUNSHOT			2
-#define	TE_EXPLOSION		3
-#define	TE_TAREXPLOSION		4
-#define	TE_LIGHTNING1		5
-#define	TE_LIGHTNING2		6
-#define	TE_WIZSPIKE			7
-#define	TE_KNIGHTSPIKE		8
-#define	TE_LIGHTNING3		9
-#define	TE_LAVASPLASH		10
-#define	TE_TELEPORT			11
-#define TE_EXPLOSION2		12
-
-// PGM 01/21/97 
-#define TE_BEAM				13
-// PGM 01/21/97 
-
+#define	TE_SPIKE			0		// [coords] x y z
+#define	TE_SUPERSPIKE		1		// [coords] x y z
+#define	TE_GUNSHOT			2		// [coords] x y z
+#define	TE_EXPLOSION		3		// [coords] x y z
+#define	TE_TAREXPLOSION		4		// [coords] x y z
+#define	TE_WATERCOLOR		5		// [byte] r [byte] g [byte] b [byte] a(unused)
+#define	TE_TRACER			6		// [coords] x y z [coords] x y z
+#define	TE_WIZSPIKE			7		// [coords] x y z
+#define	TE_KNIGHTSPIKE		8		// [coords] x y z
+#define TE_SPARKS			9		// [coords] x y z
+#define	TE_LAVASPLASH		10		// [coords] x y z
+#define	TE_TELEPORT			11		// [coords] x y z
+#define TE_EXPLOSION2		12		// [coords] x y z [byte] colorStart [byte] colorLength
+//#define TE_RESERVED		13		// 
 #ifdef QUAKE2
-#define TE_IMPLOSION		14
-#define TE_RAILTRAIL		15
+#define	TE_IMPLOSION		14		// [coords] x y z
+#define	TE_RAILTRAIL		15		// [coords] x y z [coords] x y z
 #endif
 
-#define	MSG_BROADCAST	0		// unreliable to all
-#define	MSG_ONE			1		// reliable to one (msg_entity)
-#define	MSG_ALL			2		// reliable to all
-#define	MSG_INIT		3		// write to the init string
+#define	TE_UNKNOWN			100		// [coords] x y z
+#define	TE_BLOODSTREAM		101		// [coords] x y z [coords] pitch yaw roll [byte] color [byte] speed
+#define	TE_SHOWLINE			102		// [coords] x y z [coords] endx endy endz
+#define	TE_BLOOD			103		// [coords] x y z [coords] pitch yaw roll [byte] color [byte] speed
+#define	TE_GUNSHOTDECAL		104		// [coords] x y z [byte] entity [byte] decalid
+#define	TE_FIZZ				105		// [byte] entity [short] modelindex [byte] density
+#define	TE_MODEL			106		// [coords] x y z [coords] pitch yaw roll [short] modelindex [byte] lifetime
+#define	TE_EXPLODEMODEL		107		// [coords] x y z [float] scale [short] modelindex [short] count [byte] lifetime
+#define	TE_BREAKMODEL		108		// [coords] x y z [coords] sizex sizey sizez [coords] pitch yaw roll [short] modelindex [byte] count [byte] lifetime [byte] flags
+
+#define	MSG_BROADCAST		0		// unreliable to all
+#define	MSG_ONE				1		// reliable to one (msg_entity)
+#define	MSG_ALL				2		// reliable to all
+#define	MSG_INIT			3		// write to the init string
+
+// TEMPENTITY flags
+#define	FTENT_NONE			0x0
+#define	FTENT_SINEWAVE		0x1
+#define	FTENT_GRAVITY		0x2
+#define FTENT_ROTATE		0x4
+#define	FTENT_SLOWGRAVITY	0x8
+#define FTENT_SMOKETRAIL	0x10
+#define FTENT_COLLIDEWORLD	0x20
+#define FTENT_FLICKER		0x40
+
+// Break Model Defines
+// BreakType
+#define	BREAK_TYPEMASK		0xF
+#define	BREAK_GLASS			0x01
+#define	BREAK_METAL			0x02
+#define	BREAK_FLESH			0x04
+#define	BREAK_WOOD			0x08
+
+// BreakFlag
+#define	BREAK_SMOKE			0x10
+#define	BREAK_TRANS			0x20
 
 typedef enum
 {
-	kRenderModeNormal,
+	kRenderModeNormal = 0,
 	kRenderModeColor,
 	kRenderModeTexture,
 	kRenderModeBlur,

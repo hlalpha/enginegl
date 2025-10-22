@@ -30,7 +30,10 @@ int		ramp1[8] = {0x6f, 0x6d, 0x6b, 0x69, 0x67, 0x65, 0x63, 0x61};
 int		ramp2[8] = {0x6f, 0x6e, 0x6d, 0x6c, 0x6b, 0x6a, 0x68, 0x66};
 int		ramp3[8] = {0x6d, 0x6b, 6, 5, 4, 3};
 
+int		gSparkRamp[9] = {0xfe, 0xfd, 0xfc, 0x6f, 0x6e, 0x6d, 0x6c, 0x67, 0x60};
+
 particle_t	*active_particles, *free_particles;
+particle_t	*gpActiveTracers;
 
 particle_t	*particles;
 int			r_numparticles;
@@ -186,6 +189,8 @@ void R_ClearParticles (void)
 	
 	free_particles = &particles[0];
 	active_particles = NULL;
+
+	gpActiveTracers = NULL;
 
 	for (i=0 ;i<r_numparticles ; i++)
 		particles[i].next = &particles[i+1];
@@ -393,6 +398,30 @@ void R_BlobExplosion (vec3_t org)
 
 /*
 ===============
+R_TracerParticles
+
+===============
+*/
+void R_TracerParticles (vec_t *org, vec_t *vel, float life)
+{
+	particle_t	*p;
+
+	if (!free_particles)
+		return;
+	p = free_particles;
+	free_particles = p->next;
+	p->next = gpActiveTracers;
+	gpActiveTracers = p;
+
+	p->type = pt_static;
+	p->color = 109;
+	p->die = cl.time + life;
+	VectorCopy (org, p->org);
+	VectorCopy (vel, p->vel);
+}
+
+/*
+===============
 R_RunParticleEffect
 
 ===============
@@ -449,6 +478,37 @@ void R_RunParticleEffect (vec3_t org, vec3_t dir, int color, int count)
 	}
 }
 
+/*
+===============
+R_SparkStreaks
+
+===============
+*/
+void R_SparkStreaks (vec3_t org)
+{
+	int			i, j;
+	particle_t	*p;
+
+	for (i=0 ; i<15 ; i++)
+	{
+		if (!free_particles)
+			return;
+		p = free_particles;
+		free_particles = p->next;
+		p->next = active_particles;
+		active_particles = p;
+
+		for (j=0;j<3;j++)
+			p->org[j] = org[j] + ((rand()&31)-16);
+
+		p->vel[2] = (rand()%63);
+
+		p->ramp = 0;
+		p->color = 254;
+		p->type = pt_blob2;
+		p->die = cl.time + 3;
+	}
+}
 
 /*
 ===============
@@ -532,6 +592,65 @@ void R_TeleportSplash (vec3_t org)
 				vel = 50 + (rand()&63);
 				VectorScale (dir, vel, p->vel);
 			}
+}
+
+/*
+===============
+R_ShowLine
+
+===============
+*/
+void R_ShowLine (vec3_t startpos, vec3_t endpos)
+{
+	int			i;
+	particle_t	*p;
+	vec3_t		trace;
+	float		norm;
+
+	VectorSubtract (endpos, startpos, trace);
+
+	norm = VectorNormalize (trace);
+	VectorScale (trace, 5.0, trace);
+
+	for ( ; norm ; norm-=5.0)
+	{
+		if (!free_particles)
+			return;
+		p = free_particles;
+		free_particles = p->next;
+		p->next = active_particles;
+		active_particles = p;
+
+		VectorCopy (vec3_origin, p->vel);
+		p->type = pt_static;
+		p->die = cl.time + 120;
+		VectorCopy (startpos, p->org);
+		p->color = 4000;
+
+		VectorAdd (startpos, trace, startpos);
+	}
+}
+
+/*
+===============
+R_BloodStream
+
+===============
+*/
+void R_BloodStream (vec3_t pos, vec3_t dir, int pcolor, int speed)
+{
+	Sys_Error ("%s: not implemented!", __FUNCTION__);
+}
+
+/*
+===============
+R_Blood
+
+===============
+*/
+void R_Blood (vec3_t pos, vec3_t dir, int pcolor, int speed)
+{
+	Sys_Error ("%s: not implemented!", __FUNCTION__);
 }
 
 void R_RocketTrail (vec3_t start, vec3_t end, int type)
@@ -645,6 +764,7 @@ R_DrawParticles
 ===============
 */
 extern	cvar_t	sv_gravity;
+void R_TracerDraw (void);
 
 void R_DrawParticles (void)
 {
@@ -778,9 +898,12 @@ void R_DrawParticles (void)
 			break;
 
 		case pt_blob2:
-			for (i=0 ; i<2 ; i++)
-				p->vel[i] -= p->vel[i]*dvel;
-			p->vel[2] -= grav;
+			p->ramp += time2;
+			if (p->ramp >=9)
+				p->die = -1;
+			else
+				p->color = gSparkRamp[(int)p->ramp];
+			p->vel[2] -= grav * 5.0;
 			break;
 
 		case pt_grav:
@@ -789,13 +912,24 @@ void R_DrawParticles (void)
 			break;
 #endif
 		case pt_slowgrav:
-			p->vel[2] -= grav;
+			p->vel[2] = grav;
+			break;
+
+		case pt_vox_slowgrav:
+			p->vel[2] -= grav * 4;
+			break;
+
+		case pt_vox_grav:
+			p->vel[2] -= grav * 8;
 			break;
 		}
 	}
 
 #ifdef GLQUAKE
 	glEnd ();
+
+	R_TracerDraw();
+
 	glDisable (GL_BLEND);
 	glDisable (GL_ALPHA_TEST);
 	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
@@ -804,3 +938,99 @@ void R_DrawParticles (void)
 #endif
 }
 
+#ifdef GLQUAKE
+/*
+===============
+R_TracerDraw
+===============
+*/
+void R_TracerDraw (void)
+{
+	float		scale, frametime;
+	vec3_t		up, right, end, v;
+	particle_t	*p, *kill;
+
+	// nothing to work with
+	if (!gpActiveTracers)
+		return;
+
+	frametime = cl.time - cl.oldtime;
+
+	// prepare client vectors
+	VectorScale (vup, 1.5, up);
+	VectorScale (vright, 1.5, right);
+
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE);
+	glColor4f (tracerRed.value, tracerGreen.value, tracerBlue.value, tracerAlpha.value);
+	glCullFace (GL_FRONT_AND_BACK); // NOTE(SanyaSho): [glport] Change GL_FRONT_AND_BACK to GL_FRONT to make tracers visible in OpenGL.
+
+	for ( ;; ) 
+	{
+		kill = gpActiveTracers;
+		if (kill && kill->die < cl.time)
+		{
+			gpActiveTracers = kill->next;
+			kill->next = free_particles;
+			free_particles = kill;
+			continue;
+		}
+		break;
+	}
+
+	glBegin (GL_QUADS);
+	for (p=gpActiveTracers ; p ; p=p->next)
+	{
+		for ( ;; )
+		{
+			kill = p->next;
+			if (kill && kill->die < cl.time)
+			{
+				p->next = kill->next;
+				kill->next = free_particles;
+				free_particles = kill;
+				continue;
+			}
+			break;
+		}
+
+		// hack a scale up to keep particles from disapearing
+		scale = (p->org[0] - r_origin[0])*vpn[0] + (p->org[1] - r_origin[1])*vpn[1]
+			+ (p->org[2] - r_origin[2])*vpn[2];
+		if (scale < 20)
+			scale = 1;
+		else
+			scale = 1 + scale * 0.004;
+
+		// calcualte the tracer end point
+		end[0] = p->org[0] + p->vel[0] * tracerLength.value * frametime;
+		end[1] = p->org[1] + p->vel[1] * tracerLength.value * frametime;
+		end[2] = p->org[2] + p->vel[2] * tracerLength.value * frametime;
+
+		v[0] = p->org[0] + right[0] * scale;
+		v[1] = p->org[1] + right[1] * scale;
+		v[2] = p->org[2] + right[2] * scale;
+
+		glTexCoord2f (0,0);
+		glVertex3fv (p->org);
+
+		// move the tracer
+		p->org[0] += p->vel[0]*frametime;
+		p->org[1] += p->vel[1]*frametime;
+		p->org[2] += p->vel[2]*frametime;
+
+		glTexCoord2f (0,0.5);
+		glVertex3f (end[0] + up[0]*scale, end[1] + up[1]*scale, end[2] + up[2]*scale);
+
+		glTexCoord2f (0.5,0.5);
+		glVertex3f (end[0] + (right[0] + up[0])*scale, end[1] + (right[1] + up[1])*scale, end[2] + (right[2] + up[2])*scale);
+
+		glTexCoord2f (0.5,0);
+		glVertex3fv (v);
+	}
+	glEnd ();
+
+	glCullFace (GL_FRONT);
+}
+#else
+#error GLQUAKE
+#endif
