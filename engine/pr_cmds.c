@@ -616,7 +616,7 @@ void PF_sound_I (edict_t *entity, int channel, char *sample, float volume, float
 	if (channel < 0 || channel > 7)
 		Sys_Error ("SV_StartSound: channel = %i", channel);
 
-	SV_StartSound (entity, channel, sample, volume, attenuation);
+	SV_StartSound (entity, channel, sample, (int)(volume * 255.0), attenuation);
 }
 void PF_sound (void)
 {
@@ -629,7 +629,7 @@ void PF_sound (void)
 	entity = G_EDICT(OFS_PARM0);
 	channel = G_FLOAT(OFS_PARM1);
 	sample = G_STRING(OFS_PARM2);
-	volume = G_FLOAT(OFS_PARM3) * 255;
+	volume = G_FLOAT(OFS_PARM3);
 	attenuation = G_FLOAT(OFS_PARM4);
 	
 	PF_sound_I (entity, channel, sample, volume, attenuation);
