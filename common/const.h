@@ -104,7 +104,7 @@
 #define	TE_RAILTRAIL		15		// [coords] x y z [coords] x y z
 #endif
 
-#define	TE_UNKNOWN			100		// [coords] x y z
+#define	TE_LARGEFUNNEL		100		// [coords] x y z
 #define	TE_BLOODSTREAM		101		// [coords] x y z [coords] pitch yaw roll [byte] color [byte] speed
 #define	TE_SHOWLINE			102		// [coords] x y z [coords] endx endy endz
 #define	TE_BLOOD			103		// [coords] x y z [coords] pitch yaw roll [byte] color [byte] speed

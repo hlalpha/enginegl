@@ -145,6 +145,7 @@ void R_ParticleExplosion (vec3_t org);
 void R_ParticleExplosion2 (vec3_t org, int colorStart, int colorLength);
 void R_SparkStreaks (vec3_t org);
 void R_LavaSplash (vec3_t org);
+void R_LargeFunnel (vec3_t org);
 void R_TeleportSplash (vec3_t org);
 void R_ShowLine (vec3_t startpos, vec3_t endpos);
 void R_BloodStream (vec3_t pos, vec3_t dir, int pcolor, int speed);

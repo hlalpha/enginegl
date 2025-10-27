@@ -609,11 +609,11 @@ void CL_ParseTEnt (void)
 		break;
 #endif
 
-	case TE_UNKNOWN: // TODO(SanyaSho): Revisit the name
+	case TE_LARGEFUNNEL:
 		pos[0] = MSG_ReadCoord ();
 		pos[1] = MSG_ReadCoord ();
 		pos[2] = MSG_ReadCoord ();
-		//sub_40D15A (pos); // /shrug
+		R_LargeFunnel (pos);
 		break;
 
 	case TE_BLOODSTREAM:

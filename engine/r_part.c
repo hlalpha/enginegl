@@ -554,6 +554,51 @@ void R_LavaSplash (vec3_t org)
 
 /*
 ===============
+R_LargeFunnel
+
+===============
+*/
+void R_LargeFunnel (vec3_t org)
+{
+	int			i, j, k;
+	particle_t	*p;
+	float		vel;
+	vec3_t		dir;
+
+	for (i=-18 ; i<18 ; i++)
+		for (j=-18 ; j<18 ; j++)
+			for (k = 0; k < 1; k++)
+			{
+				if (!free_particles)
+					return;
+				p = free_particles;
+				free_particles = p->next;
+				p->next = active_particles;
+				active_particles = p;
+
+				p->die = cl.time + 6 + (rand()&31) * 0.02;
+				p->type = pt_static;
+				p->color = 6 * ((rand()&7) + 25);
+
+				dir[0] = j*25 + (rand()&7);
+				dir[1] = i*25 + (rand()&7);
+
+				p->org[0] = org[0] + dir[0];
+				p->org[1] = org[1] + dir[1];
+				p->org[2] = org[2] + (100 + (rand()>>5));
+
+				dir[0] = org[0] - p->org[0];
+				dir[1] = org[1] - p->org[1];
+				dir[2] = org[2] - p->org[2];
+
+				VectorNormalize (dir);
+				vel = (100 + (rand()&63));
+				VectorScale (dir, vel, p->vel);
+			}
+}
+
+/*
+===============
 R_TeleportSplash
 
 ===============
