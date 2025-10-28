@@ -340,6 +340,7 @@ void CL_ParseUpdate (int bits)
 	entity_t	*ent;
 	int			num;
 	int			skin;
+	float		seqtime, modnumc, modnuma;
 
 	if (cls.signon == SIGNONS - 1)
 	{	// first update is the final signon stage
@@ -408,7 +409,7 @@ if (bits&(1<<i))
 	}
 	
 	if (bits & U_FRAME)
-		ent->frame = MSG_ReadByte ();
+		ent->frame = MSG_ReadWord () / 256.0;
 	else
 		ent->frame = ent->baseline.frame;
 
@@ -483,15 +484,40 @@ if (bits&(1<<i))
 	if ( bits & U_NOLERP )
 		ent->forcelink = true;
 
-#if 0
 	if ( bits & U_SEQUENCE )
 	{
-		// TODO(SanyaSho): studiorender
+		// sequence
+		i = MSG_ReadByte();
+
+		// FIXME(SanyaSho): Decompiled code!!!
+		modnumc = (double)(int)(__int64)(cl.time * 100.0 / 256.0) * 2.56;
+
+		for (modnuma = (double)MSG_ReadByte() / 100.0 + modnumc; cl.time < modnuma; modnuma = modnuma - 2.56)
+			;
+
+		if (ent->animtime != modnuma)
+		{
+			if (i != ent->sequence)
+			{
+				ent->prevsequence = ent->sequence;
+				ent->sequencetime = modnuma;
+				ent->sequence = i;
+			}
+
+			ent->prevanimtime = ent->animtime;
+
+			memcpy (ent->prevcontroller, ent->controller, 4);
+			memcpy (ent->prevblending, ent->blending, 2);
+			VectorCopy (ent->origin, ent->prevorigin);
+			VectorCopy (ent->angles, ent->prevangles);
+
+			ent->animtime = modnuma;
+		}
 	}
 	else
 	{
 		ent->sequence = ent->baseline.sequence;
-		ent->gap8 = cl.time;
+		ent->animtime = cl.time;
 	}
 
 	if ( bits & U_CUSTOM_FRAMERATE )
@@ -501,35 +527,34 @@ if (bits&(1<<i))
 
 	if ( bits & U_CONTROLLER )
 	{
-		ent->unk[0] = MSG_ReadByte();
-		ent->unk[1] = MSG_ReadByte();
-		ent->unk[2] = MSG_ReadByte();
-		ent->unk[3] = MSG_ReadByte();
+		ent->controller[0] = MSG_ReadByte();
+		ent->controller[1] = MSG_ReadByte();
+		ent->controller[2] = MSG_ReadByte();
+		ent->controller[3] = MSG_ReadByte();
 	}
 	else
 	{
-		ent->unk[0] = 0;
-		ent->unk[1] = 0;
-		ent->unk[2] = 0;
-		ent->unk[3] = 0;
+		ent->controller[0] = 0;
+		ent->controller[1] = 0;
+		ent->controller[2] = 0;
+		ent->controller[3] = 0;
 	}
 
 	if ( bits & U_BLENDING )
 	{
-		ent->unk[0] = MSG_ReadByte();
-		ent->unk[1] = MSG_ReadByte();
+		ent->blending[0] = MSG_ReadByte();
+		ent->blending[1] = MSG_ReadByte();
 	}
 	else
 	{
-		ent->unk[0] = 0;
-		ent->unk[1] = 0;
+		ent->blending[0] = 0;
+		ent->blending[1] = 0;
 	}
 
 	if ( bits & U_BODY )
 		ent->body = MSG_ReadByte();
 	else
 		ent->body = 0;
-#endif
 
 	if ( bits & U_CUSTOM_RENDERER )
 	{
@@ -550,12 +575,10 @@ if (bits&(1<<i))
 		ent->renderfx = ent->baseline.renderfx;
 	}
 
-#if 0
 	if ( bits & U_UNKNOWN9 )
-		ent->unknown_byte800k = 4;
+		ent->valve_unknown_byte800k = 4;
 	else
-		ent->unknown_byte800k = 0;
-#endif
+		ent->valve_unknown_byte800k = 0;
 
 	if ( forcelink )
 	{	// didn't have an update last message
@@ -577,7 +600,7 @@ void CL_ParseBaseline (entity_t *ent)
 	int			i;
 	
 	ent->baseline.modelindex = MSG_ReadByte ();
-	//ent->baseline.sequence = MSG_ReadByte();
+	ent->baseline.sequence = MSG_ReadByte();
 	ent->baseline.frame = MSG_ReadByte ();
 	ent->baseline.colormap = MSG_ReadByte();
 	ent->baseline.skin = MSG_ReadByte();
@@ -1051,9 +1074,8 @@ void CL_ParseServerMessage (void)
 			break;
 
 		case svc_weaponanim:
-			// TODO(SanyaSho): studiorender
-			//cl.animtime = cl.time;
-			//cl.sequence = MSG_ReadByte();
+			cl.animtime = cl.time;
+			cl.sequence = MSG_ReadByte();
 			break;
 
 		case svc_decalname:

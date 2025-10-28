@@ -233,9 +233,9 @@ LIGHT SAMPLING
 mplane_t		*lightplane;
 vec3_t			lightspot;
 
-int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
+colorVec RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 {
-	int			r;
+	colorVec	c;
 	float		front, back, frac;
 	int			side;
 	mplane_t	*plane;
@@ -249,8 +249,11 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	int			maps;
 
 	if (node->contents < 0)
-		return -1;		// didn't hit anything
-	
+	{
+		c.r = c.g = c.b = 0;
+		return c;		// didn't hit anything
+	}
+
 // calculate mid point
 
 // FIXME: optimize for axial
@@ -268,12 +271,15 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	mid[2] = start[2] + (end[2] - start[2])*frac;
 	
 // go down front side	
-	r = RecursiveLightPoint (node->children[side], start, mid);
-	if (r >= 0)
-		return r;		// hit something
+	c = RecursiveLightPoint (node->children[side], start, mid);
+	if (c.r != 0 && c.g != 0 && c.b != 0)
+		return c;		// hit something
 		
 	if ( (back < 0) == side )
-		return -1;		// didn't hit anuthing
+	{
+		c.r = c.g = c.b = 0;
+		return c;		// didn't hit anuthing
+	}
 		
 // check for impact on this node
 	VectorCopy (mid, lightspot);
@@ -301,13 +307,16 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 			continue;
 
 		if (!surf->samples)
-			return 0;
+		{
+			c.r = c.g = c.b = 0;
+			return c;
+		}
 
 		ds >>= 4;
 		dt >>= 4;
 
 		lightmap = surf->samples;
-		r = 0;
+		c.r = c.g = c.b = 0;
 		if (lightmap)
 		{
 
@@ -317,38 +326,64 @@ int RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 					maps++)
 			{
 				scale = d_lightstylevalue[surf->styles[maps]];
-				r += *lightmap * scale;
-				lightmap += ((surf->extents[0]>>4)+1) *
+				c.r += lightmap[0] * scale;
+				c.g += lightmap[1] * scale;
+				c.b += lightmap[1] * scale;
+				lightmap += 3 * ((surf->extents[0]>>4)+1) *
 						((surf->extents[1]>>4)+1);
 			}
 			
-			r >>= 8;
+			c.r >>= 8;
+			c.g >>= 8;
+			c.b >>= 8;
+
+			if (c.r == 0)
+				c.r = 1;
 		}
 		
-		return r;
+		return c;
 	}
 
 // go down back side
 	return RecursiveLightPoint (node->children[!side], mid, end);
 }
 
-int R_LightPoint (vec3_t p)
+colorVec R_LightVec (vec3_t start, vec3_t end)
+{
+	colorVec	c;
+
+	if (!cl.worldmodel->lightdata)
+	{
+		c.r = c.g = c.b = 255;
+	}
+	else
+	{
+		c = RecursiveLightPoint (cl.worldmodel->nodes, start, end);
+
+		c.r += r_refdef.ambientlight[0];
+		c.g += r_refdef.ambientlight[1];
+		c.b += r_refdef.ambientlight[2];
+
+		if (c.r > 255)
+			c.r = 255;
+		if (c.g > 255)
+			c.g = 255;
+		if (c.b > 255)
+			c.b = 255;
+	}
+
+	return c;
+}
+
+colorVec R_LightPoint (vec3_t p)
 {
 	vec3_t		end;
-	int			r;
-	
-	if (!cl.worldmodel->lightdata)
-		return 255;
+	colorVec	c;
 	
 	end[0] = p[0];
 	end[1] = p[1];
 	end[2] = p[2] - 2048;
-	
-	r = RecursiveLightPoint (cl.worldmodel->nodes, p, end);
-	
-	if (r == -1)
-		r = 0;
 
-	return r;
+	return R_LightVec(p, end);
 }
 

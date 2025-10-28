@@ -114,6 +114,8 @@ set( ENGINE_SOURCES # "Source Files"
 	"r_trans.c"
 	"snd_dsp.c"
 	"in_camera.c"
+	"l_studio.c"
+	"r_studio.c"
 
 	"progdefs.q1"
 	"progdefs.q2"
@@ -146,7 +148,7 @@ set( ENGINE_SW_SOURCES
 	#"d_polysa.s" # [!$GL]
 	"d_polyse.c" # [!$GL]
 	"d_scan.c" # [!$GL]
-	"d_scana.s" # [!$GL]
+	#"d_scana.s" # [!$GL]
 	"d_sky.c" # [!$GL]
 	#"d_spr8.s" # [!$GL]
 	"d_sprite.c" # [!$GL]
@@ -251,6 +253,8 @@ set( ENGINE_HEADERS # "Header Files"
 	"r_trans.h"
 	"snd_dsp.h"
 	"in_camera.h"
+	"studio.h"
+	"r_studio.h"
 )
 
 set( ENGINE_RESOURCES # "Resource Files"

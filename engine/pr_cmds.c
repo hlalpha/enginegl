@@ -1922,7 +1922,7 @@ void PF_makestatic_I (edict_t *ent)
 
 	MSG_WriteByte (&sv.signon, SV_ModelIndex(pr_strings + ent->v.model));
 
-	//MSG_WriteByte (&sv.signon, ent->v.sequence);
+	MSG_WriteByte (&sv.signon, ent->v.sequence);
 	MSG_WriteByte (&sv.signon, ent->v.frame);
 	MSG_WriteByte (&sv.signon, ent->v.colormap);
 	MSG_WriteByte (&sv.signon, ent->v.skin);

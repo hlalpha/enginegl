@@ -239,6 +239,7 @@ void	VID_UnlockBuffer (void);
 #include "decals.h"
 #include "r_trans.h"
 #include "in_camera.h"
+#include "r_studio.h"
 #endif
 
 //=============================================================================

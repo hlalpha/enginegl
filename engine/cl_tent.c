@@ -94,9 +94,9 @@ int ModelFrameCount (model_t *m)
 			psprite = (msprite_t *)m->cache.data;
 			count = psprite->numframes;
 			break;
-		/*case mod_studio: // TODO(SanyaSho): (studiorender)
+		case mod_studio:
 			count = R_StudioBodyVariations (m);
-			break;*/
+			break;
 		};
 
 		if (count < 1)
@@ -229,7 +229,7 @@ void R_TempSphereModel (vec3_t pos, vec_t scale, float life, int count, int mode
 		if (!ptemp)
 			break;
 
-		//ptemp->entity.body = (rand() % framecount); // TODO(SanyaSho): (studiorender)
+		ptemp->entity.body = (rand() % framecount);
 
 		if ((rand()&255) >= 200)
 			ptemp->flags |= FTENT_GRAVITY;
@@ -310,8 +310,8 @@ void R_BreakModel (vec3_t pos, vec3_t size, vec3_t dir, float life, int count, i
 
 		if (pmod->type == mod_sprite)
 			ptemp->entity.frame = (rand() % framecount);
-		/*else if (pmod->type == mod_studio) // TODO(SanyaSho): (studiorender)
-			ptemp->entity.body = (rand() % framecount);*/
+		else if (pmod->type == mod_studio)
+			ptemp->entity.body = (rand() % framecount);
 
 		ptemp->flags |= FTENT_COLLIDEWORLD;
 
@@ -385,8 +385,8 @@ void R_TempModel (vec3_t pos, vec3_t dir, float life, int modelindex)
 
 	if (pmod->type == mod_sprite)
 		ptemp->entity.frame = (rand() % framecount);
-	/*else // FIXME(SanyaSho): Check for mod_studio here! // TODO(SanyaSho): (studiorender)
-		ptemp->entity.body = (rand() % framecount);*/
+	else // FIXME(SanyaSho): Check for mod_studio here!
+		ptemp->entity.body = (rand() % framecount);
 }
 
 /*

@@ -71,6 +71,27 @@ typedef struct entity_s
 	struct mnode_s			*topnode;		// for bmodels, first world node
 											//  that splits bmodel, or NULL if
 											//  not split
+
+	int valve_unknown_byte800k;
+
+	float animtime;
+	float framerate;
+	int body;
+	int sequence;
+
+	byte controller[4];
+	byte blending[2];
+
+	float prevanimtime;
+	vec3_t prevorigin;
+	vec3_t prevangles;
+	float prevframe;
+	float sequencetime;
+	int prevsequence;
+	byte prevcontroller[4];
+	byte prevblending[2];
+
+	char gap13[14];
 } entity_t;
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
@@ -101,7 +122,7 @@ typedef struct
 	
 	float		fov_x, fov_y;
 
-	int			ambientlight;
+	byte		ambientlight[3];
 } refdef_t;
 
 

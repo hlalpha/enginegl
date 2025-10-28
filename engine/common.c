@@ -547,6 +547,20 @@ void MSG_WriteShort (sizebuf_t *sb, int c)
 	buf[1] = c>>8;
 }
 
+void MSG_WriteWord (sizebuf_t *sb, int c)
+{
+	byte    *buf;
+	
+#ifdef PARANOID
+	if (c < ((short)0x8000) || c > (short)0x7fff)
+		Sys_Error ("MSG_WriteShort: range error");
+#endif
+
+	buf = SZ_GetSpace (sb, 2);
+	buf[0] = c&0xff;
+	buf[1] = c>>8;
+}
+
 void MSG_WriteLong (sizebuf_t *sb, int c)
 {
 	byte    *buf;
@@ -647,6 +661,24 @@ int MSG_ReadShort (void)
 	}
 		
 	c = (short)(net_message.data[msg_readcount]
+	+ (net_message.data[msg_readcount+1]<<8));
+	
+	msg_readcount += 2;
+	
+	return c;
+}
+
+int MSG_ReadWord (void)
+{
+	int     c;
+	
+	if (msg_readcount+2 > net_message.cursize)
+	{
+		msg_badread = true;
+		return -1;
+	}
+		
+	c = (short)(net_message.data[msg_readcount] // TODO(SanyaSho): Should i replace this with WORD (unsigned short)?
 	+ (net_message.data[msg_readcount+1]<<8));
 	
 	msg_readcount += 2;

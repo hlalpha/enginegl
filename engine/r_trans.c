@@ -36,16 +36,16 @@ void AddTentity( entity_t *ent )
 	numTransObjs++;
 }
 
-extern int CL_FxBlend( entity_t *ent );
-
 extern void R_DrawSpriteModel (entity_t *e);
 extern void R_DrawAliasModel (entity_t *e);
 extern void R_DrawBrushModel (entity_t *e);
 
 void R_DrawTEntitiesOnList( void )
 {
-	int i;
-	transObjRef *ref;
+	int				i;
+	transObjRef		*ref;
+	alight_t		light;
+	vec3_t			lvec;
 
 	if ( !r_drawentities.value )
 		return;
@@ -69,8 +69,14 @@ void R_DrawTEntitiesOnList( void )
 			R_DrawAliasModel( currententity );
 			break;
 
-		//case mod_studio:
-		//	break;
+		case mod_studio:
+			if (R_StudioShouldDraw())
+			{
+				light.plightvec = lvec;
+				R_StudioDynamicLight (currententity, &light);
+				R_StudioRenderFinal (currententity, &light);
+			}
+			break;
 
 		case mod_brush:
 			R_DrawBrushModel( currententity );
@@ -84,3 +90,4 @@ void R_DrawTEntitiesOnList( void )
 	numTransObjs = 0;
 	r_blend = 1.f;
 }
+

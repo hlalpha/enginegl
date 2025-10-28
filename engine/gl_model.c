@@ -222,7 +222,7 @@ void Mod_TouchModel (char *name)
 	
 	if (!mod->needload)
 	{
-		if (mod->type == mod_alias)
+		if (mod->type == mod_alias || mod->type == mod_studio)
 			Cache_Check (&mod->cache);
 	}
 }
@@ -240,15 +240,18 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 	unsigned *buf;
 	byte	stackbuf[1024];		// avoid dirtying the cache heap
 
-	if (!mod->needload)
+	if (mod->type == mod_alias || mod->type == mod_studio)
 	{
-		if (mod->type == mod_alias)
+		d = Cache_Check (&mod->cache);
+		if (d)
 		{
-			d = Cache_Check (&mod->cache);
-			if (d)
-				return mod;
+			mod->needload = false;
+			return mod;
 		}
-		else
+	}
+	else
+	{
+		if (!mod->needload)
 			return mod;		// not cached at all
 	}
 
@@ -293,6 +296,10 @@ model_t *Mod_LoadModel (model_t *mod, qboolean crash)
 		
 	case IDSPRITEHEADER:
 		Mod_LoadSpriteModel (mod, buf);
+		break;
+
+	case IDSTUDIOHEADER:
+		Mod_LoadStudioModel (mod, buf);
 		break;
 	
 	default:

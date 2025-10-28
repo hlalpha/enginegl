@@ -260,6 +260,8 @@ cvar_t		v_gamma = {"gamma", "2.5", true};
 cvar_t		v_lightgamma = {"lightgamma", "2.5"};
 cvar_t		v_texgamma = {"texgamma", "1.8"};
 cvar_t		v_brightness = {"brightness", "0.0", true};
+cvar_t		v_lambert = {"lambert", "1.7"};
+cvar_t		v_direct = {"direct", "0.9"};
 
 byte		texgammatable[256];	// palette is sent through this
 int			lightgammatable[1024];
@@ -1165,6 +1167,8 @@ void V_Init (void)
 	Cvar_RegisterVariable (&v_lightgamma);
 	Cvar_RegisterVariable (&v_texgamma);
 	Cvar_RegisterVariable (&v_brightness);
+	Cvar_RegisterVariable (&v_lambert);
+	Cvar_RegisterVariable (&v_direct);
 }
 
 

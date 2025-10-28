@@ -23,6 +23,8 @@ extern	cvar_t		v_gamma;
 extern	cvar_t		v_lightgamma;
 extern	cvar_t		v_texgamma;
 extern	cvar_t		v_brightness;
+extern	cvar_t		v_lambert;
+extern	cvar_t		v_direct;
 
 extern	byte		texgammatable[256];	// palette is sent through this
 extern	int			lightgammatable[1024];

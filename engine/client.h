@@ -225,6 +225,11 @@ typedef struct
 // architectually ugly but it works
 	int			light_level;
 #endif
+
+	char gap8[4];
+	int animtime;
+	int sequence;
+	char gap9[4];
 } client_state_t;
 
 
@@ -333,6 +338,8 @@ void CL_SendMove (usercmd_t *cmd);
 void CL_ParseTEnt (void);
 void CL_TempEntInit (void);
 void CL_TempEntUpdate (void);
+
+int CL_FxBlend (entity_t *ent);
 
 void CL_ClearState (void);
 

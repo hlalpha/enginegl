@@ -70,8 +70,10 @@ texture_t	*r_notexture_mip;
 
 int		d_lightstylevalue[256];	// 8.8 fraction of base light value
 
+alight_t	r_viewlighting;
 
 void R_MarkLeaves (void);
+colorVec R_LightPoint (vec3_t p);
 
 cvar_t	r_norefresh = {"r_norefresh","0"};
 cvar_t	r_drawentities = {"r_drawentities","1"};
@@ -501,7 +503,7 @@ void R_DrawAliasModel (entity_t *e)
 	// get lighting information
 	//
 
-	ambientlight = shadelight = R_LightPoint (currententity->origin);
+	//ambientlight = shadelight = R_LightPoint (currententity->origin); // TODO(SanyaSho): Make alias models use RGB!
 
 	// allways give the gun some light
 	if (e == &cl.viewent && ambientlight < 24)
@@ -629,7 +631,9 @@ R_DrawEntitiesOnList
 */
 void R_DrawEntitiesOnList (void)
 {
-	int		i;
+	int			i;
+	alight_t	light;
+	vec3_t		lvec;
 
 	if (!r_drawentities.value)
 		return;
@@ -649,6 +653,15 @@ void R_DrawEntitiesOnList (void)
 			{
 			case mod_alias:
 				R_DrawAliasModel (currententity);
+				break;
+
+			case mod_studio:
+				if (R_StudioShouldDraw())
+				{
+					light.plightvec = lvec;
+					R_StudioDynamicLight (currententity, &light);
+					R_StudioRenderFinal (currententity, &light);
+				}
 				break;
 
 			case mod_brush:
@@ -681,13 +694,13 @@ R_DrawViewModel
 */
 void R_DrawViewModel (void)
 {
-	float		ambient[4], diffuse[4];
 	int			j;
 	int			lnum;
 	vec3_t		dist;
 	float		add;
 	dlight_t	*dl;
-	int			ambientlight, shadelight;
+	colorVec	c;
+	vec3_t		lvec;
 
 	if (!r_drawviewmodel.value)
 		return;
@@ -711,36 +724,65 @@ void R_DrawViewModel (void)
 	if (!currententity->model)
 		return;
 
-	j = R_LightPoint (currententity->origin);
-
-	if (j < 24)
-		j = 24;		// allways give some light on gun
-	ambientlight = j;
-	shadelight = j;
-
-// add dynamic lights		
-	for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
-	{
-		dl = &cl_dlights[lnum];
-		if (!dl->radius)
-			continue;
-		if (!dl->radius)
-			continue;
-		if (dl->die < cl.time)
-			continue;
-
-		VectorSubtract (currententity->origin, dl->origin, dist);
-		add = dl->radius - Length(dist);
-		if (add > 0)
-			ambientlight += add;
-	}
-
-	ambient[0] = ambient[1] = ambient[2] = ambient[3] = (float)ambientlight / 128;
-	diffuse[0] = diffuse[1] = diffuse[2] = diffuse[3] = (float)shadelight / 128;
-
 	// hack the depth range to prevent view model from poking into walls
 	glDepthRange (gldepthmin, gldepthmin + 0.3*(gldepthmax-gldepthmin));
-	R_DrawAliasModel (currententity);
+
+	switch (currententity->model->type)
+	{
+	case mod_alias:
+		c = R_LightPoint (currententity->origin);
+
+		j = (c.r + c.g + c.b) / 3;
+		if (j < 24)
+			j = 24;		// allways give some light on gun
+		
+// add dynamic lights		
+		for (lnum=0 ; lnum<MAX_DLIGHTS ; lnum++)
+		{
+			dl = &cl_dlights[lnum];
+			if (!dl->radius)
+				continue;
+			if (!dl->radius)
+				continue;
+			if (dl->die < cl.time)
+				continue;
+
+			VectorSubtract (currententity->origin, dl->origin, dist);
+			add = dl->radius - Length(dist);
+			if (add > 0)
+				r_viewlighting.ambientlight += add;
+		}
+
+		// clamp lighting so it doesn't overbright as much
+		if (r_viewlighting.ambientlight > 128)
+			r_viewlighting.ambientlight = 128;
+		if (r_viewlighting.ambientlight + r_viewlighting.shadelight > 192)
+			r_viewlighting.shadelight = r_viewlighting.ambientlight - 192;
+
+		r_viewlighting.plightvec = lvec;
+
+		R_DrawAliasModel (currententity);
+		break;
+	case mod_studio:
+		currententity->sequence = cl.sequence;
+		currententity->frame = 0;
+		currententity->framerate = 1;
+		currententity->animtime = cl.animtime;
+
+		r_viewlighting.plightvec = lvec;
+
+		R_StudioDynamicLight (currententity, &r_viewlighting);
+
+#if defined( QUAKE2 )
+		cl.light_level = r_viewlighting.ambientlight;
+#endif // QUAKE2
+
+		R_StudioRenderFinal (currententity, &r_viewlighting);
+		break;
+	default:
+		R_DrawBrushModel(currententity);
+	}
+
 	glDepthRange (gldepthmin, gldepthmax);
 }
 

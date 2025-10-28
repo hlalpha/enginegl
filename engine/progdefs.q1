@@ -75,9 +75,15 @@ typedef struct entvars_s
 	vec3_t	punchangle;
 	string_t	classname;
 	string_t	model;
-	float	frame;
 	float	skin;
+	float	body;
 	float	effects;
+	float	sequence;
+	float	animtime;
+	float	frame;
+	float	framerate;
+	int	controller;
+	float	blending;
 	vec3_t	mins;
 	vec3_t	maxs;
 	vec3_t	size;
@@ -146,4 +152,4 @@ typedef struct entvars_s
 	void*	pSystemGlobals;
 } entvars_t;
 
-#define PROGHEADER_CRC 10422
+#define PROGHEADER_CRC 9428
