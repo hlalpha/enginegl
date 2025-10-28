@@ -1532,10 +1532,12 @@ int		help_page;
 
 void M_Menu_Help_f (void)
 {
+#if 0
 	key_dest = key_menu;
 	m_state = m_help;
 	m_entersound = true;
 	help_page = 0;
+#endif
 }
 
 
