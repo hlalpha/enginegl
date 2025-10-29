@@ -34,6 +34,8 @@ typedef struct
 #define DISPATCHFUNC_KEYVALUE 5
 #define DISPATCHFUNC_SAVE 6
 
+extern enginefuncs_t g_engfuncsExportedToDlls;
+
 DISPATCHFUNC GetDispatchFuncById( edict_t *ent, int dllFunc );
 void CallDispatchFunc( edict_t *ent, int dllFunc, void *funcArg );
 

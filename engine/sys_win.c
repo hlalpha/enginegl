@@ -25,6 +25,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "resource.h"
 #include "conproc.h"
 
+#include "string.h"
+#include "io.h"
+
 #define MINIMUM_WIN_MEMORY		0x0880000
 #define MAXIMUM_WIN_MEMORY		0x1000000
 
@@ -51,6 +54,34 @@ static HANDLE	tevent;
 static HANDLE	hFile;
 static HANDLE	heventParent;
 static HANDLE	heventChild;
+
+
+extensiondll_t g_rgextdll[50];
+int g_iextdllMac;
+
+char *qccFuncsToWrap[9] =
+{
+	"ClientDisconnect",
+	"PlayerPreThink",
+	"PlayerPostThink",
+	"StartFrame",
+	"SetNewParms",
+	"SetChangeParms",
+	"ClientKill",
+	"ClientConnect",
+	"PutClientInServer"
+};
+qccwrap_t g_rqccFuncs[9];
+
+DISPATCHFUNC g_pfnDispatchSpawn;
+DISPATCHFUNC g_pfnDispatchThink;
+DISPATCHFUNC g_pfnDispatchUse;
+DISPATCHFUNC g_pfnDispatchTouch;
+DISPATCHFUNC g_pfnDispatchSave;
+DISPATCHFUNC g_pfnDispatchRestore;
+DISPATCHFUNC g_pfnDispatchKeyValue;
+DISPATCHFUNC g_pfnDispatchBlocked;
+
 
 void MaskExceptions (void);
 void Sys_InitFloatTime (void);
@@ -891,5 +922,304 @@ int WINAPI WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 
     /* return success of application */
     return TRUE;
+}
+
+
+/*
+===========
+FunctionFromName
+
+Check if any of game DLLs have the entity classname exported
+===========
+*/
+DISPATCHFUNC FunctionFromName (LPCSTR lpProcName)
+{
+	int					i;
+	DISPATCHFUNC		pfnDispatchFunc;
+
+	for (i=0 ; i<g_iextdllMac ; i++)
+	{
+		pfnDispatchFunc = (DISPATCHFUNC)GetProcAddress (g_rgextdll[i].lDLLHandle, lpProcName);
+
+		// Check if we have the dispatch func we need
+		if (pfnDispatchFunc)
+			return pfnDispatchFunc;
+	}
+
+	// No such entity was in DLL
+	Con_Printf ("Can't find proc: %s\n", lpProcName);
+	return NULL;
+}
+
+
+/*
+===========
+LoadServerDLL
+
+Find and load all game DLLs from the game folder
+===========
+*/
+void LoadServerDLL (const char *pBaseDir)
+{
+	intptr_t			hFindHandle;
+	char				searchpath[MAX_PATH];
+	char				libname[MAX_PATH];
+	struct _finddata_t	c_file;
+
+	memset (g_rqccFuncs, 0, sizeof(g_rqccFuncs));
+	g_iextdllMac = 0;
+	memset (g_rgextdll, 0, sizeof(g_rgextdll));
+
+	sprintf (searchpath, "%s\\%s\\*.dll", pBaseDir, GAMENAME"\\dlls");
+
+	hFindHandle = _findfirst (searchpath, &c_file);
+	if ( hFindHandle != -1 )
+	{
+		do
+		{
+			sprintf (libname, "%s\\%s\\%s", pBaseDir, GAMENAME"\\dlls", c_file.name);
+			LoadThisDll (libname);
+		}
+		while (_findnext( hFindHandle, &c_file ) == 0);
+	}
+	_findclose (hFindHandle);
+
+	g_pfnDispatchSpawn = FunctionFromName ("DispatchSpawn");
+	g_pfnDispatchThink = FunctionFromName ("DispatchThink");
+	g_pfnDispatchUse = FunctionFromName ("DispatchUse");
+	g_pfnDispatchTouch = FunctionFromName ("DispatchTouch");
+	g_pfnDispatchSave = FunctionFromName ("DispatchSave");
+	g_pfnDispatchRestore = FunctionFromName ("DispatchRestore");
+	g_pfnDispatchKeyValue = FunctionFromName ("DispatchKeyValue");
+	g_pfnDispatchBlocked = FunctionFromName ("DispatchBlocked");
+
+	if (!g_pfnDispatchSpawn || !g_pfnDispatchThink || !g_pfnDispatchUse || !g_pfnDispatchTouch || !g_pfnDispatchSave || !g_pfnDispatchRestore || !g_pfnDispatchKeyValue || !g_pfnDispatchBlocked)
+	{
+		Sys_Error ("Can't get all dispatchfunctions!");
+	}
+}
+
+
+/*
+===========
+LoadThisDll
+
+Load game DLL, export the enginefuncs_t and check for any QC exports
+===========
+*/
+void LoadThisDll (LPCSTR lpLibFileName)
+{
+	HMODULE					hDLL;
+	GIVEFNPTRSTODLL_PROC	pfnGiveFnptrsToDll;
+	extensiondll_t			*pextdll;
+	int						i;
+	QCCFUNC					pfnQccFunc;
+
+	hDLL = LoadLibraryA (lpLibFileName);
+	if (!hDLL)
+	{
+		Con_Printf ("LoadLibrary failed on %s\n", lpLibFileName);
+		goto ignoreThisDLL;
+	}
+
+	// Try to find "GiveFnptrsToDll" export
+	pfnGiveFnptrsToDll = (GIVEFNPTRSTODLL_PROC)GetProcAddress (hDLL, "GiveFnptrsToDll");
+	if (!pfnGiveFnptrsToDll)
+	{
+		Con_Printf ("Couldn't get GiveFnptrsToDll in %s\n", lpLibFileName);
+		goto ignoreThisDLL;
+	}
+
+	// Export engine interface
+	pfnGiveFnptrsToDll (&g_engfuncsExportedToDlls);
+
+	if (g_iextdllMac == 50)
+	{
+		Con_Printf ("Too many DLLs, ignoring remainder");
+		goto ignoreThisDLL;
+	}
+
+	// Store the loaded DLL
+	pextdll = &g_rgextdll[g_iextdllMac++];
+	pextdll->lDLLHandle = hDLL;
+
+	// Store QC exported functions
+	for (i=0 ; i<9 ; i++)
+	{
+		if (!g_rqccFuncs[i].func)
+		{
+			pfnQccFunc = (QCCFUNC)GetProcAddress (hDLL, qccFuncsToWrap[i]);
+			if (pfnQccFunc)
+				g_rqccFuncs[i].func = pfnQccFunc;
+		}
+	}
+
+	return;
+
+ignoreThisDLL:
+	if (hDLL)
+	{
+		FreeLibrary (hDLL);
+	}
+}
+
+
+/*
+===========
+ReleaseEntityDlls
+
+Free game DLL handles
+===========
+*/
+void ReleaseEntityDlls()
+{
+	extensiondll_t			*pextdllFirst;
+	extensiondll_t			*pextdll;
+
+	pextdllFirst = &g_rgextdll[0];
+	pextdll = &g_rgextdll[g_iextdllMac];
+
+	while (pextdllFirst < pextdll)
+	{
+		FreeLibrary (pextdllFirst->lDLLHandle);
+		pextdllFirst->lDLLHandle = NULL;
+
+		pextdllFirst++;
+	}
+}
+
+
+/*
+===========
+EngineFprintf
+===========
+*/
+int EngineFprintf (FILE *f, char *format, ...)
+{
+	static char				buf[1024];
+	va_list					argptr;
+
+	va_start (argptr, format);
+	vsprintf (buf, format, argptr);
+	va_end (argptr);
+
+	return fprintf (f, buf);
+}
+
+
+/*
+===========
+AlertMessage
+
+Throws an alert to the console
+===========
+*/
+void AlertMessage (int atype, const char *szFmt, ...)
+{
+	va_list					argptr;
+	static char				szOut[1024];
+	UINT					uFlags;
+	HWND					activeWindow;
+
+	if (!developer.value)
+		return;
+
+	uFlags = 0;
+
+	switch (atype)
+	{
+	case 1:		// CONSOLE LOG
+		szOut[0] = '\0';
+		break;
+	case 2:		// WARN
+		strcpy (szOut, "WARNING:  ");
+		uFlags = MB_ICONWARNING;
+		break;
+	case 3:		// ERROR
+		strcpy (szOut, "ERROR:  ");
+		uFlags = MB_ICONERROR;
+		break;
+	default:	// INFO
+		strcpy (szOut, "NOTE:  ");
+		uFlags = MB_ICONINFORMATION;
+		break;
+	};
+
+	va_start (argptr, szFmt);
+	vsprintf (&szOut[strlen(szOut)], szFmt, argptr);
+	va_end (argptr);
+
+	if (atype == 1 || CVarGetFloat("vid_mode") > 2.f)
+	{
+		Con_Printf (szOut);
+	}
+	else
+	{
+		activeWindow = GetActiveWindow();
+		if (activeWindow)
+		{
+			MessageBox (activeWindow, szOut, "ALERT", uFlags);
+		}
+	}
+}
+
+
+/*
+===========
+PR_ExecuteProgramFromDLL
+
+Calls an exported QC func from external game DLLs
+===========
+*/
+void PR_ExecuteProgramFromDLL (int nProgram)
+{
+	qccwrap_t			*wrap;
+	edict_t				*ed;
+
+	wrap = &g_rqccFuncs[nProgram];
+	if (wrap->func)
+	{
+		// TODO: Quiver progdefs
+		ed = PROG_TO_EDICT (pr_global_struct->self);
+		ed->v.pContainingEntity = ed;
+		ed->v.pSystemGlobals = pr_global_struct;
+
+		wrap->func (pr_global_struct);
+#if !defined( QUIVER_QUAKE_COMPAT )
+		// In QCVM compat mode we want both extDLL and QC functions to be called
+		return;
+#endif
+	}
+
+	switch (nProgram)
+	{
+	case 0:
+		PR_ExecuteProgram (pr_global_struct->ClientDisconnect);
+		break;
+	case 1:
+		PR_ExecuteProgram (pr_global_struct->PlayerPreThink);
+		break;
+	case 2:
+		PR_ExecuteProgram (pr_global_struct->PlayerPostThink);
+		break;
+	case 3:
+		PR_ExecuteProgram (pr_global_struct->StartFrame);
+		break;
+	case 4:
+		PR_ExecuteProgram (pr_global_struct->SetNewParms);
+		break;
+	case 5:
+		PR_ExecuteProgram (pr_global_struct->SetChangeParms);
+		break;
+	case 6:
+		PR_ExecuteProgram (pr_global_struct->ClientKill);
+		break;
+	case 7:
+		PR_ExecuteProgram (pr_global_struct->ClientConnect);
+		break;
+	case 8:
+		PR_ExecuteProgram (pr_global_struct->PutClientInServer);
+		break;
+	}
 }
 
