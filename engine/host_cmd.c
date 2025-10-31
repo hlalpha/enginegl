@@ -1834,6 +1834,21 @@ void Host_Viewprev_f (void)
 }
 
 /*
+==================
+Host_Interp_f
+==================
+*/
+void Host_Interp_f (void)
+{
+	r_dointerp ^= 1;
+
+	if (r_dointerp)
+		Con_Printf ("Frame Interpolation ON\n");
+	else
+		Con_Printf ("Frame Interpolation OFF\n");
+}
+
+/*
 ===============================================================================
 
 DEMO LOOP CONTROL
@@ -1967,4 +1982,6 @@ void Host_InitCommands (void)
 	Cmd_AddCommand ("viewprev", Host_Viewprev_f);
 
 	Cmd_AddCommand ("mcache", Mod_Print);
+
+	Cmd_AddCommand ("interp", Host_Interp_f);
 }

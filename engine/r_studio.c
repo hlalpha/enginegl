@@ -5,10 +5,12 @@ extern void R_RotateForEntity (entity_t *e);
 extern	cvar_t	gl_ztrick;
 extern vec3_t			lightspot;
 
+int r_dointerp;
+
 float bonetransform[MAXSTUDIOBONES][3][4];
 float lighttransform[MAXSTUDIOBONES][3][4];
 
-int g_chrome[2048][2];
+int chrome[MAXSTUDIOVERTS][2];
 
 int r_ambientlight;
 vec3_t r_plightvec;
@@ -443,8 +445,8 @@ void R_StudioLighting (float *lv, int bone, int flags, vec_t *normal)
 		float rx = v * lx - vpn[0];
 		float rz = v * lz - vpn[2];
 
-		g_chrome[index][0] = (int)((rx + 1.0f) * 32.0f);
-		g_chrome[index][1] = (int)((rz + 1.0f) * 32.0f);
+		chrome[index][0] = (int)((rx + 1.0f) * 32.0f);
+		chrome[index][1] = (int)((rz + 1.0f) * 32.0f);
 	}*/
 
 	if (illum > 255)
@@ -542,9 +544,8 @@ void R_StudioRenderFinal (entity_t *ent, alight_t *plight)
 	{
 		R_StudioSetupModel (i);
 
-		// TODO
-		//if (r_dointerp)
-		//	ent->trivial_accept = 0;
+		if (r_dointerp)
+			ent->trivial_accept = 0;
 
 		if (ent->rendermode != kRenderModeNormal)
 		{
@@ -732,8 +733,8 @@ void R_GLStudioDrawPoints (entity_t *ent, alight_t *plight)
 
 				/// vert1
 				glTexCoord2f (
-					(float)g_chrome[ptricmds[0].normindex][0] * ss,
-					(float)g_chrome[ptricmds[0].normindex][1] * st
+					(float)chrome[ptricmds[0].normindex][0] * ss,
+					(float)chrome[ptricmds[0].normindex][1] * st
 				);
 				l = (*pvlightvalues)[ptricmds[0].normindex];
 				glColor4f (
@@ -752,8 +753,8 @@ void R_GLStudioDrawPoints (entity_t *ent, alight_t *plight)
 
 				/// vert2
 				glTexCoord2f (
-					(float)g_chrome[ptricmds[1].normindex][0] * ss,
-					(float)g_chrome[ptricmds[1].normindex][1] * st
+					(float)chrome[ptricmds[1].normindex][0] * ss,
+					(float)chrome[ptricmds[1].normindex][1] * st
 				);
 				l = (*pvlightvalues)[ptricmds[1].normindex];
 				glColor4f (
@@ -772,8 +773,8 @@ void R_GLStudioDrawPoints (entity_t *ent, alight_t *plight)
 
 				/// vert3
 				glTexCoord2f (
-					(float)g_chrome[ptricmds[2].normindex][0] * ss,
-					(float)g_chrome[ptricmds[2].normindex][1] * st
+					(float)chrome[ptricmds[2].normindex][0] * ss,
+					(float)chrome[ptricmds[2].normindex][1] * st
 				);
 				l = (*pvlightvalues)[ptricmds[2].normindex];
 				glColor4f (

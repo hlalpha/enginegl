@@ -14,6 +14,8 @@ typedef struct alight_s
 	float *plightvec;
 } alight_t;
 
+extern int r_dointerp;
+
 #include "studio.h"
 
 // l_studio.c
