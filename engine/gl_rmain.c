@@ -656,7 +656,7 @@ void R_DrawEntitiesOnList (void)
 				break;
 
 			case mod_studio:
-				if (R_StudioShouldDraw())
+				if (R_StudioCheckBBox())
 				{
 					light.plightvec = lvec;
 					R_StudioDynamicLight (currententity, &light);

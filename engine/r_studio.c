@@ -27,11 +27,11 @@ auxvert_t auxverts[MAXSTUDIOVERTS];
 vec3_t lightvalues[MAXSTUDIOVERTS];
 
 auxvert_t *pauxverts;
-vec3_t *pvlightvalues;
+vec_t *pvlightvalues;
 
 vec3_t shadevector;
 
-qboolean R_StudioShouldDraw (void)
+qboolean R_StudioCheckBBox (void)
 {
 	return true;
 }
@@ -805,7 +805,7 @@ void R_GLStudioDrawPoints (entity_t *ent, alight_t *plight)
 					(float)ptricmds[0].s * ss,
 					(float)ptricmds[0].t * st
 				);
-				l = (*pvlightvalues)[ptricmds[0].normindex];
+				l = pvlightvalues[ptricmds[0].normindex];
 				glColor4f (
 					plight->color[0] * l,
 					plight->color[1] * l,
@@ -825,7 +825,7 @@ void R_GLStudioDrawPoints (entity_t *ent, alight_t *plight)
 					(float)ptricmds[1].s * ss,
 					(float)ptricmds[1].t * st
 				);
-				l = (*pvlightvalues)[ptricmds[1].normindex];
+				l = pvlightvalues[ptricmds[1].normindex];
 				glColor4f (
 					plight->color[0] * l,
 					plight->color[1] * l,
@@ -845,7 +845,7 @@ void R_GLStudioDrawPoints (entity_t *ent, alight_t *plight)
 					(float)ptricmds[2].s * ss,
 					(float)ptricmds[2].t * st
 				);
-				l = (*pvlightvalues)[ptricmds[2].normindex];
+				l = pvlightvalues[ptricmds[2].normindex];
 				glColor4f (
 					plight->color[0] * l,
 					plight->color[1] * l,

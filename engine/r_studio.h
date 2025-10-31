@@ -20,7 +20,7 @@ typedef struct alight_s
 void Mod_LoadStudioModel (model_t *mod, void *buffer);
 
 // r_studio.c
-qboolean R_StudioShouldDraw (void);
+qboolean R_StudioCheckBBox (void);
 int R_StudioBodyVariations (model_t *model);
 void R_StudioCalcRotations (vec3_t *pos, vec4_t *q, int sequence, float f);
 void R_StudioSetupBones (void);
