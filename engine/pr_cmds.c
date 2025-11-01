@@ -1290,6 +1290,21 @@ void PF_Find (void)
 	RETURN_EDICT(ed);
 }
 
+int GetEntityIllum (edict_t *pEnt)
+{
+	int			numedict;
+	colorVec	col;
+
+	if (!pEnt)
+		return -1;
+
+	numedict = NUM_FOR_EDICT(pEnt);
+
+	col = cl_entities[numedict].cvFloorColor;
+
+	return (col.r + col.g + col.b) / 3;
+}
+
 void PR_CheckEmptyString (char *s)
 {
 	if (s[0] <= ' ')

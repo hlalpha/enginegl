@@ -58,7 +58,7 @@ enginefuncs_t g_engfuncsExportedToDlls =
 	NULL,
 #endif
 	FindEntityByString,
-	NULL, // GetEntityIllum
+	GetEntityIllum,
 	PF_findradius_I,
 	PF_checkclient_I,
 	PF_makevectors_I,

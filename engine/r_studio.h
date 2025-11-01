@@ -8,7 +8,7 @@ typedef struct
 
 typedef struct alight_s
 {
-	int ambientlight;
+	int ambientlight;		// max 128
 	int shadelight;
 	vec3_t color;
 	float *plightvec;

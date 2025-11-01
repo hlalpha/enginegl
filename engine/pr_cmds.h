@@ -53,6 +53,8 @@ void PF_changepitch_I (edict_t *ent);
 
 edict_t *FindEntityByString (edict_t *e, char *key, char *value);
 
+int GetEntityIllum (edict_t *pEnt);
+
 sizebuf_t *WriteDest_I (int dest);
 void PF_WriteByte_I (int dest, int c);
 void PF_WriteChar_I (int dest, int c);

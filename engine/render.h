@@ -91,7 +91,7 @@ typedef struct entity_s
 	byte prevcontroller[4];
 	byte prevblending[2];
 
-	char gap13[14];
+	colorVec cvFloorColor;
 } entity_t;
 
 // !!! if this is changed, it must be changed in asm_draw.h too !!!

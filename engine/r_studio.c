@@ -411,7 +411,7 @@ void R_StudioLighting (float *lv, int bone, int flags, vec_t *normal)
 	float ly = DotProduct (lighttransform[bone][1], normal);
 	float lz = DotProduct (lighttransform[bone][2], normal);
 
-	illum = r_ambientlight;
+	illum = (float)r_ambientlight;
 
 	// TODO
 	if ((flags & STUDIO_NF_FLATSHADE) /*&& dword_48F068 != 1*/)
@@ -469,7 +469,7 @@ void R_StudioSetupLighting (alight_t *plighting)
 
 void R_StudioSetupModel (int bodypart)
 {
-	int index;
+	int			index;
 
 	if (pstudiohdr->numbodyparts < bodypart)
 	{
@@ -485,9 +485,16 @@ void R_StudioSetupModel (int bodypart)
 	psubmodel = (mstudiomodel_t *)((byte *)pstudiohdr + pbodypart->modelindex) + index;
 }
 
+colorVec R_LightVec (vec3_t start, vec3_t end);
 void R_StudioDynamicLight (entity_t *ent, alight_t *plight)
 {
-	//if (r_fullbright.value)
+	vec3_t		start, dir, end, lorg, lcolor;
+	float		floor, dist, add, distscale;
+	dlight_t	*dl;
+	int			i;
+	colorVec	lightColor;
+
+	if (r_fullbright.value)
 	{
 		plight->shadelight = 0;
 		plight->ambientlight = 192;
@@ -497,11 +504,96 @@ void R_StudioDynamicLight (entity_t *ent, alight_t *plight)
 		plight->plightvec[0] = 0;
 		plight->plightvec[1] = 0;
 		plight->plightvec[2] = -1;
-
 		return;
 	}
 
-	// TODO
+	dir[0] = 0.f;
+	dir[1] = 0.f;
+	dir[2] = -1.f;
+
+	VectorCopy(ent->origin, start);
+	start[2] -= dir[2] * 8; // TODO(SanyaSho): Revisit this line
+
+	VectorScale(dir, 2048.0f, end);
+	VectorAdd(start, end, end);
+
+	lightColor = R_LightVec (start, end);
+	currententity->cvFloorColor = lightColor;
+
+	lcolor[0] = lightColor.r;
+	lcolor[1] = lightColor.g;
+	lcolor[2] = lightColor.b;
+
+	floor = max(max(lcolor[0], lcolor[1]), lcolor[2]);
+	if (floor == 0.f)
+		floor = 1.f;
+
+	VectorScale(dir, floor, dir);
+
+	dl = cl_dlights;
+	for (i=0 ; i<MAX_DLIGHTS ; i++, dl++)
+	{
+		if (dl->die < cl.time)
+			continue;
+
+		VectorSubtract (ent->origin, dl->origin, lorg);
+		dist = Length (lorg);
+
+		add = (dl->radius - dist);
+		if (add > 0)
+		{
+			if (dist > 1)
+				VectorScale(lorg, (add / dist), lorg);
+			else
+				VectorScale(lorg, add, lorg);
+
+			floor += add;
+
+			VectorAdd (dir, lorg, dir);
+
+			lcolor[0] += dl->color[0] * (add / 256.0);
+			lcolor[1] += dl->color[1] * (add / 256.0);
+			lcolor[2] += dl->color[2] * (add / 256.0);
+		}
+	}
+
+	if (floor >= 128)
+		distscale = v_direct.value;
+	else
+		distscale = (floor * v_direct.value) / 128.0f;
+
+	VectorScale (dir, distscale, dir);
+
+	plight->shadelight = Length (dir);
+	plight->ambientlight = (floor - plight->shadelight);
+
+	floor = max(max(lcolor[0], lcolor[1]), lcolor[2]);
+	if (floor == 0.f)
+		floor = 1.f;
+
+	plight->color[0] = lcolor[0] * (1.f / floor);
+	plight->color[1] = lcolor[1] * (1.f / floor);
+	plight->color[2] = lcolor[2] * (1.f / floor);
+
+	if (plight->ambientlight > 128)
+		plight->ambientlight = 128;
+	if (plight->ambientlight + plight->shadelight > 256)
+		plight->shadelight = 256 - plight->ambientlight;
+
+	if (ent->effects & EF_MUZZLEFLASH)
+	{
+		ent->effects &= ~EF_MUZZLEFLASH;
+
+		plight->ambientlight = plight->shadelight;
+		plight->shadelight = 80;
+
+		plight->color[0] = 1.0;
+		plight->color[1] = 1.0;
+		plight->color[2] = 0.6;
+	}
+
+	VectorNormalize (dir);
+	VectorCopy (dir, plight->plightvec);
 }
 
 void R_StudioRenderFinal (entity_t *ent, alight_t *plight)
