@@ -12,27 +12,18 @@ Draw_CacheWadInit
 */
 void Draw_CacheWadInit (char *name, int cacheMax, cachewad_t *wad)
 {
-	int len;
-	int handle;
-	int size;
-	wadinfo_t header;
-	int i;
-	lumpinfo_t *lumps;
+	int				len, handle, size, i;
+	wadinfo_t		header;
+	lumpinfo_t		*lumps;
 	
 	len = COM_OpenFile (name, &handle);
-	if ( handle == -1 )
+	if (handle == -1)
 		Sys_Error ("Draw_LoadWad: Couldn't open %s\n", name);
 
-	Sys_FileRead (handle, &header, 12);
+	Sys_FileRead (handle, &header, sizeof(wadinfo_t));
 
-	if ( header.identification[0] != 'W' ||
-		 header.identification[1] != 'A' ||
-		 header.identification[2] != 'D' ||
-		 header.identification[3] != '3'
-	   )
-	{
+	if (header.identification[0] != 'W' || header.identification[1] != 'A' || header.identification[2] != 'D' || header.identification[3] != '3')
 		Sys_Error ("Wad file %s doesn't have WAD3 id\n", name);
-	}
 
 	wad->lumps = malloc (len - header.infotableofs);
 
@@ -42,17 +33,15 @@ void Draw_CacheWadInit (char *name, int cacheMax, cachewad_t *wad)
 	COM_CloseFile (handle);
 
 	lumps = wad->lumps;
-	for (i = 0; i < header.numlumps; i++, lumps++)
-	{
+	for (i=0 ; i<header.numlumps ; i++, lumps++)
 		W_CleanupName (lumps->name, lumps->name);
-	}
 
 	wad->lumpCount = header.numlumps;
 	wad->cacheCount = 0;
 	wad->cacheMax = cacheMax;
 	wad->name = name; // TODO(SanyaSho): use strdup?
 	size = sizeof(cacheentry_t) * cacheMax;
-	wad->cache = malloc(size);
+	wad->cache = malloc (size);
 	memset (wad->cache, 0, size);
 	wad->pfnCacheBuild = NULL;
 	wad->cacheExtra = 0;
@@ -108,25 +97,19 @@ Draw_CacheIndex
 */
 int Draw_CacheIndex (cachewad_t *wad, char *path)
 {
-	int i;
-	cacheentry_t *pCache;
+	int				i;
+	cacheentry_t	*pCache;
 
 	pCache = wad->cache;
 
 	for (i = 0; i < wad->cacheCount; i++, pCache++)
-	{
 		if ( !strcmp(path, pCache->name) )
-		{
 			break;
-		}
-	}
 
 	if (i == wad->cacheCount)
 	{
 		if (wad->cacheMax == wad->cacheCount)
-		{
 			Sys_Error ("Draw_CacheIndex: Cache wad (%s) out of %d entries", wad->name, wad->cacheMax);
-		}
 
 		wad->cacheCount++;
 		strcpy (pCache->name, path);
@@ -154,19 +137,16 @@ Draw_CacheGet
 */
 void *Draw_CacheGet (cachewad_t *wad, int index)
 {
-	int i;
-	cacheentry_t *pCache;
-	cache_user_t *pCacheUser;
-	int handle;
-	byte *pCacheAlloc;
-	void *pCacheCheck;
-	lumpinfo_t *lumps;
-	char szDest[16], szCleanDest[16];
+	int				i, handle;
+	cacheentry_t	*pCache;
+	cache_user_t	*pCacheUser;
+	byte			*pCacheAlloc;
+	void			*pCacheCheck;
+	lumpinfo_t		*lumps;
+	char			szDest[16], szCleanDest[16];
 
 	if (wad->cacheCount <= index)
-	{
 		Sys_Error ("Cache wad indexed before load %s: %d", wad->name, index);
-	}
 
 	pCache = &wad->cache[index];
 	pCacheUser = &pCache->cache;
@@ -174,9 +154,7 @@ void *Draw_CacheGet (cachewad_t *wad, int index)
 	// Don't alloc anything if the image was already in the cache
 	pCacheCheck = Cache_Check (pCacheUser);
 	if (pCacheCheck)
-	{
 		return pCacheCheck;
-	}
 	
 	COM_FileBase (pCache->name, szDest);
 
@@ -184,31 +162,27 @@ void *Draw_CacheGet (cachewad_t *wad, int index)
 
 	lumps = wad->lumps;
 
-	for (i = 0; i < wad->lumpCount; i++, lumps++)
-	{
-		if ( !Q_strcmp (szCleanDest, lumps->name) )
+	for (i=0 ; i<wad->lumpCount ; i++, lumps++)
+		if (!Q_strcmp (szCleanDest, lumps->name))
 			break;
-	}
 
 	if (i == wad->lumpCount)
-	{
 		Sys_Error ("Draw_CacheGet: couldn't find %s in %s", pCache->name, wad->name);
-	}
 
 	COM_OpenFile (wad->name, &handle);
 
 	if (handle == -1)
-	{
 		return NULL;
-	}
 
 	pCacheAlloc = Cache_Alloc (pCacheUser, lumps->size + wad->cacheExtra + 1, szCleanDest);
 	if (!pCacheAlloc)
-	{
 		Sys_Error ("Draw_CacheGet: not enough space for %s in %s", pCache->name, wad->name);
-	}
 
 	pCacheAlloc[lumps->size + wad->cacheExtra] = 0;
+
+#if !defined( GLQUAKE )
+	Draw_BeginDisc ();
+#endif // !GLQUAKE
 
 	Sys_FileSeek (handle, lumps->filepos);
 	Sys_FileRead (handle, pCacheAlloc + wad->cacheExtra, lumps->size);
@@ -217,6 +191,10 @@ void *Draw_CacheGet (cachewad_t *wad, int index)
 
 	if (wad->pfnCacheBuild)
 		wad->pfnCacheBuild (wad, pCacheAlloc);
+
+#if !defined( GLQUAKE )
+	Draw_EndDisc ();
+#endif // !GLQUAKE
 
 	if (!pCacheUser->data)
 		Sys_Error ("Draw_CacheGet: failed to load %s", pCache->name);

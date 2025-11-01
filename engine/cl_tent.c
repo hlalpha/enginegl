@@ -49,7 +49,7 @@ sfx_t			*cl_sfx_rail;
 
 /*
 =================
-CL_ParseTEnt
+CL_InitTEnts
 =================
 */
 void CL_InitTEnts (void)
@@ -734,11 +734,10 @@ void CL_TempEntInit (void)
 	{
 		gTempEnts[i].next = &gTempEnts[i + 1];
 	}
-	gTempEnts[MAX_TEMP_ENTITIES - 1].next = NULL; // SanyaSho: Decompiler might be wrong, i'm guessing this is what should be here by 8684 hw.so
+	gTempEnts[MAX_TEMP_ENTITIES - 1].next = NULL;
 
 	gpTempEntFree = gTempEnts;
 	gpTempEntActive = NULL;
-
 }
 
 /*
@@ -931,110 +930,74 @@ int CL_FxBlend (entity_t *ent)
 
 	case kRenderFXSlowFadeAway:		// 5
 		if (ent->renderamt > 0)
-		{
 			ent->renderamt -= 1;
-		}
 		else
-		{
 			ent->renderamt = 0;
-		}
 		ramt = ent->renderamt;
 		break;
 
 	case kRenderFXFastFadeAway:		// 6
 		if (ent->renderamt > 3)
-		{
 			ent->renderamt -= 4;
-		}
 		else
-		{
 			ent->renderamt = 0;
-		}
 		ramt = ent->renderamt;
 		break;
 
 	case kRenderFXSlowBecomeSolid:	// 7
 		if (ent->renderamt < 255)
-		{
 			ent->renderamt += 1;
-		}
 		else
-		{
 			ent->renderamt = 255;
-		}
 		ramt = ent->renderamt;
 		break;
 
 	case kRenderFXFastBecomeSolid:	// 8
 		if (ent->renderamt < 252)
-		{
 			ent->renderamt += 4;
-		}
 		else
-		{
 			ent->renderamt = 255;
-		}
 		ramt = ent->renderamt;
 		break;
 
 	case kRenderFXSlowStrobe:		// 9
 		ramt = 20 * sin(cl.time * 4.f);
 		if (ramt < 0)
-		{
 			ramt = 0;
-		}
 		else
-		{
 			ramt = ent->renderamt;
-		}
 		break;
 
 	case kRenderFXFastStrobe:		// 10
 		ramt = 20 * sin(cl.time * 16.f);
 		if (ramt < 0)
-		{
 			ramt = 0;
-		}
 		else
-		{
 			ramt = ent->renderamt;
-		}
 		break;
 
 	case kRenderFXFasterStrobe:		// 11
 		ramt = 20 * sin(cl.time * 36.f);
 		if (ramt < 0)
-		{
 			ramt = 0;
-		}
 		else
-		{
 			ramt = ent->renderamt;
-		}
 		break;
 
 	case kRenderFXSlowFlicker:		// 12
 		ramt = 20 * (sin(cl.time * 2.f) + sin(cl.time + 17.f));
 		if (ramt < 0)
-		{
 			ramt = 0;
-		}
 		else
-		{
 			ramt = ent->renderamt;
-		}
 		break;
 
 	case kRenderFXFastFlicker:		// 13
 		ramt = 20 * (sin(cl.time * 16.f) + sin(cl.time + 23.f));
 		if (ramt < 0)
-		{
 			ramt = 0;
-		}
 		else
-		{
 			ramt = ent->renderamt;
-		}
 		break;
 	};
 

@@ -397,7 +397,7 @@ void shootdecal_f(void)
 
 	SV_RecursiveHullCheck (cl.worldmodel->hulls, 0, 0, 1, r_refdef.vieworg, dest, &trace);
 
-	R_DecalShoot ( Draw_DecalIndex( Cmd_Argc() > 1 ? atoi( Cmd_Args( 1 ) ) : 0 ), trace.ent, trace.endpos, 0 );
+	R_DecalShoot ( Draw_DecalIndex( Cmd_Argc() > 1 ? atoi( Cmd_Argv(1) ) : 0), trace.ent, trace.endpos, 0);
 }
 #endif // QUIVER_TESTS
 
@@ -418,11 +418,11 @@ void Draw_Init (void)
 	byte	*ncdata;
 	int		f, fstep;
 
-	Draw_CacheWadInit( "decals.wad", 128, &decals_wad ); // TODO(SanyaSho): Does 128 mean MAX_WAD_DECALS/2?
-	Draw_CacheWadHandler( &decals_wad, Draw_MiptexTexture, 32 );
+	Draw_CacheWadInit ("decals.wad", 128, &decals_wad); // TODO(SanyaSho): Does 128 mean MAX_WAD_DECALS/2?
+	Draw_CacheWadHandler (&decals_wad, Draw_MiptexTexture, 32);
 
 #if defined( QUIVER_TESTS )
-	Cmd_AddCommand( "shootdecal", shootdecal_f );
+	Cmd_AddCommand ("shootdecal", shootdecal_f);
 #endif // QUIVER_TESTS
 
 	Cvar_RegisterVariable (&gl_nobind);
@@ -1422,13 +1422,10 @@ qpic_t *Draw_LoadPicFromWad (char *identifier)
 
 void Draw_MiptexTexture (cachewad_t *wad, byte *data)
 {
-	texture_t *tex;
-	miptex_t tmp;
-	int i;
-	int s;
-	int paloff;
-	byte *pPal, *pData;
-	int texture;
+	texture_t		*tex;
+	miptex_t		tmp;
+	int				i, s, paloff, texture;
+	byte			*pPal, *pData;
 
 	if (wad->cacheExtra != 32) // wow
 		Sys_Error ("Draw_MiptexTexture: Bad cached wad %s\n", wad->name);
@@ -1456,7 +1453,7 @@ void Draw_MiptexTexture (cachewad_t *wad, byte *data)
 
 	pData = (byte *)tex + (tex->offsets[0]);
 
-	if ( pPal[765] || pPal[766] || pPal[767] != 0xFF )
+	if (pPal[765] != 0 || pPal[766] != 0 || pPal[767] != 255)
 	{
 		tex->name[0] = '}';
 		tex->gl_texturenum = GL_LoadTexture (tex->name, tex->width, tex->height, pData, true, TEX_TYPE_LUM, pPal);

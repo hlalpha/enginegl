@@ -129,10 +129,10 @@ sx_preset_t rgsxpre[] =
 SX_Init
 ===============
 */
-void SX_Init()
+void SX_Init (void)
 {
-	Q_memset( rgsxdly, 0, sizeof( rgsxdly ) );
-	Q_memset( rgsxlp, 0, sizeof( rgsxlp ) );
+	Q_memset (rgsxdly, 0, sizeof(rgsxdly));
+	Q_memset (rgsxlp, 0, sizeof(rgsxlp));
 
 	sxdly_delayprev = -1.f;
 	sxrvb_sizeprev = -1.f;
@@ -151,17 +151,17 @@ void SX_Init()
 
 	Con_DPrintf( "\nFX Processor Initialization\n" );
 
-	Cvar_RegisterVariable( &sxdly_delay );
-	Cvar_RegisterVariable( &sxdly_feedback );
-	Cvar_RegisterVariable( &sxdly_lp );
-	Cvar_RegisterVariable( &sxrvb_size );
-	Cvar_RegisterVariable( &sxrvb_feedback );
-	Cvar_RegisterVariable( &sxrvb_lp );
-	Cvar_RegisterVariable( &sxste_delay );
-	Cvar_RegisterVariable( &sxmod_lowpass );
-	Cvar_RegisterVariable( &sxmod_mod );
-	Cvar_RegisterVariable( &sxroom_type );
-	Cvar_RegisterVariable( &sxroom_off );
+	Cvar_RegisterVariable (&sxdly_delay);
+	Cvar_RegisterVariable (&sxdly_feedback);
+	Cvar_RegisterVariable (&sxdly_lp);
+	Cvar_RegisterVariable (&sxrvb_size);
+	Cvar_RegisterVariable (&sxrvb_feedback);
+	Cvar_RegisterVariable (&sxrvb_lp);
+	Cvar_RegisterVariable (&sxste_delay);
+	Cvar_RegisterVariable (&sxmod_lowpass);
+	Cvar_RegisterVariable (&sxmod_mod);
+	Cvar_RegisterVariable (&sxroom_type);
+	Cvar_RegisterVariable (&sxroom_off);
 }
 
 
@@ -170,16 +170,17 @@ void SX_Init()
 SX_Free
 ===============
 */
-void SX_Free()
+void SX_Free (void)
 {
-	SXDLY_Free( 0 );
+	int			i;
+	SXDLY_Free (0);
 
-	for ( int i = 1; i < 2; i++ )
+	for (i=1 ; i<2 ; i++)
 	{
-		SXDLY_Free( i );
+		SXDLY_Free (i);
 	}
 
-	SXDLY_Free( 3 );
+	SXDLY_Free (3);
 }
 
 
@@ -188,42 +189,46 @@ void SX_Free()
 SXDLY_Init
 ===============
 */
-qboolean SXDLY_Init( int idelay, float delay )
+qboolean SXDLY_Init (int idelay, float delay)
 {
-	dlyline_t *dly = &rgsxdly[idelay];
+	HGLOBAL		hBuffer;
+	void		*pLock;
+	dlyline_t	*dly;
+
+	dly = &rgsxdly[idelay];
 
 	if ( delay > 0.4 )
 		delay = 0.4;
 
-	if ( dly->lpdelayline )
+	if (dly->lpdelayline)
 	{
-		GlobalUnlock( dly->hdelayline );
-		GlobalFree( dly->hdelayline );
+		GlobalUnlock (dly->hdelayline);
+		GlobalFree (dly->hdelayline);
 		dly->hdelayline = 0;
 		dly->lpdelayline = 0;
 	}
 
-	if ( delay == 0.0 )
+	if (delay == 0.0)
 		return true;
 
 	dly->cdelaysamplesmax = (int)(shm->speed * delay + 1.0);
 
-	HGLOBAL hBuffer = GlobalAlloc( GMEM_MOVEABLE | GMEM_SHARE, dly->cdelaysamplesmax * 2 );
-	if ( !hBuffer )
+	hBuffer = GlobalAlloc (GMEM_MOVEABLE|GMEM_SHARE, dly->cdelaysamplesmax * 2);
+	if (!hBuffer)
 	{
-		Con_SafePrintf( "Sound FX: Out of memory.\n" );
+		Con_SafePrintf ("Sound FX: Out of memory.\n");
 		return false;
 	}
 
-	void *pLock = GlobalLock( hBuffer );
-	if ( !pLock )
+	pLock = GlobalLock (hBuffer);
+	if (!pLock)
 	{
-		Con_SafePrintf( "Sound FX: Failed to lock.\n" );
-		GlobalFree( hBuffer );
+		Con_SafePrintf ("Sound FX: Failed to lock.\n");
+		GlobalFree (hBuffer);
 		return false;
 	}
 
-	memset( pLock, 0, dly->cdelaysamplesmax * sizeof( sample_t ) );
+	memset (pLock, 0, dly->cdelaysamplesmax * sizeof(sample_t));
 	dly->hdelayline = hBuffer;
 	dly->lpdelayline = (sample_t *)pLock;
 	dly->idelayinput = 0;
@@ -242,13 +247,13 @@ qboolean SXDLY_Init( int idelay, float delay )
 SXDLY_Free
 ===============
 */
-void SXDLY_Free( int idelay )
+void SXDLY_Free (int idelay)
 {
 	dlyline_t *tmp = &rgsxdly[idelay];
-	if ( tmp->lpdelayline )
+	if (tmp->lpdelayline)
 	{
-		GlobalUnlock( tmp->hdelayline );
-		GlobalFree( tmp->hdelayline );
+		GlobalUnlock (tmp->hdelayline);
+		GlobalFree (tmp->hdelayline);
 		tmp->hdelayline = NULL;
 		tmp->lpdelayline = NULL;
 	}
@@ -260,33 +265,36 @@ void SXDLY_Free( int idelay )
 SXDLY_CheckNewStereoDelayVal
 ===============
 */
-void SXDLY_CheckNewStereoDelayVal()
+void SXDLY_CheckNewStereoDelayVal (void)
 {
-	dlyline_t *dly = &rgsxdly[3];
+	int			stespeed;
+	dlyline_t	*dly;
 
-	if ( sxste_delayprev == sxste_delay.value )
+	dly = &rgsxdly[3];
+
+	if (sxste_delayprev == sxste_delay.value)
 		return;
 
-	if ( !sxste_delay.value )
+	if (!sxste_delay.value)
 	{
-		SXDLY_Free( 3 );
+		SXDLY_Free (3);
 		sxste_delayprev = 0.0;
 		return;
 	}
 
-	int stespeed = min( sxste_delay.value, 0.1 ) * shm->speed;
+	stespeed = min (sxste_delay.value, 0.1) * shm->speed;
 
-	if ( !dly->lpdelayline )
+	if (!dly->lpdelayline)
 	{
 		dly->delaysamples = stespeed;
-		SXDLY_Init( 3, 0.1 );
+		SXDLY_Init (3, 0.1);
 	}
 
-	if ( dly->delaysamples != stespeed )
+	if (dly->delaysamples != stespeed)
 	{
 		dly->idelayoutputxf = dly->idelayinput - stespeed;
 
-		if ( dly->idelayoutputxf < 0 )
+		if (dly->idelayoutputxf < 0)
 			dly->idelayoutputxf += dly->cdelaysamplesmax;
 
 		dly->xfade = 128;
@@ -297,8 +305,8 @@ void SXDLY_CheckNewStereoDelayVal()
 	dly->mod = 5000 * (shm->speed / SAMPLE_RATE_11k);
 	dly->modcur = dly->mod;
 
-	if ( !dly->delaysamples )
-		SXDLY_Free( 3 );
+	if (!dly->delaysamples)
+		SXDLY_Free (3);
 }
 
 
@@ -307,52 +315,54 @@ void SXDLY_CheckNewStereoDelayVal()
 SXDLY_DoStereoDelay
 ===============
 */
-void SXDLY_DoStereoDelay( int count )
+void SXDLY_DoStereoDelay (int count)
 {
-	int left;
+	portable_samplepair_t	*pBuf;
+	int			left, nCount;
+	dlyline_t	*dly;
+	sample_t	sxf, sdly;
 
-	dlyline_t *dly = &rgsxdly[3];
-	sample_t sxf, sdly;
+	dly = &rgsxdly[3];
 
-	if ( !dly->lpdelayline )
+	if (!dly->lpdelayline)
 		return;
 
-	portable_samplepair_t *pBuf = paintbuffer;
-	int nCount = count;
+	pBuf = paintbuffer;
+	nCount = count;
 
-	while ( nCount-- )
+	while (nCount--)
 	{
-		if ( --dly->modcur < 0 )
+		if (--dly->modcur < 0)
 			dly->modcur = dly->mod;
 
 		sdly = dly->lpdelayline[dly->idelayoutput];
 		left = pBuf->left;
 
-		if ( dly->xfade || sdly || left )
+		if (dly->xfade || sdly || left)
 		{
-			if ( !dly->xfade && !dly->modcur )
+			if (!dly->xfade && !dly->modcur)
 			{
 				dly->idelayoutputxf = dly->idelayinput + ((rand() * dly->delaysamples) / (0x7FFF * 2)) - dly->delaysamples;
 
-				if ( dly->idelayoutputxf < 0 )
+				if (dly->idelayoutputxf < 0)
 					dly->idelayoutputxf += dly->cdelaysamplesmax;
 
 				dly->xfade = 128;
 			}
 
-			if ( dly->xfade )
+			if (dly->xfade)
 			{
 				sxf = dly->lpdelayline[dly->idelayoutputxf++];
 				sdly = (((128 - dly->xfade) * sxf) >> 7) + ((dly->xfade * sdly) >> 7);
 
-				if ( dly->idelayoutputxf >= dly->cdelaysamplesmax )
+				if (dly->idelayoutputxf >= dly->cdelaysamplesmax)
 					dly->idelayoutputxf = 0;
 
-				if ( !--dly->xfade )
+				if (!--dly->xfade)
 					dly->idelayoutput = dly->idelayoutputxf;
 			}
 
-			left = LIMIT( left );
+			left = LIMIT (left);
 
 			dly->lpdelayline[dly->idelayinput] = left;
 
@@ -363,10 +373,10 @@ void SXDLY_DoStereoDelay( int count )
 			dly->lpdelayline[dly->idelayinput] = 0;
 		}
 
-		if ( ++dly->idelayinput >= dly->cdelaysamplesmax )
+		if (++dly->idelayinput >= dly->cdelaysamplesmax)
 			dly->idelayinput = 0;
 
-		if ( ++dly->idelayoutput >= dly->cdelaysamplesmax )
+		if (++dly->idelayoutput >= dly->cdelaysamplesmax)
 			dly->idelayoutput = 0;
 
 		pBuf++;
@@ -379,27 +389,29 @@ void SXDLY_DoStereoDelay( int count )
 SXDLY_CheckNewDelayVal
 ===============
 */
-void SXDLY_CheckNewDelayVal()
+void SXDLY_CheckNewDelayVal (void)
 {
-	dlyline_t *dly = &rgsxdly[0];
+	dlyline_t	*dly;
 
-	if ( sxdly_delay.value != sxdly_delayprev )
+	dly = &rgsxdly[0];
+
+	if (sxdly_delay.value != sxdly_delayprev)
 	{
-		if ( !sxdly_delay.value )
+		if (!sxdly_delay.value)
 		{
-			SXDLY_Free( 0 );
+			SXDLY_Free (0);
 			sxdly_delayprev = sxdly_delay.value;
 		}
 		else
 		{
-			if ( !dly->lpdelayline )
-				SXDLY_Init( 0, 0.4 );
+			if (!dly->lpdelayline)
+				SXDLY_Init (0, 0.4);
 
-			dly->delaysamples = min( sxdly_delay.value, 0.4 ) * shm->speed;
+			dly->delaysamples = min(sxdly_delay.value, 0.4) * shm->speed;
 
-			if ( dly->lpdelayline )
+			if (dly->lpdelayline)
 			{
-				Q_memset( dly->lpdelayline, 0, dly->cdelaysamplesmax * sizeof( sample_t ) );
+				Q_memset (dly->lpdelayline, 0, dly->cdelaysamplesmax * sizeof(sample_t));
 				dly->lp0 = dly->lp1 = dly->lp2 = 0;
 			}
 
@@ -408,8 +420,8 @@ void SXDLY_CheckNewDelayVal()
 
 			sxdly_delayprev = sxdly_delay.value;
 
-			if ( !dly->delaysamples )
-				SXDLY_Free( 0 );
+			if (!dly->delaysamples)
+				SXDLY_Free (0);
 		}
 	}
 
@@ -423,32 +435,34 @@ void SXDLY_CheckNewDelayVal()
 SXDLY_DoDelay
 ===============
 */
-void SXDLY_DoDelay( int count )
+void SXDLY_DoDelay (int count)
 {
-	int left, right, newleft, newright, val, valt;
-	sample_t sdly;
+	int			nCount, left, right, newleft, newright, val, valt;
+	portable_samplepair_t	*pBuf;
+	sample_t	sdly;
+	dlyline_t	*dly;
 
-	dlyline_t *dly = &rgsxdly[0];
+	dly = &rgsxdly[0];
 
-	if ( !dly->lpdelayline )
+	if (!dly->lpdelayline)
 		return;
 
-	portable_samplepair_t *pBuf = paintbuffer;
-	int nCount = count;
+	pBuf = paintbuffer;
+	nCount = count;
 
-	while ( nCount-- )
+	while (nCount--)
 	{
 		sdly = dly->lpdelayline[dly->idelayoutput];
 
 		left = pBuf->left;
 		right = pBuf->right;
 
-		if ( sdly || left || right )
+		if (sdly || left || right)
 		{
 			val = ((left + right) >> 1) + ((dly->delayfeed * sdly) >> 8);
 			val = LIMIT( val );
 
-			if ( dly->lp )
+			if (dly->lp)
 			{
 				valt = (dly->lp0 + dly->lp1 + val) / 3;
 
@@ -477,10 +491,10 @@ void SXDLY_DoDelay( int count )
 			dly->lpdelayline[dly->idelayinput] = 0;
 		}
 
-		if ( ++dly->idelayinput >= dly->cdelaysamplesmax )
+		if (++dly->idelayinput >= dly->cdelaysamplesmax)
 			dly->idelayinput = 0;
 
-		if ( ++dly->idelayoutput >= dly->cdelaysamplesmax )
+		if (++dly->idelayoutput >= dly->cdelaysamplesmax)
 			dly->idelayoutput = 0;
 
 		pBuf++;
@@ -493,34 +507,34 @@ void SXDLY_DoDelay( int count )
 SXRVB_CheckNewReverbVal
 ===============
 */
-void SXRVB_CheckNewReverbVal()
+void SXRVB_CheckNewReverbVal (void)
 {
-	dlyline_t *dly;
-	int rvbspeed, rvbmod;
+	dlyline_t	*dly;
+	int			i, rvbspeed, rvbmod;
 
-	if ( sxrvb_sizeprev != sxrvb_size.value )
+	if (sxrvb_sizeprev != sxrvb_size.value)
 	{
 		sxrvb_sizeprev = sxrvb_size.value;
 
-		if ( !sxrvb_size.value )
+		if (!sxrvb_size.value)
 		{
-			SXDLY_Free( 1 );
-			SXDLY_Free( 2 );
+			SXDLY_Free (1);
+			SXDLY_Free (2);
 		}
 		else
 		{
-			for ( int i = 1; i < 3; i++ )
+			for (i=1 ; i<3 ; i++)
 			{
 				dly = &rgsxdly[i];
 
-				switch ( i )
+				switch (i)
 				{
 				case 1:
-					rvbspeed = min( sxrvb_size.value, 0.1 ) * shm->speed;
+					rvbspeed = min (sxrvb_size.value, 0.1) * shm->speed;
 					rvbmod = 500 * (shm->speed / SAMPLE_RATE_11k);
 					break;
 				case 2:
-					rvbspeed = min( sxrvb_size.value * 0.71, 0.1 ) * shm->speed;
+					rvbspeed = min (sxrvb_size.value * 0.71, 0.1) * shm->speed;
 					rvbmod = 700 * (shm->speed / SAMPLE_RATE_11k);
 					break;
 				default:
@@ -531,25 +545,25 @@ void SXRVB_CheckNewReverbVal()
 				dly->modcur = dly->mod = rvbmod; // FIXME(SanyaSho): rvbmod value will be overwritten by SXDLY_Init below!
 												 // Also DSP modulation is broken for some reason, if you move this after SXDLY_Init call you will get some random shit coming from your headset.
 
-				if ( !dly->lpdelayline )
+				if (!dly->lpdelayline)
 				{
 					dly->delaysamples = rvbspeed;
-					SXDLY_Init( i, 0.1 );
+					SXDLY_Init (i, 0.1);
 				}
 
-				if ( rvbspeed != dly->delaysamples )
+				if (rvbspeed != dly->delaysamples)
 				{
 					dly->idelayoutputxf = dly->idelayinput - rvbspeed;
 
-					if ( dly->idelayoutputxf < 0 )
+					if (dly->idelayoutputxf < 0)
 						dly->idelayoutputxf += dly->cdelaysamplesmax;
 
 					dly->xfade = 32;
 				}
 
-				if ( !dly->delaysamples )
+				if (!dly->delaysamples)
 				{
-					SXDLY_Free( i );
+					SXDLY_Free (i);
 				}
 			}
 		}
@@ -568,23 +582,26 @@ void SXRVB_CheckNewReverbVal()
 SXRVB_DoReverb
 ===============
 */
-void SXRVB_DoReverb( int count )
+void SXRVB_DoReverb (int count)
 {
-	int left, right;
-	int val, valt;
-	int vlr, voutm;
-	sample_t sxf, sdly;
+	int			left, right;
+	int			val, valt;
+	int			vlr, voutm;
+	sample_t	sxf, sdly;
+	portable_samplepair_t	*pBuf;
+	int			nCount;
+	dlyline_t	*dly1, *dly2;
 
-	dlyline_t *dly1 = &rgsxdly[1];
-	dlyline_t *dly2 = &rgsxdly[2];
+	dly1 = &rgsxdly[1];
+	dly2 = &rgsxdly[2];
 
-	if ( !dly1->lpdelayline )
+	if (!dly1->lpdelayline)
 		return;
 
-	portable_samplepair_t *pBuf = paintbuffer;
-	int nCount = count;
+	pBuf = paintbuffer;
+	nCount = count;
 
-	while ( nCount-- )
+	while (nCount--)
 	{
 		left = pBuf->left;
 		right = pBuf->right;
@@ -596,12 +613,12 @@ void SXRVB_DoReverb( int count )
 		// delay 1
 		sdly = dly1->lpdelayline[dly1->idelayoutput];
 
-		if ( --dly1->modcur < 0 )
+		if (--dly1->modcur < 0)
 			dly1->modcur = dly1->mod;
 
-		if ( !dly1->xfade )
+		if (!dly1->xfade)
 		{
-			if ( !sdly && !left && !right )
+			if (!sdly && !left && !right)
 			{
 				dly1->lp0 = 0;
 				dly1->lpdelayline[dly1->idelayinput] = 0;
@@ -609,11 +626,11 @@ void SXRVB_DoReverb( int count )
 			}
 			else
 			{
-				if ( !dly1->mod )
+				if (!dly1->mod)
 				{
 					dly1->idelayoutputxf = dly1->idelayinput + ((rand() * dly1->delaysamples) / -(0x7FFF * 2)) - dly1->delaysamples;
 
-					if ( dly1->idelayoutputxf < 0 )
+					if (dly1->idelayoutputxf < 0)
 						dly1->idelayoutputxf += dly1->cdelaysamplesmax;
 
 					dly1->xfade = 32;
@@ -621,19 +638,19 @@ void SXRVB_DoReverb( int count )
 			}
 		}
 
-		if ( dly1->xfade )
+		if (dly1->xfade)
 		{
 			sxf = dly1->lpdelayline[dly1->idelayoutputxf++];
 			sdly = (((32 - dly1->xfade) * sxf) >> 5) + ((dly1->xfade * sdly) >> 5);
 
-			if ( dly1->idelayoutputxf >= dly1->cdelaysamplesmax )
+			if (dly1->idelayoutputxf >= dly1->cdelaysamplesmax)
 				dly1->idelayoutputxf = 0;
 
-			if ( !--dly1->xfade )
+			if (!--dly1->xfade)
 				dly1->idelayoutput = dly1->idelayoutputxf;
 		}
 
-		if ( sdly )
+		if (sdly)
 		{
 			val = vlr + ((dly1->delayfeed * sdly) >> 8);
 			val = LIMIT( val );
@@ -643,7 +660,7 @@ void SXRVB_DoReverb( int count )
 			val = vlr;
 		}
 
-		if ( dly1->lp )
+		if (dly1->lp)
 		{
 			valt = (val + dly1->lp0) >> 1;
 			dly1->lp0 = val;
@@ -657,22 +674,22 @@ void SXRVB_DoReverb( int count )
 
 		voutm = valt;
 
-		if ( ++dly1->idelayinput >= dly1->cdelaysamplesmax )
+		if (++dly1->idelayinput >= dly1->cdelaysamplesmax)
 			dly1->idelayinput = 0;
 
-		if ( ++dly1->idelayoutput >= dly1->cdelaysamplesmax )
+		if (++dly1->idelayoutput >= dly1->cdelaysamplesmax)
 			dly1->idelayoutput = 0;
 
 
 		// delay 2
-		if ( --dly2->modcur < 0 )
+		if (--dly2->modcur < 0)
 			dly2->modcur = dly2->mod;
 
-		if ( dly2->lpdelayline )
+		if (dly2->lpdelayline)
 		{
-			if ( !dly2->xfade )
+			if (!dly2->xfade)
 			{
-				if ( !sdly && !left && !right )
+				if (!sdly && !left && !right)
 				{
 					dly2->lp0 = 0;
 					dly2->lpdelayline[dly2->idelayinput] = 0;
@@ -680,11 +697,11 @@ void SXRVB_DoReverb( int count )
 				}
 				else
 				{
-					if ( !dly2->mod )
+					if (!dly2->mod)
 					{
 						dly2->idelayoutputxf = dly2->idelayinput + ((rand() * dly2->delaysamples) / -(0x7FFF * 2)) - dly2->delaysamples;
 
-						if ( dly2->idelayoutputxf < 0 )
+						if (dly2->idelayoutputxf < 0)
 							dly2->idelayoutputxf += dly2->cdelaysamplesmax;
 
 						dly2->xfade = 32;
@@ -692,29 +709,29 @@ void SXRVB_DoReverb( int count )
 				}
 			}
 
-			if ( dly2->xfade )
+			if (dly2->xfade)
 			{
 				sxf = dly2->lpdelayline[dly2->idelayoutputxf++];
 				sdly = (((32 - dly2->xfade) * sxf) >> 5) + ((dly2->xfade * sdly) >> 5);
 
-				if ( dly2->idelayoutputxf >= dly2->cdelaysamplesmax )
+				if (dly2->idelayoutputxf >= dly2->cdelaysamplesmax)
 					dly2->idelayoutputxf = 0;
 
-				if ( !--dly2->xfade )
+				if (!--dly2->xfade)
 					dly2->idelayoutput = dly2->idelayoutputxf;
 			}
 
-			if ( sdly )
+			if (sdly)
 			{
 				val = vlr + ((dly2->delayfeed * sdly) >> 8);
-				val = LIMIT( val );
+				val = LIMIT (val);
 			}
 			else
 			{
 				val = vlr;
 			}
 
-			if ( dly2->lp )
+			if (dly2->lp)
 			{
 				valt = (val + dly2->lp0) >> 1;
 				dly2->lp0 = val;
@@ -728,18 +745,18 @@ void SXRVB_DoReverb( int count )
 
 			voutm = valt;
 
-			if ( ++dly2->idelayinput >= dly2->cdelaysamplesmax )
+			if (++dly2->idelayinput >= dly2->cdelaysamplesmax)
 				dly2->idelayinput = 0;
 
-			if ( ++dly2->idelayoutput >= dly2->cdelaysamplesmax )
+			if (++dly2->idelayoutput >= dly2->cdelaysamplesmax)
 				dly2->idelayoutput = 0;
 		}
 
 		left = voutm / 6 + left;
 		right = voutm / 6 + right;
 
-		left = LIMIT( left );
-		right = LIMIT( right );
+		left = LIMIT (left);
+		right = LIMIT (right);
 
 		pBuf->left = left;
 		pBuf->right = right;
@@ -754,24 +771,27 @@ void SXRVB_DoReverb( int count )
 SXRVB_DoAMod
 ===============
 */
-void SXRVB_DoAMod( int count )
+void SXRVB_DoAMod (int count)
 {
-	int left, right, oldleft, oldright;
+	int			left, right, oldleft, oldright;
+	portable_samplepair_t	*pBuf;
+	int			nCount;
+	qboolean	doLowpass, doMod;
 
-	if ( sxmod_lowpass.value != 0.0 || sxmod_mod.value != 0.0 )
+	if (sxmod_lowpass.value != 0.0 || sxmod_mod.value != 0.0)
 	{
-		portable_samplepair_t *pBuf = paintbuffer;
-		int nCount = count;
+		pBuf = paintbuffer;
+		nCount = count;
 
-		qboolean doLowpass = sxmod_lowpass.value != 0.f;
-		qboolean doMod = sxmod_mod.value != 0.f;
+		doLowpass = sxmod_lowpass.value != 0.f;
+		doMod = sxmod_mod.value != 0.f;
 
-		while ( nCount-- )
+		while (nCount--)
 		{
 			left = pBuf->left;
 			right = pBuf->right;
 
-			if ( doLowpass )
+			if (doLowpass)
 			{
 				oldleft = left;
 				oldright = right;
@@ -793,34 +813,34 @@ void SXRVB_DoAMod( int count )
 				rgsxlp[8] = rgsxlp[9];
 			}
 
-			if ( doMod )
+			if (doMod)
 			{
-				if ( --sxmod1cur < 0 )
+				if (--sxmod1cur < 0)
 					sxmod1cur = sxmod1;
-				if ( !sxmod1 )
-					sxamodlt = RAND( 32, 255 );
+				if (!sxmod1)
+					sxamodlt = RAND (32, 255);
 
-				if ( --sxmod2cur < 0 )
+				if (--sxmod2cur < 0)
 					sxmod2cur = sxmod2;
-				if ( !sxmod2 )
-					sxamodrt = RAND( 32, 255 );
+				if (!sxmod2)
+					sxamodrt = RAND (32, 255);
 
 				left = (sxamodl * left) >> 8;
 				right = (sxamodr * right) >> 8;
 
-				if ( sxamodl < sxamodlt )
+				if (sxamodl < sxamodlt)
 					sxamodl++;
-				else if ( sxamodl > sxamodlt )
+				else if (sxamodl > sxamodlt)
 					sxamodl--;
 
-				if ( sxamodr < sxamodrt )
+				if (sxamodr < sxamodrt)
 					sxamodr++;
-				else if ( sxamodr > sxamodrt )
+				else if (sxamodr > sxamodrt)
 					sxamodl--;
 			}
 
-			pBuf->left = LIMIT( left );
-			pBuf->right = LIMIT( right );
+			pBuf->left = LIMIT (left);
+			pBuf->right = LIMIT (right);
 
 			pBuf++;
 		}
@@ -833,47 +853,49 @@ void SXRVB_DoAMod( int count )
 SX_RoomFX
 ===============
 */
-void SX_RoomFX( int count )
+void SX_RoomFX (int count)
 {
-	if ( sxroom_off.value != 0.f )
+	int			nPreset;
+
+	if (sxroom_off.value)
 		return;
 
 	qboolean bRestart = false;
 
-	if ( sxroom_typeprev != sxroom_type.value )
+	if (sxroom_typeprev != sxroom_type.value)
 	{
-		int nPreset = (int)sxroom_type.value;
+		nPreset = (int)sxroom_type.value;
 
 		sxroom_typeprev = nPreset;
 
-		if ( nPreset <= ARRAYSIZE(rgsxpre)-1 )
+		if (nPreset <= ARRAYSIZE(rgsxpre)-1)
 		{
-			Cvar_SetValue(	"room_lp",			rgsxpre[nPreset].room_lp		);
-			Cvar_SetValue(	"room_mod",			rgsxpre[nPreset].room_mod		);
-			Cvar_SetValue(	"room_size",		rgsxpre[nPreset].room_size		);
-			Cvar_SetValue(	"room_refl",		rgsxpre[nPreset].room_refl		);
-			Cvar_SetValue(	"room_rvblp",		rgsxpre[nPreset].room_rvblp		);
-			Cvar_SetValue(	"room_delay",		rgsxpre[nPreset].room_delay		);
-			Cvar_SetValue(	"room_feedback",	rgsxpre[nPreset].room_feedback	);
-			Cvar_SetValue(	"room_dlylp",		rgsxpre[nPreset].room_dlylp		);
-			Cvar_SetValue(	"room_left",		rgsxpre[nPreset].room_left		);
+			Cvar_SetValue (	"room_lp",			rgsxpre[nPreset].room_lp		);
+			Cvar_SetValue (	"room_mod",			rgsxpre[nPreset].room_mod		);
+			Cvar_SetValue (	"room_size",		rgsxpre[nPreset].room_size		);
+			Cvar_SetValue (	"room_refl",		rgsxpre[nPreset].room_refl		);
+			Cvar_SetValue (	"room_rvblp",		rgsxpre[nPreset].room_rvblp		);
+			Cvar_SetValue (	"room_delay",		rgsxpre[nPreset].room_delay		);
+			Cvar_SetValue (	"room_feedback",	rgsxpre[nPreset].room_feedback	);
+			Cvar_SetValue (	"room_dlylp",		rgsxpre[nPreset].room_dlylp		);
+			Cvar_SetValue (	"room_left",		rgsxpre[nPreset].room_left		);
 		}
 
-		SXRVB_CheckNewReverbVal();
-		SXDLY_CheckNewDelayVal();
-		SXDLY_CheckNewStereoDelayVal();
+		SXRVB_CheckNewReverbVal ();
+		SXDLY_CheckNewDelayVal ();
+		SXDLY_CheckNewStereoDelayVal ();
 
 		bRestart = true;
 	}
 
-	if ( bRestart || sxroom_type.value != 0.f )
+	if (bRestart || sxroom_type.value)
 	{
-		SXRVB_CheckNewReverbVal();
-		SXDLY_CheckNewDelayVal();
-		SXDLY_CheckNewStereoDelayVal();
-		SXRVB_DoAMod( count );
-		SXRVB_DoReverb( count );
-		SXDLY_DoDelay( count );
-		SXDLY_DoStereoDelay( count );
+		SXRVB_CheckNewReverbVal ();
+		SXDLY_CheckNewDelayVal ();
+		SXDLY_CheckNewStereoDelayVal ();
+		SXRVB_DoAMod (count);
+		SXRVB_DoReverb (count);
+		SXDLY_DoDelay (count);
+		SXDLY_DoStereoDelay (count);
 	}
 }
