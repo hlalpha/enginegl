@@ -272,7 +272,7 @@ colorVec RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 	
 // go down front side	
 	c = RecursiveLightPoint (node->children[side], start, mid);
-	if (c.r != 0 && c.g != 0 && c.b != 0)
+	if (c.r != 0 || c.g != 0 || c.b != 0)
 		return c;		// hit something
 		
 	if ( (back < 0) == side )
@@ -320,7 +320,7 @@ colorVec RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 		if (lightmap)
 		{
 
-			lightmap += dt * ((surf->extents[0]>>4)+1) + ds;
+			lightmap += 3 * (dt * ((surf->extents[0]>>4)+1) + ds);
 
 			for (maps = 0 ; maps < MAXLIGHTMAPS && surf->styles[maps] != 255 ;
 					maps++)
@@ -328,9 +328,9 @@ colorVec RecursiveLightPoint (mnode_t *node, vec3_t start, vec3_t end)
 				scale = d_lightstylevalue[surf->styles[maps]];
 				c.r += lightmap[0] * scale;
 				c.g += lightmap[1] * scale;
-				c.b += lightmap[1] * scale;
-				lightmap += 3 * ((surf->extents[0]>>4)+1) *
-						((surf->extents[1]>>4)+1);
+				c.b += lightmap[2] * scale;
+				lightmap += 3 * (((surf->extents[0]>>4)+1) *
+						((surf->extents[1]>>4)+1));
 			}
 			
 			c.r >>= 8;
