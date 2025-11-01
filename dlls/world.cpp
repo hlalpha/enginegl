@@ -197,14 +197,12 @@ void CWorld::Spawn()
 	PRECACHE_SOUND( "common/water1.wav" );
 	PRECACHE_SOUND( "common/water2.wav" );
 
-#if 0
 	PRECACHE_MODEL( "models/doctor.mdl" );
 	PRECACHE_MODEL( "models/gib_b_bone.mdl" );
 	PRECACHE_MODEL( "models/gib_b_gib.mdl" );
 	PRECACHE_MODEL( "models/gib_legbone.mdl" );
 	PRECACHE_MODEL( "models/gib_skull.mdl" );
 	PRECACHE_MODEL( "models/gib_lung.mdl" );
-#endif
 
 //
 // Setup light animation tables. 'a' is total darkness, 'z' is maxbright.
