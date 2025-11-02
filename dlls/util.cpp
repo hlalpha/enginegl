@@ -20,7 +20,12 @@ void UTIL_VecToYaw( Vector &vec )
 	VEC_TO_YAW( vec );
 }
 
-//UTIL_VecToAngles()
+Vector UTIL_VecToAngles( Vector &vec )
+{
+	float rgflVecOut[3];
+	VEC_TO_ANGLES( vec, rgflVecOut );
+	return rgflVecOut;
+}
 
 void UTIL_MoveToOrigin( edict_t *pent, float x, float y, float z, float flDist, int iMoveType )
 {
@@ -58,7 +63,12 @@ void UTIL_TraceLine( Vector &vec1, Vector &vec2, int fNoMonsters, edict_t *pentT
 	TRACE_LINE( vec1, vec2, fNoMonsters == 0, pentToSkip, ptr );
 }
 
-//UTIL_GetAimVector
+Vector UTIL_GetAimVector( edict_t *pent, float flSpeed )
+{
+	float tmp[3];
+	GET_AIM_VECTOR( pent, flSpeed, tmp );
+	return tmp;
+}
 
 void UTIL_ParticleEffect( Vector &org, Vector &dir, unsigned int ulColor, unsigned int ulCount )
 {
