@@ -1,15 +1,6 @@
 #if !defined( EIFACE_H )
 #define EIFACE_H
 
-#include <stdio.h>
-
-#if defined( __cplusplus ) // no need to have these engine-side
-typedef int qboolean;
-typedef float vec_t;
-typedef vec_t vec3_t[3];
-#define Vector vec3_t
-#endif
-
 /*
 	pfnAlertMessage:
 		atype:
@@ -74,7 +65,7 @@ typedef struct enginefuncs_s
 	struct edict_s*		(*pfnCreateEntity)				( void );
 	void				(*pfnRemoveEntity)				( struct edict_s *ed );
 	void				(*pfnMakeStatic)				( struct edict_s *ent );
-	qboolean			(*pfnEntIsOnFloor)				( struct edict_s *ent );
+	float				(*pfnEntIsOnFloor)				( struct edict_s *ent ); // float?
 	float				(*pfnDropToFloor)				( struct edict_s *ent ); // float?
 	float				(*pfnWalkMove)					( struct edict_s *ent, float yaw, float dist ); // float?
 	void				(*pfnSetOrigin)					( struct edict_s *e, float *org );

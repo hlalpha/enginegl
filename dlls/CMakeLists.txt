@@ -24,6 +24,7 @@ set( DLLS_HEADERS # "Header Files"
 
 	"util.h"
 	"cbase.h"
+	"vector.h"
 )
 
 add_library( hl SHARED ${DLLS_SOURCES} ${DLLS_HEADERS} )

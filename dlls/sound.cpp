@@ -54,7 +54,7 @@ void CAmbientGeneric::Spawn()
 		vec3_t vecOrigin;
 		VectorCopy( pev->origin, vecOrigin );
 
-		UTIL_EmitAmbientSound( vecOrigin[0], vecOrigin[1], vecOrigin[2], sample, volume, attenuation );
+		UTIL_EmitAmbientSound( vecOrigin, sample, volume, attenuation );
 	}
 }
 
@@ -89,12 +89,12 @@ void CAmbientGeneric::ToggleUse( void *funcArgs )
 	if ( m_fActive )
 	{
 		m_fActive = FALSE;
-		EMIT_SOUND_DYN2( (edict_t *)pev->pContainingEntity, 1, "common/null.wav", volume, attenuation );
+		EMIT_SOUND_DYN2( ENT( pev ), 1, "common/null.wav", volume, attenuation );
 	}
 	else
 	{
 		m_fActive = TRUE;
-		EMIT_SOUND_DYN2( (edict_t *)pev->pContainingEntity, 1, STRING( pev->message ), volume, attenuation );
+		EMIT_SOUND_DYN2( ENT( pev ), 1, STRING( pev->message ), volume, attenuation );
 	}
 }
 
@@ -137,7 +137,7 @@ void CEnvSound::KeyValue( KeyValueData *pkvd )
 
 // returns TRUE if the given sound entity (pev) is in range 
 // and can see the given player entity (pevTarget)
-BOOL FEnvSoundInRange(entvars_t *pev, entvars_t *pevTarget, float *pflRange) 
+BOOL FEnvSoundInRange( entvars_t *pev, entvars_t *pevTarget, float *pflRange ) 
 {
 	CEnvSound *pSound = GetClassPtr( (CEnvSound *)pev );
 
@@ -146,7 +146,7 @@ BOOL FEnvSoundInRange(entvars_t *pev, entvars_t *pevTarget, float *pflRange)
 	VectorAdd( pevTarget->view_ofs, pevTarget->origin, vecSpot2 );
 
 	TraceResult tr;
-	UTIL_TraceLine( vecSpot1[0], vecSpot1[1], vecSpot1[2], vecSpot2[0], vecSpot2[1], vecSpot2[2], FALSE, ENT( pev ), &tr );
+	UTIL_TraceLine( vecSpot1, vecSpot2, FALSE, ENT( pev ), &tr );
 	
 	// check if line of sight crosses water boundary, or is blocked
 	if ( (tr.fInOpen && tr.fInWater) || tr.flFraction != 1 )

@@ -52,20 +52,20 @@ typedef int BOOL;
 #include "math.h"
 
 // Header file containing definition of globalvars_t and entvars_t
-//typedef unsigned int func_t;					//
-//typedef unsigned int string_t;				// from engine's pr_comp.h;
-//typedef float vec_t;				// needed before including progdefs.h
+typedef int func_t;					//
+typedef int string_t;				// from engine's pr_comp.h;
+typedef float vec_t;				// needed before including progdefs.h
 
 // Vector class
-//#include "vector.h"
+#include "vector.h"
 
 // Defining it as a (bogus) struct helps enforce type-checking
-//#define vec3_t Vector
+#define vec3_t Vector
 
 // Shared engine/DLL constants
-//#include "const.h"
-//#include "progdefs.h"
-//#include "edict.h"
+#include "const.h"
+#include "edict.h"
+#include "progs.h"
 
 // Shared header describing protocol between engine and DLLs
 #include "eiface.h"

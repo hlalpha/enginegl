@@ -27,12 +27,9 @@
 #define	MAX_MODELS		256			// these are sent over the net as bytes
 #define	MAX_SOUNDS		256			// so they cannot be blindly increased
 
-#include "const.h"
-
 #if __cplusplus
 #include "../engine/common.h"
 #endif
-#include "../engine/mathlib.h"
 
 #endif // PORT_H
 
