@@ -11,6 +11,9 @@ set( DLLS_SOURCES # "Source Files"
 	"world.cpp"
 	"sound.cpp"
 	"m44.cpp"
+	"h_cine.cpp"
+	"monsters.cpp"
+	"h_cycler.cpp"
 )
 
 set( DLLS_HEADERS # "Header Files"
@@ -26,6 +29,7 @@ set( DLLS_HEADERS # "Header Files"
 	"util.h"
 	"cbase.h"
 	"vector.h"
+	"basemonster.h"
 )
 
 add_library( hl SHARED ${DLLS_SOURCES} ${DLLS_HEADERS} )

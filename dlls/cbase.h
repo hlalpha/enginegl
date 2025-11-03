@@ -28,6 +28,9 @@ public:
 	virtual void Use( void *funcArgs );
 	virtual void Blocked( void *funcArgs );
 
+	void SUB_Remove( void *funcArgs );
+	void SUB_DoNothing( void *funcArgs );
+
 	void *operator new( size_t stAllocateBlock, entvars_t *pev ) { return (void *)ALLOC_PRIVATE( (edict_t *)pev->pContainingEntity, stAllocateBlock ); }
 	void operator delete( void *pMem, entvars_t *pev ) {}
 
