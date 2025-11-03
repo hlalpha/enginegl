@@ -68,6 +68,21 @@ template <class T> T * GetClassPtr( T *a )
 	return a;
 }
 
+class CPointEntity : public CBaseEntity
+{
+public:
+};
+
+class CBaseDelay : public CBaseEntity
+{
+public:
+	float m_flDelay;
+	char *m_iszKillTarget;
+
+	void SUB_UseTargets( void *funcArgs );
+	void DelayThink( void *funcArgs );
+};
+
 // this moved here from world.cpp, to allow classes to be derived from it
 //=======================
 // CWorld

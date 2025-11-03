@@ -10,6 +10,20 @@
 #include "util.h"
 #include "cbase.h"
 
+#ifdef DEBUG
+edict_t *DBG_EntOfVars( const entvars_t *pev )
+{
+	if ( pev->pContainingEntity != NULL )
+		return (edict_t *)pev->pContainingEntity;
+	ALERT( at_log, "entvars_t pContainingEntity is NULL, calling into engine" );
+	edict_t *pent = ( *g_engfuncs.pfnFindEntityByVars )( (entvars_t *)pev );
+	if ( pent == NULL )
+		ALERT( at_log, "DAMN!  Even the engine couldn't FindEntityByVars!" );
+	( (entvars_t *)pev )->pContainingEntity = pent;
+	return pent;
+}
+#endif //DEBUG
+
 void UTIL_SetSize( entvars_t *pent, Vector &vecMin, Vector &vecMax )
 {
 	SET_SIZE( ENT( pent ), vecMin, vecMax );

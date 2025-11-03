@@ -128,13 +128,3 @@ void CBaseEntity::Blocked( void *funcArgs )
 	if ( m_pfnBlocked )
 		(this->*m_pfnBlocked)( funcArgs );
 }
-
-void CBaseEntity::SUB_Remove( void *funcArgs )
-{
-	REMOVE_ENTITY( ENT( pev ) );
-}
-
-void CBaseEntity::SUB_DoNothing( void *funcArgs )
-{
-	/* Nothing */
-}
