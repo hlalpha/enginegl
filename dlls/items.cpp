@@ -29,7 +29,7 @@ void CItem::ThrowShell( Vector &vecOrigin )
 
 	pev->origin = vecOrigin;
 
-	//SetTouch( &??? ); // TODO(SanyaSho)
+	SetTouch( &CItem::SUB_CallTouchToggle );
 }
 
 void CItem::Use( void *funcArgs )
@@ -41,7 +41,7 @@ void CItem::Touch( void *funcArgs )
 {
 	entvars_t *pevToucher = VARS( ENT( gpGlobals->other ) );
 
-	if ( !FClassnameIs( ENT( gpGlobals->other ), "player" ) )
+	if ( !FClassnameIs( pevToucher, "player" ) )
 		return;
 
 	// SDKTODO(SanyaSho)

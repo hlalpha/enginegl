@@ -569,7 +569,7 @@ void CChangeLevel::TouchChangeLevel( void *funcArgs )
 //
 // func_ladder
 //
-class CFuncLadder : public CBaseTrigger
+class CLadder : public CBaseTrigger
 {
 public:
 	virtual void KeyValue( KeyValueData *pkvd );
@@ -577,14 +577,14 @@ public:
 	virtual void Touch( void *funcArgs );
 };
 
-LINK_ENTITY_TO_CLASS( func_ladder, CFuncLadder );
+LINK_ENTITY_TO_CLASS( func_ladder, CLadder );
 
-void CFuncLadder::KeyValue( KeyValueData *pkvd )
+void CLadder::KeyValue( KeyValueData *pkvd )
 {
 	/* Nothing */
 }
 
-void CFuncLadder::Spawn()
+void CLadder::Spawn()
 {
 	pev->solid = SOLID_TRIGGER;
 	pev->solid = SOLID_BSP;
@@ -596,7 +596,7 @@ void CFuncLadder::Spawn()
 	pev->rendermode = kRenderModeColor;
 }
 
-void CFuncLadder::Touch( void *funcArgs )
+void CLadder::Touch( void *funcArgs )
 {
 	// SDKTODO(SanyaSho)
 	/*edict_t *pevToucher = ENT( globals->other );
@@ -650,7 +650,7 @@ void CTriggerPush::Touch( void *funcArgs )
 	if ( pevToucher->health > 0 )
 	{
 		//pevToucher->velocity = pev->movedir * pev->speed * 10.f; // TODO(SanyaSho)
-		pevToucher->velocity = pev->movedir * 1.f * 10.f;
+		pevToucher->velocity = pev->movedir * 10.f * 10.f;
 	}
 
 	if ( FBitSet( pev->spawnflags, 1 ) )

@@ -44,7 +44,7 @@ void CCycler::GenericCyclerSpawn( char *szModel, Vector vecMin, Vector vecMax )
 
 	ResetSequenceInfo( 0.1 );
 
-	//SetUse( &CExplode::Use );
+	SetUse( &CCycler::SUB_CallUseToggle );
 }
 
 void CCycler::Think( void *funcArgs )

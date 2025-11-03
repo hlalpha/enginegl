@@ -30,6 +30,8 @@ public:
 
 	void SUB_Remove( void *funcArgs );
 	void SUB_DoNothing( void *funcArgs );
+	void SUB_CallUseToggle( void *funcArgs );
+	void SUB_CallTouchToggle( void *funcArgs );
 
 	void *operator new( size_t stAllocateBlock, entvars_t *pev ) { return (void *)ALLOC_PRIVATE( (edict_t *)pev->pContainingEntity, stAllocateBlock ); }
 	void operator delete( void *pMem, entvars_t *pev ) {}
@@ -82,6 +84,57 @@ public:
 	void SUB_UseTargets( void *funcArgs );
 	void DelayThink( void *funcArgs );
 };
+
+enum TOGGLE_STATE
+{
+	TS_AT_TOP = 0,
+	TS_AT_BOTTOM,
+	TS_GOING_UP,
+	TS_GOING_DOWN,
+};
+
+class CBaseToggle : public CBaseDelay
+{
+public:
+	void LinearMove( Vector vecDest, float flSpeed );
+	void LinearMoveDone( void *funcArgs );
+	void AngularMove( Vector vecDestAngle, float flSpeed );
+	void AngularMoveDone( void *funcArgs );
+
+	static void AxisDir( entvars_t *pev );
+	static float AxisDelta( int flags, Vector &angle1, Vector &angle2 );
+
+protected:
+	TOGGLE_STATE m_toggle_state;
+
+	void *unk4;
+
+	float m_flMoveDistance;
+	float m_flWait;
+	float m_flLip;
+
+	void *unk8;
+	void *unk9;
+
+	vec3_t m_vecPosition1;
+	vec3_t m_vecPosition2;
+
+	int m_cTriggersLeft;
+	float m_flHeight;
+
+	int m_nActivator;
+
+	void( __stdcall *m_pfnCallWhenMoveDone )( void *funcArg );
+
+	Vector m_vecFinalDest;
+	Vector m_vecFinalAngle;
+
+	BYTE m_bHealthValue;
+	BYTE m_bMoveSnd;
+	BYTE m_bStopSnd;
+	BYTE unk;
+};
+
 
 // this moved here from world.cpp, to allow classes to be derived from it
 //=======================
