@@ -24,6 +24,30 @@ void CBaseEntity::SUB_CallTouchToggle( void *funcArgs )
 }
 
 
+/*
+QuakeEd only writes a single float for angles (bad idea), so up and down are
+just constant angles.
+*/
+void SetMovedir( entvars_t *pev )
+{
+	if ( pev->angles == Vector( 0, -1, 0 ) )
+	{
+		pev->movedir = Vector( 0, 0, 1 );
+	}
+	else if ( pev->angles == Vector( 0, -2, 0 ) )
+	{
+		pev->movedir = Vector( 0, 0, -1 );
+	}
+	else
+	{
+		UTIL_MakeVectors( pev->angles );
+		pev->movedir = gpGlobals->v_forward;
+	}
+
+	pev->angles = g_vecZero;
+}
+
+
 void CBaseDelay::SUB_UseTargets( void *funcArgs )
 {
 	if ( m_flDelay != 0.f )

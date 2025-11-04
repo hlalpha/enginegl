@@ -4,6 +4,11 @@
 #include "cbase.h"
 #include "basemonster.h"
 
+
+extern void SetMovedir( entvars_t *pev );
+extern Vector VecBModelOrigin( entvars_t *pevBModel );
+
+
 //
 // func_friction
 //
@@ -115,9 +120,8 @@ int g_eoActivator;
 
 void CBaseTrigger::InitTrigger()
 {
-	// TODO(SanyaSho)
-//	if ( pev->angles[0] != 0 || pev->angles[1] != 0 || pev->angles[2] != 0 )
-//		SetMovedir( pev );
+	if ( pev->angles != g_vecZero )
+		SetMovedir( pev );
 
 	pev->solid = SOLID_TRIGGER;
 
@@ -183,8 +187,7 @@ LINK_ENTITY_TO_CLASS( trigger_monsterjump, CTriggerMonsterJump );
 
 void CTriggerMonsterJump::Spawn()
 {
-	// TODO(SanyaSho)
-	//SetMovedir( pev );
+	SetMovedir( pev );
 
 	InitTrigger();
 
