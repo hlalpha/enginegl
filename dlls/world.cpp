@@ -11,7 +11,7 @@
 #include "cbase.h"
 
 /*extern*/ CBaseEntity				*g_pLastSpawn; // TODO(SanyaSho): Move it into player.cpp
-DLL_GLOBAL edict_t				*g_pBodyQueueHead;
+DLL_GLOBAL EOFFSET					g_eoBodyQueueHead;
 
 //extern void W_Precache();
 void W_Precache()
@@ -95,21 +95,22 @@ BODY QUE
 */
 static void InitBodyQue()
 {
-#if 0
-	string_t	istrClassname = MAKE_STRING("bodyque");
+	string_t istrClassname = ALLOC_STRING( "bodyque" );
 
-	g_pBodyQueueHead = CREATE_NAMED_ENTITY( istrClassname );
-	entvars_t *pev = VARS(g_pBodyQueueHead);
+	g_eoBodyQueueHead = OFFSET( CREATE_ENTITY() );
+
+	entvars_t *pev = VARS( g_eoBodyQueueHead );
+	pev->classname = istrClassname;
 
 	// Reserve 3 more slots for dead bodies
 	for ( int i = 0; i < 3; i++ )
 	{
-		pev->owner = CREATE_NAMED_ENTITY( istrClassname );
-		pev = VARS(pev->owner);
+		pev->owner = OFFSET( CREATE_ENTITY() );
+		pev->classname = istrClassname;
+		pev = VARS( pev->owner );
 	}
 
-	pev->owner = g_pBodyQueueHead;
-#endif
+	pev->owner = g_eoBodyQueueHead;
 }
 
 //
@@ -119,24 +120,24 @@ static void InitBodyQue()
 //
 void CopyToBodyQue( entvars_t *pev )
 {
-#if 0
-	entvars_t *pevHead	= VARS(g_pBodyQueueHead);
+	entvars_t *pevHead = VARS( ENT( g_eoBodyQueueHead ) );
 
-	VectorCopy( pev->angles, pevHead->angles );
-	pevHead->model		= pev->model;
-	pevHead->modelindex	= pev->modelindex;
-	pevHead->frame		= pev->frame;
-	pevHead->colormap	= pev->colormap;
-	pevHead->movetype	= MOVETYPE_TOSS;
-	VectorCopy( pev->velocity, pevHead->velocity );
-	pevHead->flags		= 0;
-	pevHead->deadflag	= pev->deadflag;
-	pevHead->sequence	= pev->sequence;
+	pevHead->angles = pev->angles;
+	pevHead->model = pev->model;
+	pevHead->modelindex = pev->modelindex;
+	pevHead->frame = pev->frame;
+	pevHead->colormap = pev->colormap;
+	pevHead->movetype = pev->movetype;
+	pevHead->velocity = pev->velocity;
+	pevHead->flags = 0;
+	pevHead->deadflag = pev->deadflag;
+	pevHead->sequence = pev->sequence;
 
-	UTIL_SetOrigin(pevHead, pev->origin);
-	UTIL_SetSize(pevHead, pev->mins, pev->maxs);
-	g_pBodyQueueHead = pevHead->owner;
-#endif
+	UTIL_SetOrigin( pevHead, pev->origin );
+
+	UTIL_SetSize( pevHead, pev->mins, pev->maxs );
+
+	g_eoBodyQueueHead = pevHead->owner;
 }
 
 
