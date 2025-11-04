@@ -18,6 +18,7 @@ set( DLLS_SOURCES # "Source Files"
 	"triggers.cpp"
 	"items.cpp"
 	"bmodels.cpp"
+	"globals.cpp"
 )
 
 set( DLLS_HEADERS # "Header Files"

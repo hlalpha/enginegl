@@ -29,7 +29,7 @@ LINK_ENTITY_TO_CLASS( func_wall, CFuncWall );
 
 void CFuncWall::Spawn()
 {
-	pev->angles = Vector( 0, 0, 0 ); // SDKTODO(SanyaSho): g_vecZero
+	pev->angles = g_vecZero;
 
 	pev->movetype = MOVETYPE_PUSH;
 	pev->solid = SOLID_BSP;
@@ -65,7 +65,7 @@ void CFuncIllusionary::KeyValue( KeyValueData *pkvd )
 
 void CFuncIllusionary::Spawn()
 {
-	pev->angles = Vector( 0, 0, 0 ); // SDKTODO(SanyaSho): g_vecZero
+	pev->angles = g_vecZero;
 
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_NOT;
@@ -345,7 +345,7 @@ void CFuncRotating::SpinDown( void *funcArgs )
 
 	if ( pev->avelocity.x <= 0 && pev->avelocity.y <= 0 && pev->avelocity.z <= 0 )
 	{
-		pev->avelocity = Vector( 0, 0, 0 ); // SDKTODO(SanyaSho): g_vecZero
+		pev->avelocity = g_vecZero;
 		pev->nextthink = pev->ltime + 99999;
 	}
 }
@@ -355,7 +355,7 @@ void CFuncRotating::Use( void *funcArgs )
 	char *szNoise;
 	if ( FBitSet( pev->spawnflags, 0x10 ) )
 	{
-		if ( pev->avelocity != Vector( 0, 0, 0 ) ) // SDKTODO(SanyaSho): g_vecZero
+		if ( pev->avelocity != g_vecZero )
 		{
 			SetThink( &CFuncRotating::SpinDown );
 			szNoise = STRING( pev->noise2 );
@@ -371,9 +371,9 @@ void CFuncRotating::Use( void *funcArgs )
 	}
 	else
 	{
-		if ( pev->avelocity != Vector( 0, 0, 0 ) ) // SDKTODO(SanyaSho): g_vecZero
+		if ( pev->avelocity != g_vecZero )
 		{
-			pev->avelocity = Vector( 0, 0, 0 ); // SDKTODO(SanyaSho): g_vecZero
+			pev->avelocity = g_vecZero;
 		}
 		else
 		{
@@ -578,7 +578,7 @@ void CPendulum::Use( void *funcArgs )
 	{
 		//pev->speed = 0; // SDKTODO(SanyaSho)
 		SetThink( NULL );
-		pev->avelocity = Vector( 0, 0, 0 ); // SDKTODO(SanyaSho): g_vecZero
+		pev->avelocity = g_vecZero;
 	}
 }
 
@@ -588,7 +588,7 @@ void CPendulum::Stop( void *funcArgs )
 	//pev->speed = 0; // SDKTODO(SanyaSho)
 
 	SetThink( NULL );
-	pev->avelocity = Vector( 0, 0, 0 ); // SDKTODO(SanyaSho): g_vecZero
+	pev->avelocity = g_vecZero;
 }
 
 void CPendulum::Swing( void *funcArgs )
@@ -670,7 +670,7 @@ void CPendulum::RopeTouch( void *funcArgs )
 	{
 		pev->enemy = gpGlobals->other;
 
-		pevToucher->velocity = Vector( 0, 0, 0 ); // SDKTODO(SanyaSho): g_vecZero
+		pevToucher->velocity = g_vecZero;
 		pevToucher->movetype = MOVETYPE_NONE;
 	}
 }

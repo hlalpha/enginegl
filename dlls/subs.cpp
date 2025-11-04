@@ -111,7 +111,7 @@ void CBaseToggle::LinearMove( Vector vecDest, float flSpeed )
 void CBaseToggle::LinearMoveDone( void *funcArgs )
 {
 	UTIL_SetOrigin( pev, m_vecFinalDest );
-	pev->velocity = Vector( 0, 0, 0 ); // SDKTODO(SanyaSho): g_vecZero
+	pev->velocity = g_vecZero;
 	pev->nextthink = -1;
 	m_pfnCallWhenMoveDone( NULL );
 }
@@ -144,7 +144,7 @@ void CBaseToggle::AngularMove( Vector vecDestAngle, float flSpeed )
 void CBaseToggle::AngularMoveDone( void *funcArgs )
 {
 	pev->angles = m_vecFinalAngle;
-	pev->avelocity = Vector( 0, 0, 0 ); // SDKTODO(SanyaSho): g_vecZero
+	pev->avelocity = g_vecZero;
 	pev->nextthink = -1;
 	m_pfnCallWhenMoveDone( NULL );
 }

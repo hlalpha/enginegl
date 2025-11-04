@@ -122,6 +122,9 @@ inline BOOL FClassnameIs(entvars_t* pev, const char* szClassname)
 #define SF_AMBIENT_SOUND_START_SILENT	( 1 << 1 )
 
 
+extern DLL_GLOBAL Vector g_vecZero;
+
+
 extern void UTIL_SetSize( entvars_t *pent, Vector &vecMin, Vector &vecMax );
 extern void UTIL_VecToYaw( Vector &vec );
 extern Vector UTIL_VecToAngles( Vector &vec );

@@ -411,7 +411,7 @@ void CBaseTrigger::MultiTouch( void *funcArgs )
 		return;
 	}
 
-	if ( pev->movedir != Vector( 0, 0, 0 ) ) // TODO(SanyaSho): g_vecZero
+	if ( pev->movedir != g_vecZero )
 	{
 		UTIL_MakeVectors( VARS( pevToucher )->angles );
 
@@ -630,7 +630,7 @@ void CTriggerPush::KeyValue( KeyValueData *pkvd )
 
 void CTriggerPush::Spawn()
 {
-	if ( pev->angles == Vector( 0, 0, 0 ) ) // TODO(SanyaSho): g_vecZero
+	if ( pev->angles == g_vecZero )
 		pev->angles[1] = 360.f;
 
 	InitTrigger();
@@ -659,6 +659,12 @@ void CTriggerPush::Touch( void *funcArgs )
 
 void CTriggerPush::Use( void *funcArgs )
 {
-	// TODO(SanyaSho)
-	pev->solid = ( pev->solid != SOLID_TRIGGER );
+	if ( pev->solid != SOLID_NOT )
+	{
+		pev->solid = SOLID_NOT;
+	}
+	else
+	{
+		pev->solid = SOLID_TRIGGER;
+	}
 }
