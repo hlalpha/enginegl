@@ -107,17 +107,17 @@ public:
 protected:
 	TOGGLE_STATE m_toggle_state;
 
-	void *unk4;
+	float m_flActivateFinished;
 
 	float m_flMoveDistance;
 	float m_flWait;
 	float m_flLip;
 
-	void *unk8;
-	void *unk9;
+	float m_flTWidth;
+	float m_flTLength;
 
-	vec3_t m_vecPosition1;
-	vec3_t m_vecPosition2;
+	Vector m_vecPosition1;
+	Vector m_vecPosition2;
 
 	int m_cTriggersLeft;
 	float m_flHeight;
@@ -128,11 +128,6 @@ protected:
 
 	Vector m_vecFinalDest;
 	Vector m_vecFinalAngle;
-
-	BYTE m_bHealthValue;
-	BYTE m_bMoveSnd;
-	BYTE m_bStopSnd;
-	BYTE unk;
 };
 
 
