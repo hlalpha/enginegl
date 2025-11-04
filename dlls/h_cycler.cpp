@@ -20,7 +20,7 @@ private:
 void CCycler::GenericCyclerSpawn( char *szModel, Vector vecMin, Vector vecMax )
 {
 	PRECACHE_MODEL( szModel );
-	SET_MODEL( ENT( pev ), szModel );
+	SET_MODEL( edict(), szModel );
 
 	pev->solid = SOLID_SLIDEBOX;
 	pev->movetype = MOVETYPE_NONE;

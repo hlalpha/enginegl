@@ -34,7 +34,7 @@ void CFuncWall::Spawn()
 	pev->movetype = MOVETYPE_PUSH;
 	pev->solid = SOLID_BSP;
 
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	SET_MODEL( edict(), STRING( pev->model ) );
 }
 
 void CFuncWall::Use( void *funcArgs )
@@ -70,9 +70,9 @@ void CFuncIllusionary::Spawn()
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_NOT;
 
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	SET_MODEL( edict(), STRING( pev->model ) );
 
-	MAKE_STATIC( ENT( pev ) );
+	MAKE_STATIC( edict() );
 }
 
 //
@@ -113,7 +113,7 @@ void CFuncGlass::Spawn()
 	pev->solid = SOLID_BSP;
 	pev->movetype = MOVETYPE_PUSH;
 
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	SET_MODEL( edict(), STRING( pev->model ) );
 }
 
 void CFuncGlass::Use( void *funcArgs )
@@ -140,7 +140,7 @@ void CFuncGlass::Touch( void *funcArgs )
 
 void CFuncGlass::Die()
 {
-	EMIT_SOUND_DYN2( ENT( pev ), 2, "common/glass.wav", 1.0, 0.8 );
+	EMIT_SOUND_DYN2( edict(), 2, "common/glass.wav", 1.0, 0.8 );
 
 	UTIL_MakeVectors( pev->angles );
 
@@ -332,7 +332,7 @@ void CFuncRotating::SpinUp( void *funcArgs )
 		//pev->avelocity = pev->movedir * pev->speed;
 		pev->avelocity = pev->movedir * 10.f;
 
-		EMIT_SOUND_DYN2( ENT( pev ), 1, STRING( pev->noise3 ), 1.0, 0.8 );
+		EMIT_SOUND_DYN2( edict(), 1, STRING( pev->noise3 ), 1.0, 0.8 );
 		pev->nextthink = pev->ltime + 99999;
 	}
 }
@@ -366,7 +366,7 @@ void CFuncRotating::Use( void *funcArgs )
 			szNoise = STRING( pev->noise1 );
 		}
 
-		EMIT_SOUND_DYN2( ENT( pev ), 1, szNoise, 1.0, 0.8 );
+		EMIT_SOUND_DYN2( edict(), 1, szNoise, 1.0, 0.8 );
 		pev->nextthink = pev->ltime + 0.1;
 	}
 	else
@@ -377,7 +377,7 @@ void CFuncRotating::Use( void *funcArgs )
 		}
 		else
 		{
-			EMIT_SOUND_DYN2( ENT( pev ), 1, STRING( pev->noise3 ), 1.0, 0.8 );
+			EMIT_SOUND_DYN2( edict(), 1, STRING( pev->noise3 ), 1.0, 0.8 );
 
 			//pev->avelocity = pev->movedir * pev->speed; // SDKTODO(SanyaSho)
 			pev->avelocity = pev->movedir * 10.f;
@@ -414,7 +414,7 @@ void CPushable::Spawn()
 	pev->movetype = MOVETYPE_PUSHSTEP;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	SET_MODEL( edict(), STRING( pev->model ) );
 
 	// SDKTODO(SanyaSho)
 	//if ( pev->friction > 399.f )
@@ -525,7 +525,7 @@ void CPendulum::Spawn()
 
 	UTIL_SetOrigin( pev, pev->origin );
 
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	SET_MODEL( edict(), STRING( pev->model ) );
 
 	if ( m_distance == 0 )
 		return;

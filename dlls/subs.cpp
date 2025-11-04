@@ -5,7 +5,7 @@
 
 void CBaseEntity::SUB_Remove( void *funcArgs )
 {
-	REMOVE_ENTITY( ENT( pev ) );
+	REMOVE_ENTITY( edict() );
 }
 
 void CBaseEntity::SUB_DoNothing( void *funcArgs )
@@ -75,6 +75,8 @@ void CBaseDelay::SUB_UseTargets( void *funcArgs )
 		}
 	}
 
+	ALERT( at_log, "Firing: (%s)\n", STRING( pev->target ) );
+
 	if ( !FStringNull( pev->target ) )
 	{
 		int oldSelf = globals->self;
@@ -85,6 +87,7 @@ void CBaseDelay::SUB_UseTargets( void *funcArgs )
 		for (;;)
 		{
 			pEnt = FIND_ENTITY_BY_STRING( pEnt, "targetname", STRING( pev->target ) );
+			ALERT( at_log, "Found: %s, firing (%s)\n", STRING( pEnt->v.classname ), STRING( pev->target ) );
 			if ( FNullEnt ( pEnt ) )
 				break;
 
@@ -103,7 +106,7 @@ void CBaseDelay::SUB_UseTargets( void *funcArgs )
 void CBaseDelay::DelayThink( void *funcArgs )
 {
 	SUB_UseTargets( NULL );
-	REMOVE_ENTITY( ENT( pev ) );
+	REMOVE_ENTITY( edict() );
 }
 
 

@@ -100,7 +100,7 @@ void CBaseMonster::StudioFrameAdvance( float flInterval )
 // SDKTODO(SanyaSho): Find a better place for these!
 void CBaseMonster::ResetSequenceInfo( float flInterval )
 {
-	void *pModel = GET_MODEL_PTR( ENT( pev ) );
+	void *pModel = GET_MODEL_PTR( edict() );
 	GetSequenceInfo( pModel, pev, &m_flFrameRate, &m_flGroundSpeed ); // grab the model anim info
 
 	pev->animtime = globals->time;

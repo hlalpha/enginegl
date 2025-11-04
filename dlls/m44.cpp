@@ -14,7 +14,7 @@ LINK_ENTITY_TO_CLASS( monster_m44, CM44 );
 void CM44::Spawn()
 {
 	PRECACHE_MODEL( "models/m44.mdl" );
-	SET_MODEL( ENT( pev ), "models/m44.mdl" );
+	SET_MODEL( edict(), "models/m44.mdl" );
 
 	pev->solid = SOLID_BBOX;
 	pev->movetype = MOVETYPE_STEP;

@@ -50,7 +50,7 @@ void CLight::Spawn()
 	if ( FStringNull( pev->targetname ) )
 	{
 		// inert light
-		REMOVE_ENTITY( ENT( pev ) );
+		REMOVE_ENTITY( edict() );
 		return;
 	}
 

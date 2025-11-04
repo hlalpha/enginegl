@@ -103,7 +103,7 @@ LINK_ENTITY_TO_CLASS( monster_cine3_barney, CCine3Barney );
 void CCineMonster ::CineSpawn( char *szModel )
 {
 	PRECACHE_MODEL( szModel );
-	SET_MODEL( ENT( pev ), szModel );
+	SET_MODEL( edict(), szModel );
 
 	UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 
@@ -192,7 +192,7 @@ void CCineBlood ::BloodGush( void *funcArgs )
 #if 0
 	UTIL_MakeVectors( pev->angles );
 	if ( pev->health-- < 0 )
-		REMOVE_ENTITY( ENT( pev ) );
+		REMOVE_ENTITY( edict() );
 	// CHANGE_METHOD ( ENT(pev), em_think, SUB_Remove );
 
 	if ( RANDOM_FLOAT( 0, 1 ) < 0.7 ) // larger chance of globs
@@ -208,7 +208,7 @@ void CCineBlood ::BloodGush( void *funcArgs )
 	{ // decals the floor with blood.
 		vecSplatDir = Vector( 0, 0, -1 );
 		vecSplatDir = vecSplatDir + ( RANDOM_FLOAT( -1, 1 ) * 0.6 * gpGlobals->v_right ) + ( RANDOM_FLOAT( -1, 1 ) * 0.6 * gpGlobals->v_forward ); // randomize a bit
-		UTIL_TraceLine( pev->origin + Vector( 0, 0, 64 ), pev->origin + vecSplatDir * 256, ignore_monsters, ENT( pev ), &tr );
+		UTIL_TraceLine( pev->origin + Vector( 0, 0, 64 ), pev->origin + vecSplatDir * 256, ignore_monsters, edict(), &tr );
 		if ( tr.flFraction != 1.0 )
 		{
 			// Decal with a bloodsplat

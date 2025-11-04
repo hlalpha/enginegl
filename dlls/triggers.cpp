@@ -29,7 +29,7 @@ void CFrictionModifier::Spawn()
 {
 	pev->solid = SOLID_TRIGGER;
 
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	SET_MODEL( edict(), STRING( pev->model ) );
 
 	pev->movetype = MOVETYPE_NONE;
 
@@ -125,7 +125,7 @@ void CBaseTrigger::InitTrigger()
 
 	pev->solid = SOLID_TRIGGER;
 
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	SET_MODEL( edict(), STRING( pev->model ) );
 
 	pev->movetype = MOVETYPE_NONE;
 	pev->modelindex = 0;
@@ -444,7 +444,7 @@ void CBaseTrigger::ActivateMultiTrigger()
 	// make some noise
 	if ( !FStringNull( pev->noise ) )
 	{
-		EMIT_SOUND_DYN2( ENT( pev ), 2, STRING( pev->noise ), 1.f, 0.8f );
+		EMIT_SOUND_DYN2( edict(), 2, STRING( pev->noise ), 1.f, 0.8f );
 	}
 
 	g_eoActivator = pev->enemy;
@@ -592,7 +592,7 @@ void CLadder::Spawn()
 	pev->solid = SOLID_TRIGGER;
 	pev->solid = SOLID_BSP;
 
-	SET_MODEL( ENT( pev ), STRING( pev->model ) );
+	SET_MODEL( edict(), STRING( pev->model ) );
 
 	pev->movetype = MOVETYPE_PUSH;
 	pev->renderamt = 0;
@@ -657,7 +657,7 @@ void CTriggerPush::Touch( void *funcArgs )
 	}
 
 	if ( FBitSet( pev->spawnflags, 1 ) )
-		REMOVE_ENTITY( ENT( pev ) );
+		REMOVE_ENTITY( edict() );
 }
 
 void CTriggerPush::Use( void *funcArgs )

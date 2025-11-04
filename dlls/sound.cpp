@@ -69,7 +69,7 @@ void CAmbientGeneric::RampThink( void *funcArgs )
 		float volume, attenuation;
 		VOL_AND_ATT( volume, attenuation );
 
-		EMIT_SOUND_DYN2( (edict_t *)pev->pContainingEntity, 1, STRING( pev->message ), volume, attenuation );
+		EMIT_SOUND_DYN2( edict(), 1, STRING( pev->message ), volume, attenuation );
 	}
 
 	SetThink( NULL );
@@ -89,12 +89,12 @@ void CAmbientGeneric::ToggleUse( void *funcArgs )
 	if ( m_fActive )
 	{
 		m_fActive = FALSE;
-		EMIT_SOUND_DYN2( ENT( pev ), 1, "common/null.wav", volume, attenuation );
+		EMIT_SOUND_DYN2( edict(), 1, "common/null.wav", volume, attenuation );
 	}
 	else
 	{
 		m_fActive = TRUE;
-		EMIT_SOUND_DYN2( ENT( pev ), 1, STRING( pev->message ), volume, attenuation );
+		EMIT_SOUND_DYN2( edict(), 1, STRING( pev->message ), volume, attenuation );
 	}
 }
 
