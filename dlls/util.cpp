@@ -29,9 +29,9 @@ void UTIL_SetSize( entvars_t *pent, Vector &vecMin, Vector &vecMax )
 	SET_SIZE( ENT( pent ), vecMin, vecMax );
 }
 
-void UTIL_VecToYaw( Vector &vec )
+float UTIL_VecToYaw( Vector &vec )
 {
-	VEC_TO_YAW( vec );
+	return VEC_TO_YAW( vec );
 }
 
 Vector UTIL_VecToAngles( Vector &vec )

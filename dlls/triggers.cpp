@@ -347,7 +347,7 @@ void CTriggerHurt::HurtTouch( void *funcArgs )
 
 	if ( pevToucher->takedamage != DAMAGE_NO && gpGlobals->time >= m_flDelay )
 	{
-		CBaseMonster *pMonster = (CBaseMonster *)GET_PRIVATE( ENT( gpGlobals->other ) );
+		CBaseMonster *pMonster = (CBaseMonster *)CBaseMonster::Instance( gpGlobals->other );
 		//pMonster->TakeDamage( pev, pev, pev->dmg ); // TODO(SanyaSho)
 		pMonster->TakeDamage( pev, pev, 10.f );
 
@@ -607,7 +607,7 @@ void CLadder::Touch( void *funcArgs )
 
 	if ( FClassnameIs( pevToucherVars, "player" ) )
 	{
-		CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE( pevToucher );
+		CBasePlayer *pPlayer = (CBasePlayer *)CBasePlayer::Instance( pevToucher );
 		pPlayer->unk10 |= 1;
 	}*/
 }

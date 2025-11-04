@@ -36,6 +36,13 @@ public:
 	void *operator new( size_t stAllocateBlock, entvars_t *pev ) { return (void *)ALLOC_PRIVATE( (edict_t *)pev->pContainingEntity, stAllocateBlock ); }
 	void operator delete( void *pMem, entvars_t *pev ) {}
 
+	static CBaseEntity *Instance( edict_t *pent ) { if ( !pent ) pent = ENT( 0 ); CBaseEntity *pEnt = (CBaseEntity *)GET_PRIVATE( pent ); return pEnt; }
+	static CBaseEntity *Instance( entvars_t *pev ) { return Instance( ENT( pev ) ); }
+	static CBaseEntity *Instance( EOFFSET eoffset ) { return Instance( ENT( eoffset ) ); }
+
+	edict_t *edict() { return ENT( pev ); };
+	EOFFSET eoffset() { return OFFSET( pev ); };
+
 	entvars_t *pev;
 	globalvars_t *globals;
 

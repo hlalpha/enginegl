@@ -126,7 +126,7 @@ extern DLL_GLOBAL Vector g_vecZero;
 
 
 extern void UTIL_SetSize( entvars_t *pent, Vector &vecMin, Vector &vecMax );
-extern void UTIL_VecToYaw( Vector &vec );
+extern float UTIL_VecToYaw( Vector &vec );
 extern Vector UTIL_VecToAngles( Vector &vec );
 extern void UTIL_MoveToOrigin( edict_t *pent, float x, float y, float z, float flDist, int iMoveType );
 extern edict_t *UTIL_FindRadius( Vector &vecOrigin, float flRadius );
