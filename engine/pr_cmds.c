@@ -738,14 +738,7 @@ void PF_TraceToss_I (edict_t *ent, edict_t *ignore)
 }
 void PF_TraceToss_DLL (edict_t *ent, edict_t *ignore, TraceResult *ptr)
 {
-	edict_t* ent;
-
-	if (ignore)
-		ent = ignore;
-	else
-		ent = sv.edicts;
-
-	PF_TraceToss_I (ent, ignore);
+	PF_TraceToss_I (ent, ignore ? ignore : sv.edicts);
 
 	ptr->fAllSolid = pr_global_struct->trace_allsolid;
 	ptr->fStartSolid = pr_global_struct->trace_startsolid;
