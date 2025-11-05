@@ -829,15 +829,11 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 	SuckOutClassname (data, ent);
 
 	classname = &pr_strings[ent->v.classname];
-	func = FunctionFromName( classname );
-	if ( func )
-	{
-		func( &ent->v, NULL );
-	}
+	func = FunctionFromName (classname);
+	if (func)
+		func (&ent->v, NULL);
 	else
-	{
-		Con_Printf( "Can't init %s\n", classname );
-	}
+		Con_Printf ("Can't init %s\n", classname);
 
 // go through all the dictionary pairs
 	while (1)
@@ -875,7 +871,7 @@ char *ED_ParseEdict (char *data, edict_t *ent)
 			continue;
 
 		classname = &pr_strings[ent->v.classname];
-		if ( !classname || strcmp( classname, com_token ) )
+		if ( !classname || strcmp(classname, com_token) )
 		{
 			// anglehack is to allow QuakeEd to write single scalar angles
 			// and allow them to be turned into vectors. (FIXME...)

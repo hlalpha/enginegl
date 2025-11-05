@@ -939,7 +939,7 @@ DISPATCHFUNC FunctionFromName (LPCSTR lpProcName)
 
 	for (i=0 ; i<g_iextdllMac ; i++)
 	{
-		pfnDispatchFunc = (DISPATCHFUNC)GetProcAddress (g_rgextdll[i].lDLLHandle, lpProcName);
+		pfnDispatchFunc = (DISPATCHFUNC)GetProcAddress ((HMODULE)g_rgextdll[i].lDLLHandle, lpProcName);
 
 		// Check if we have the dispatch func we need
 		if (pfnDispatchFunc)
@@ -1179,7 +1179,6 @@ void PR_ExecuteProgramFromDLL (int nProgram)
 	wrap = &g_rqccFuncs[nProgram];
 	if (wrap->func)
 	{
-		// TODO: Quiver progdefs
 		ed = PROG_TO_EDICT (pr_global_struct->self);
 		ed->v.pContainingEntity = ed;
 		ed->v.pSystemGlobals = pr_global_struct;

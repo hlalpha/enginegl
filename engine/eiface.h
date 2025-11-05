@@ -105,7 +105,7 @@ typedef struct enginefuncs_s
 	void*				(*pfnDispatchFuncById)			( struct edict_s *ent, int dllFunc );
 	void				(*pfnChangeMethods)				( void ); // TODO
 
-	char*				(*pfnSzFromIndex)				( int iString );
+	char*				(*pfnSzFromIndex)				( string_t iString );
 	int					(*pfnAllocString)				( char *string );
 
 	struct entvars_s*	(*pfnGetVarsOfEnt)				( struct edict_s *pEdict );
