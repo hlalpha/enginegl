@@ -290,7 +290,7 @@ int SV_FlyMove (edict_t *ent, float time, trace_t *steptrace)
 		if (trace.plane.normal[2] > 0.7)
 		{
 			blocked |= 1;		// floor
-			if (trace.ent->v.solid == SOLID_BSP)
+			if (trace.ent->v.solid == SOLID_BSP || trace.ent->v.movetype == MOVETYPE_PUSHSTEP)
 			{
 				ent->v.flags =	(int)ent->v.flags | FL_ONGROUND;
 				ent->v.groundentity = EDICT_TO_PROG(trace.ent);
@@ -1056,7 +1056,7 @@ void SV_WalkMove (edict_t *ent)
 
 	if (downtrace.plane.normal[2] > 0.7)
 	{
-		if (ent->v.solid == SOLID_BSP)
+		if (ent->v.solid == SOLID_BSP || ent->v.movetype == MOVETYPE_PUSHSTEP)
 		{
 			ent->v.flags =	(int)ent->v.flags | FL_ONGROUND;
 			ent->v.groundentity = EDICT_TO_PROG(downtrace.ent);
@@ -1326,11 +1326,13 @@ void SV_Physics_Toss (edict_t *ent)
 // move origin
 #ifdef QUAKE2
 	VectorAdd (ent->v.velocity, ent->v.basevelocity, ent->v.velocity);
+	SV_CheckVelocity (ent);
 #endif
 	VectorScale (ent->v.velocity, host_frametime, move);
 	trace = SV_PushEntity (ent, move);
 #ifdef QUAKE2
 	VectorSubtract (ent->v.velocity, ent->v.basevelocity, ent->v.velocity);
+	SV_CheckVelocity (ent);
 #endif
 	if (trace.fraction == 1)
 		return;
@@ -1454,8 +1456,11 @@ void SV_Physics_Step (edict_t *ent)
 			}
 
 		VectorAdd (ent->v.velocity, ent->v.basevelocity, ent->v.velocity);
+		SV_CheckVelocity (ent);
 		SV_FlyMove (ent, host_frametime, NULL);
+		SV_CheckVelocity (ent);
 		VectorSubtract (ent->v.velocity, ent->v.basevelocity, ent->v.velocity);
+		SV_CheckVelocity (ent);
 
 		// determine if it's on solid ground at all
 		{
@@ -1538,7 +1543,7 @@ void SV_Physics (void)
 	edict_t	*ent;
 
 // let the progs know that a new frame has started
-	pr_global_struct->self = EDICT_TO_PROG(sv.edicts);
+	pr_global_struct->self = 0;
 	pr_global_struct->other = 0;
 	pr_global_struct->time = sv.time;
 	PR_ExecuteProgramFromDLL (3);
@@ -1573,6 +1578,11 @@ void SV_Physics (void)
 			SV_Physics_Noclip (ent);
 		else if (ent->v.movetype == MOVETYPE_STEP)
 			SV_Physics_Step (ent);
+		else if (ent->v.movetype == MOVETYPE_PUSHSTEP)
+		{
+			SV_Physics_Step (ent);
+			SV_Physics_Pusher (ent);
+		}
 		else if (ent->v.movetype == MOVETYPE_TOSS 
 		|| ent->v.movetype == MOVETYPE_BOUNCE
 #ifdef QUAKE2
@@ -1581,11 +1591,6 @@ void SV_Physics (void)
 		|| ent->v.movetype == MOVETYPE_FLY
 		|| ent->v.movetype == MOVETYPE_FLYMISSILE)
 			SV_Physics_Toss (ent);
-		else if (ent->v.movetype == MOVETYPE_PUSHSTEP)
-		{
-			SV_Physics_Step (ent);
-			SV_Physics_Pusher (ent);
-		}
 		else
 			Sys_Error ("SV_Physics: bad movetype %i", (int)ent->v.movetype);			
 	}
