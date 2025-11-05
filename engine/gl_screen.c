@@ -186,9 +186,15 @@ void SCR_DrawCenterString (void)
 			if (start[l] == '\n' || !start[l])
 				break;
 		x = (vid.width - l*8)/2;
+#if defined( GLQUAKE )
 		for (j=0 ; j<l ; j++, x+=8) // TODO(SanyaSho): Add support for custom fonts
 		{
 			Draw_Character (x, y, start[j]);	
+#else
+		for (j=0 ; j<l ; j++)
+		{
+			x += Draw_Character (x, y, start[j]);	
+#endif // GLQUAKE
 			if (!remaining--)
 				return;
 		}
@@ -700,9 +706,14 @@ void SCR_DrawNotifyString (void)
 			if (start[l] == '\n' || !start[l])
 				break;
 		x = (vid.width - l*8)/2;
+#if defined( GLQUAKE )
 		for (j=0 ; j<l ; j++, x+=8)
 			Draw_Character (x, y, start[j]);	
-			
+#else
+		for (j=0 ; j<l ; j++)
+			x += Draw_Character (x, y, start[j-1]);	
+#endif // GLQUAKE
+
 		y += 8;
 
 		while (*start && *start != '\n')
