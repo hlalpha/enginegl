@@ -1259,8 +1259,7 @@ mtriangle_t	triangles[MAXALIASTRIS];
 trivertx_t	*poseverts[MAXALIASFRAMES];
 int			posenum;
 
-byte		**player_8bit_texels_tbl;
-byte		*player_8bit_texels;
+byte		player_8bit_texels[320*200];
 
 /*
 =================
@@ -1431,12 +1430,11 @@ void *Mod_LoadAllSkins (int numskins, daliasskintype_t *pskintype)
 		Mod_FloodFillSkin( skin, pheader->skinwidth, pheader->skinheight );
 
 		// save 8 bit texels for the player model to remap
+		// save 8 bit texels for the player model to remap
 		if (!strcmp(loadmodel->name,"progs/player.mdl")) {
-			if (s > 64000) // TODO(SanyaSho): What's 64000?
+			if (s > sizeof(player_8bit_texels))
 				Sys_Error ("Player skin too large");
-
-			// FIXME(SanyaSho): do we still need to memcpy texels data for R_TranslatePlayerSkin?
-			//memcpy (texels, (byte *)(pskintype + 1), s);
+			memcpy (player_8bit_texels, (byte *)(pskintype + 1), s);
 		}
 		sprintf (name, "%s_%i", loadmodel->name, i);
 		pheader->gl_texturenum[i][0] =
