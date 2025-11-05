@@ -24,6 +24,7 @@ void *GetModelPtr (edict_t *pEdict);
 
 // sv_move.c
 void SV_MoveToGoal_I (edict_t *ent, float dist);
+float SV_MoveToOrigin_I (edict_t *ent, const float *pflGoal, float dist, int iStrafe);
 
 #if defined( QUIVER_TESTS )
 void pfnRegisterCvar (cvar_t *cvar)
@@ -33,11 +34,6 @@ void pfnRegisterCvar (cvar_t *cvar)
 	Cvar_RegisterVariable (cvar);
 }
 #endif
-
-void stub (edict_t* ent, float* goal, float dist, int strafe)
-{
-	Con_Printf ("ALERT: Stub SV_MoveToGoal_I is called!\n");
-}
 
 enginefuncs_t g_engfuncsExportedToDlls =
 {
@@ -55,7 +51,7 @@ enginefuncs_t g_engfuncsExportedToDlls =
 	PF_vectoyaw_I,
 	PF_vectoangles_I,
 	SV_MoveToGoal_I,
-	stub, // SV_MoveToOrigin_I
+	SV_MoveToOrigin_I,
 	PF_changeyaw_I,
 #if defined( QUAKE2 )
 	PF_changepitch_I,
