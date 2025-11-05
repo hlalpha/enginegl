@@ -51,8 +51,10 @@ kbutton_t	in_left, in_right, in_forward, in_back;
 kbutton_t	in_lookup, in_lookdown, in_moveleft, in_moveright;
 kbutton_t	in_strafe, in_speed, in_use, in_jump, in_attack;
 kbutton_t	in_up, in_down;
+kbutton_t	in_attack2, in_duck;
 
 int			in_impulse;
+int			in_cancel;
 
 
 void KeyDown (kbutton_t *b)
@@ -149,12 +151,19 @@ void IN_StrafeDown(void) {KeyDown(&in_strafe);}
 void IN_StrafeUp(void) {KeyUp(&in_strafe);}
 
 void IN_AttackDown(void) {KeyDown(&in_attack);}
-void IN_AttackUp(void) {KeyUp(&in_attack);}
+void IN_AttackUp(void) {KeyUp(&in_attack); in_cancel = 0;}
+
+void IN_Attack2Down(void) {KeyDown(&in_attack2);}
+void IN_Attack2Up(void) {KeyUp(&in_attack2);}
 
 void IN_UseDown (void) {KeyDown(&in_use);}
 void IN_UseUp (void) {KeyUp(&in_use);}
 void IN_JumpDown (void) {KeyDown(&in_jump);}
 void IN_JumpUp (void) {KeyUp(&in_jump);}
+
+void IN_DuckDown (void) {KeyDown(&in_duck);}
+void IN_DuckUp (void) {KeyUp(&in_duck);}
+void IN_Cancel (void) {in_cancel = 1;}
 
 void IN_Impulse (void) {in_impulse=Q_atoi(Cmd_Argv(1));}
 
@@ -317,6 +326,13 @@ void CL_BaseMove (usercmd_t *cmd)
 		cmd->upmove *= cl_movespeedkey.value;
 	}
 
+	if (in_duck.state & 1)
+	{
+		cmd->forwardmove *= 0.333;
+		cmd->sidemove *= 0.333;
+		cmd->upmove *= 0.333;
+	}
+
 #ifdef QUAKE2
 	cmd->lightlevel = cl.light_level;
 #endif
@@ -361,15 +377,54 @@ void CL_SendMove (usercmd_t *cmd)
 //
 	bits = 0;
 	
-	if ( in_attack.state & 3 )
-		bits |= 1;
+	if (in_attack.state & 3)
+		bits |= IN_ATTACK;
 	in_attack.state &= ~2;
 	
+	if (in_duck.state & 3)
+		bits |= IN_DUCK;
+	in_duck.state &= ~2;
+
 	if (in_jump.state & 3)
-		bits |= 2;
+		bits |= IN_JUMP;
 	in_jump.state &= ~2;
 	
-    MSG_WriteByte (&buf, bits);
+	if (in_forward.state & 3)
+		bits |= IN_FORWARD;
+	in_forward.state &= ~2;
+
+	if (in_back.state & 3)
+		bits |= IN_BACK;
+	in_back.state &= ~2;
+
+	if (in_use.state & 3)
+		bits |= IN_USE;
+	in_use.state &= ~2;
+
+	if (in_cancel)
+		bits |= IN_CANCEL;
+
+	if (in_left.state & 3)
+		bits |= IN_LEFT;
+	in_left.state &= ~2;
+
+	if (in_right.state & 3)
+		bits |= IN_RIGHT;
+	in_left.state &= ~2; // FIXME(SanyaSho): kek!
+
+	if (in_moveleft.state & 3)
+		bits |= IN_MOVELEFT;
+	in_moveleft.state &= ~2;
+
+	if (in_moveright.state & 3)
+		bits |= IN_MOVERIGHT;
+	in_moveleft.state &= ~2; // FIXME(SanyaSho): kek!
+
+	if (in_attack2.state & 3)
+		bits |= IN_ATTACK2;
+	in_attack2.state &= ~2;
+
+    MSG_WriteShort (&buf, bits);
 
     MSG_WriteByte (&buf, in_impulse);
 	in_impulse = 0;
@@ -434,6 +489,8 @@ void CL_InitInput (void)
 	Cmd_AddCommand ("-speed", IN_SpeedUp);
 	Cmd_AddCommand ("+attack", IN_AttackDown);
 	Cmd_AddCommand ("-attack", IN_AttackUp);
+	Cmd_AddCommand ("+attack2", IN_Attack2Down);
+	Cmd_AddCommand ("-attack2", IN_Attack2Up);
 	Cmd_AddCommand ("+use", IN_UseDown);
 	Cmd_AddCommand ("-use", IN_UseUp);
 	Cmd_AddCommand ("+jump", IN_JumpDown);
@@ -443,6 +500,8 @@ void CL_InitInput (void)
 	Cmd_AddCommand ("-klook", IN_KLookUp);
 	Cmd_AddCommand ("+mlook", IN_MLookDown);
 	Cmd_AddCommand ("-mlook", IN_MLookUp);
+	Cmd_AddCommand ("+duck", IN_DuckDown);
+	Cmd_AddCommand ("-duck", IN_DuckUp);
 
 	// From in_camera.c:
 	Cmd_AddCommand ("+campitchup", CAM_CamPitchUpDown);

@@ -1581,6 +1581,11 @@ void SV_Physics (void)
 		|| ent->v.movetype == MOVETYPE_FLY
 		|| ent->v.movetype == MOVETYPE_FLYMISSILE)
 			SV_Physics_Toss (ent);
+		else if (ent->v.movetype == MOVETYPE_PUSHSTEP)
+		{
+			SV_Physics_Step (ent);
+			SV_Physics_Pusher (ent);
+		}
 		else
 			Sys_Error ("SV_Physics: bad movetype %i", (int)ent->v.movetype);			
 	}

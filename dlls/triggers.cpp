@@ -476,7 +476,7 @@ void CBaseTrigger::CounterUse( void *funcArgs )
 	if ( m_cTriggersLeft < 0 )
 		return;
 
-	BOOL fTellActivator = FStrEq( STRING( VARS( ENT( g_eoActivator ) )->classname ), "player" ) && !FBitSet( pev->spawnflags, SPAWNFLAG_NOMESSAGE );
+	BOOL fTellActivator = FClassnameIs( ENT( g_eoActivator ), "player" ) && !FBitSet( pev->spawnflags, SPAWNFLAG_NOMESSAGE );
 
 	if ( m_cTriggersLeft )
 	{

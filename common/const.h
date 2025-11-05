@@ -37,6 +37,7 @@
 #define MOVETYPE_BOUNCEMISSILE	11		// bounce w/o gravity
 #define MOVETYPE_FOLLOW			12		// track movement of aiment
 #endif
+#define	MOVETYPE_PUSHSTEP		13		// BSP model that needs physics/world collisions (uses nearest hull for world collision)
 
 // edict->solid values
 #define	SOLID_NOT				0		// no interaction with other objects
@@ -128,6 +129,10 @@
 #define FTENT_SMOKETRAIL	0x10
 #define FTENT_COLLIDEWORLD	0x20
 #define FTENT_FLICKER		0x40
+
+#ifndef IN_BUTTONS_H
+#include "in_buttons.h"
+#endif
 
 // Break Model Defines
 // BreakType

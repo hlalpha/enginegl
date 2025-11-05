@@ -684,6 +684,8 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 	if (ent->v.idealpitch)
 		bits |= SU_IDEALPITCH;
 
+	bits |= SU_ITEMS;
+
 // stuff the sigil bits into the high bits of items for sbar, or else
 // mix in items2
 #ifdef QUAKE2
@@ -697,13 +699,16 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 		items = (int)ent->v.items | ((int)pr_global_struct->serverflags << 28);
 #endif
 
-	bits |= SU_ITEMS;
+	if ( (int)ent->v.weapons )
+		bits |= SU_ACTIVEWEAPON; // TODO
 	
 	if ( (int)ent->v.flags & FL_ONGROUND)
 		bits |= SU_ONGROUND;
 	
 	if ( ent->v.waterlevel >= 2)
 		bits |= SU_INWATER;
+	if ( ent->v.waterlevel >= 3 )
+		bits |= SU_UNDERWATER;
 	
 	for (i=0 ; i<3 ; i++)
 	{
@@ -744,6 +749,10 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 // [always sent]	if (bits & SU_ITEMS)
 	MSG_WriteLong (msg, items);
 
+	MSG_WriteLong (msg, ent->v.items2);
+
+	if (bits & SU_ACTIVEWEAPON)
+		MSG_WriteLong (msg, ent->v.weapons);
 	if (bits & SU_WEAPONFRAME)
 		MSG_WriteByte (msg, ent->v.weaponframe);
 	if (bits & SU_ARMOR)
@@ -753,14 +762,14 @@ void SV_WriteClientdataToMessage (edict_t *ent, sizebuf_t *msg)
 	
 	MSG_WriteShort (msg, ent->v.health);
 	MSG_WriteByte (msg, ent->v.currentammo);
-	MSG_WriteByte (msg, ent->v.ammo_shells);
-	MSG_WriteByte (msg, ent->v.ammo_nails);
-	MSG_WriteByte (msg, ent->v.ammo_rockets);
-	MSG_WriteByte (msg, ent->v.ammo_cells);
+	MSG_WriteByte (msg, ent->v.ammo_1);
+	MSG_WriteByte (msg, ent->v.ammo_2);
+	MSG_WriteByte (msg, ent->v.ammo_3);
+	MSG_WriteByte (msg, ent->v.ammo_4);
 
-	if (standard_quake)
+	if (standard_quake) // NOTE(SanyaSho): Was added after GLQuake 1.07
 	{
-		MSG_WriteByte (msg, ent->v.weapon);
+		MSG_WriteLong (msg, ent->v.weapon); // NOTE(SanyaSho): Was MSG_WriteByte
 	}
 	else
 	{

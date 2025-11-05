@@ -104,10 +104,7 @@ typedef struct
 	int motionbone;
 
 	int unk11;
-	float unk12;
-
-	int unk13;
-	int unk14;
+	vec3_t linearmovement;
 
 	int numanims; ///< the same as numevents
 	int animindex;

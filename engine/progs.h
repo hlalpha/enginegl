@@ -112,7 +112,8 @@ int NUM_FOR_EDICT(edict_t *e);
 #define	E_FLOAT(e,o) (((float*)&e->v)[o])
 #define	E_INT(e,o) (*(int *)&((float*)&e->v)[o])
 #define	E_VECTOR(e,o) (&((float*)&e->v)[o])
-#define	E_STRING(e,o) (pr_strings + *(string_t *)&((float*)&e->v)[o])
+//#define	E_STRING(e,o) (pr_strings + *(string_t *)&((float*)&e->v)[o])
+#define	E_STRING(e,o) (pr_strings + *(string_t *)((size_t)&ed->v + o))
 
 extern	int		type_size[8];
 

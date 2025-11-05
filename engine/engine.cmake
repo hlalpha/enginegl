@@ -119,6 +119,7 @@ set( ENGINE_SOURCES # "Source Files"
 
 	"progdefs.q1"
 	"progdefs.q2"
+	"progdefs.quiver"
 )
 
 set( ENGINE_HW_SOURCES
@@ -195,6 +196,7 @@ set( ENGINE_HEADERS # "Header Files"
 	"${SRCDIR}/public/edict.h"
 	"${SRCDIR}/public/qfont.h"
 	"${SRCDIR}/common/const.h"
+	"${SRCDIR}/common/in_buttons.h"
 
 	"anorm_dots.h"
 	"anorms.h"
@@ -291,10 +293,10 @@ function( add_engine )
 		${ARGS_TARGET} PRIVATE
 
 		"$<${IS_HW}:GLQUAKE>"
-		"$<${QUIVER}:QUIVER_QUAKE_COMPAT>"
+		#"$<${QUIVER}:QUIVER_QUAKE_COMPAT>"
 		"$<${QUIVER}:QUIVER>"
-		"$<${QUIVER}:QUIVER_TESTS>"
-		#"$<${QUIVER}:QUAKE2>" # TODO
+		#"$<${QUIVER}:QUIVER_TESTS>"
+		"$<${QUIVER}:QUAKE2>"
 	)
 	target_include_directories(
 		${ARGS_TARGET} PRIVATE

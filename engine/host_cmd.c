@@ -1552,6 +1552,7 @@ DEBUGGING TOOLS
 ===============================================================================
 */
 
+#if !defined( QUIVER ) // TODO
 /*
 ==================
 Host_Give_f
@@ -1710,6 +1711,7 @@ void Host_Give_f (void)
         break;		
     }
 }
+#endif // !QUIVER
 
 edict_t	*FindViewthing (void)
 {
@@ -1970,7 +1972,9 @@ void Host_InitCommands (void)
 	Cmd_AddCommand ("ping", Host_Ping_f);
 	Cmd_AddCommand ("load", Host_Loadgame_f);
 	Cmd_AddCommand ("save", Host_Savegame_f);
+#if !defined( QUIVER )
 	Cmd_AddCommand ("give", Host_Give_f);
+#endif // !QUIVER
 
 	Cmd_AddCommand ("startdemos", Host_Startdemos_f);
 	Cmd_AddCommand ("demos", Host_Demos_f);

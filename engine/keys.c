@@ -646,6 +646,14 @@ void Key_Event (int key, qboolean down)
 			break;
 		case key_game:
 		case key_console:
+			// Close the weapon selection HUD
+			// TODO(SanyaSho): Is this correct?
+			if ((cl.stats[STAT_ACTIVEWEAPON] & 0xFFFF0000) != 0)
+			{
+				IN_Cancel ();
+				return;
+			}
+
 			M_ToggleMenu_f ();
 			break;
 		default:

@@ -44,11 +44,10 @@ void CItem::Touch( void *funcArgs )
 	if ( !FClassnameIs( pevToucher, "player" ) )
 		return;
 
-	// SDKTODO(SanyaSho)
-	/*if ( m_nItem >= MAX_ITEMS )
+	if ( m_nItem >= MAX_ITEMS )
 		pevToucher->items |= (1 << ( m_nItem - MAX_ITEMS ));
 	else
-		pevToucher->weapons |= (1 << m_nItem);*/
+		pevToucher->weapons |= (1 << m_nItem);
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	pev->nextthink = gpGlobals->time + 0.1f;

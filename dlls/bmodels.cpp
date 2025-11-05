@@ -283,12 +283,11 @@ void CFuncRotating::Spawn()
 
 	UTIL_SetOrigin( pev, pev->origin );
 
-	// SDKTODO(SanyaSho)
-	//if ( pev->speed <= 0 )
-	//	pev->speed = 0;
+	if ( pev->speed <= 0 )
+		pev->speed = 0;
 
-	//if ( pev->dmg == 0 )
-	//	pev->dmg = 2;
+	if ( pev->dmg == 0 )
+		pev->dmg = 2;
 
 	if ( FBitSet( pev->spawnflags, 1 ) )
 	{
@@ -309,28 +308,23 @@ void CFuncRotating::Touch( void *funcArgs )
 	if ( pevToucher->takedamage == DAMAGE_NO )
 		return;
 
-	/*pev->dmg*/ float dmg = pev->avelocity.Length() * 0.1; // SDKTODO(SanyaSho)
+	pev->dmg = pev->avelocity.Length() * 0.1;
 
 	CBaseMonster *pMonster = GetClassPtr( (CBaseMonster *)pevToucher );
-	//pMonster->TakeDamage( pev, pev, pev->dmg ); // SDKTODO(SanyaSho)
-	pMonster->TakeDamage( pev, pev, dmg );
+	pMonster->TakeDamage( pev, pev, pev->dmg );
 
-	pevToucher->velocity = ( pevToucher->origin - VecBModelOrigin( pev ) ).Normalize() * /*pev->dmg*/ dmg; // SDKTODO(SanyaSho)
+	pevToucher->velocity = ( pevToucher->origin - VecBModelOrigin( pev ) ).Normalize() * pev->dmg;
 }
 
 void CFuncRotating::SpinUp( void *funcArgs )
 {
 	pev->nextthink = pev->ltime + 0.1;
 
-	pev->avelocity = pev->avelocity + ( pev->movedir * ( /*pev->speed*/ 10.f * m_fFriction ) ); // SDKTODO(SanyaSho)
+	pev->avelocity = pev->avelocity + ( pev->movedir * ( pev->speed * m_fFriction ) );
 
-	// SDKTODO(SanyaSho)
-	//if ( ( pev->movedir[0] * pev->speed ) <= pev->avelocity[0] && ( pev->movedir[1] * pev->speed ) <= pev->avelocity[1] && ( pev->movedir[2] * pev->speed ) <= pev->avelocity[2] )
-	if ( ( pev->movedir[0] * 10.f ) <= pev->avelocity[0] && ( pev->movedir[1] * 10.f ) <= pev->avelocity[1] && ( pev->movedir[2] * 10.f ) <= pev->avelocity[2] )
+	if ( ( pev->movedir[0] * pev->speed ) <= pev->avelocity[0] && ( pev->movedir[1] * pev->speed ) <= pev->avelocity[1] && ( pev->movedir[2] * pev->speed ) <= pev->avelocity[2] )
 	{
-		// SDKTODO(SanyaSho)
-		//pev->avelocity = pev->movedir * pev->speed;
-		pev->avelocity = pev->movedir * 10.f;
+		pev->avelocity = pev->movedir * pev->speed;
 
 		EMIT_SOUND_DYN2( edict(), 1, STRING( pev->noise3 ), 1.0, 0.8 );
 		pev->nextthink = pev->ltime + 99999;
@@ -341,7 +335,7 @@ void CFuncRotating::SpinDown( void *funcArgs )
 {
 	pev->nextthink = pev->ltime + 0.1;
 
-	pev->avelocity = pev->avelocity - ( pev->movedir * ( /*pev->speed*/ 10.f * m_fFriction ) ); // SDKTODO(SanyaSho)
+	pev->avelocity = pev->avelocity - ( pev->movedir * ( pev->speed * m_fFriction ) );
 
 	if ( pev->avelocity.x <= 0 && pev->avelocity.y <= 0 && pev->avelocity.z <= 0 )
 	{
@@ -379,8 +373,7 @@ void CFuncRotating::Use( void *funcArgs )
 		{
 			EMIT_SOUND_DYN2( edict(), 1, STRING( pev->noise3 ), 1.0, 0.8 );
 
-			//pev->avelocity = pev->movedir * pev->speed; // SDKTODO(SanyaSho)
-			pev->avelocity = pev->movedir * 10.f;
+			pev->avelocity = pev->movedir * pev->speed;
 			pev->nextthink = gpGlobals->time + 99999;
 		}
 	}
@@ -389,8 +382,7 @@ void CFuncRotating::Use( void *funcArgs )
 void CFuncRotating::Blocked( void *funcArgs )
 {
 	CBaseMonster *pBlocker = GetClassPtr( (CBaseMonster *)ENT( gpGlobals->other ) );
-	//pBlocker->TakeDamage( pev, pev, pev->dmg ); // SDKTODO(SanyaSho)
-	pBlocker->TakeDamage( pev, pev, 10.f );
+	pBlocker->TakeDamage( pev, pev, pev->dmg );
 }
 
 //
@@ -416,14 +408,11 @@ void CPushable::Spawn()
 
 	SET_MODEL( edict(), STRING( pev->model ) );
 
-	// SDKTODO(SanyaSho)
-	//if ( pev->friction > 399.f )
-	//	pev->friction = 399.f;
+	if ( pev->friction > 399.f )
+		pev->friction = 399.f;
 
-	//m_maxSpeed = pev->friction - 400;
-	//pev->friction = 0;
-
-	m_maxSpeed = 1000.f;
+	m_maxSpeed = pev->friction - 400;
+	pev->friction = 0;
 }
 
 void CPushable::KeyValue( KeyValueData *pkvd )
@@ -530,12 +519,11 @@ void CPendulum::Spawn()
 	if ( m_distance == 0 )
 		return;
 
-	// SDKTODO(SanyaSho)
-	//if ( pev->speed == 0 )
-	//	pev->speed = 100;
+	if ( pev->speed == 0 )
+		pev->speed = 100;
 
-	//m_accel = ( pev->speed * pev->speed ) / ( m_distance * 2.0 );
-	//m_maxSpeed = pev->speed;
+	m_accel = ( pev->speed * pev->speed ) / ( m_distance * 2.0 );
+	m_maxSpeed = pev->speed;
 	m_start = pev->angles;
 	m_center = pev->movedir * ( m_distance * 0.5 ) + pev->angles;
 
@@ -545,7 +533,7 @@ void CPendulum::Spawn()
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
 
-	//pev->speed = 0;
+	pev->speed = 0;
 
 	if ( FBitSet( pev->spawnflags, 2 ) )
 	{
@@ -555,15 +543,14 @@ void CPendulum::Spawn()
 
 void CPendulum::Use( void *funcArgs )
 {
-	// SDKTODO(SanyaSho)
-	//if ( pev->speed == 0 )
-	//{
-	//	pev->nextthink = pev->ltime + 0.1;
-	//	m_time = pev->ltime;
-	//	m_dampSpeed = m_maxSpeed;
-	//	SetThink( &CPendulum::Think );
-	//	return;
-	//}
+	if ( pev->speed == 0 )
+	{
+		pev->nextthink = pev->ltime + 0.1;
+		m_time = pev->ltime;
+		m_dampSpeed = m_maxSpeed;
+		SetThink( &CPendulum::Think );
+		return;
+	}
 
 	if ( FBitSet( pev->spawnflags, 0x10 ) )
 	{
@@ -576,7 +563,7 @@ void CPendulum::Use( void *funcArgs )
 	}
 	else
 	{
-		//pev->speed = 0; // SDKTODO(SanyaSho)
+		pev->speed = 0;
 		SetThink( NULL );
 		pev->avelocity = g_vecZero;
 	}
@@ -585,7 +572,7 @@ void CPendulum::Use( void *funcArgs )
 void CPendulum::Stop( void *funcArgs )
 {
 	pev->angles = m_start;
-	//pev->speed = 0; // SDKTODO(SanyaSho)
+	pev->speed = 0;
 
 	SetThink( NULL );
 	pev->avelocity = g_vecZero;
@@ -597,18 +584,17 @@ void CPendulum::Swing( void *funcArgs )
 	float dt = gpGlobals->time - m_time;
 	m_time = gpGlobals->time;
 
-	// SDKTODO(SanyaSho)
-	//if ( delta > 0 && m_accel > 0 )
-	//	pev->speed -= m_accel * dt;
-	//else
-	//	pev->speed += m_accel * dt;
+	if ( delta > 0 && m_accel > 0 )
+		pev->speed -= m_accel * dt;
+	else
+		pev->speed += m_accel * dt;
 
-	//if ( pev->speed > m_maxSpeed )
-	//	pev->speed = m_maxSpeed;
-	//else if ( pev->speed < -m_maxSpeed )
-	//	pev->speed = -m_maxSpeed;
+	if ( pev->speed > m_maxSpeed )
+		pev->speed = m_maxSpeed;
+	else if ( pev->speed < -m_maxSpeed )
+		pev->speed = -m_maxSpeed;
 
-	//pev->avelocity = pev->speed * pev->movedir;
+	pev->avelocity = pev->speed * pev->movedir;
 
 	pev->nextthink = pev->ltime + 0.1;
 
@@ -618,16 +604,15 @@ void CPendulum::Swing( void *funcArgs )
 		if ( m_dampSpeed < 30.0 )
 		{
 			pev->angles = m_center;
-			//pev->speed = 0; // SDKTODO(SanyaSho)
+			pev->speed = 0;
 
 			SetThink( NULL );
 			pev->avelocity = Vector( 0, 0, 0 );
 		}
-		// SDKTODO(SanyaSho)
-		//else if ( pev->speed > m_dampSpeed )
-		//	pev->speed = m_dampSpeed;
-		//else if ( pev->speed < -m_dampSpeed )
-		//	pev->speed = -m_dampSpeed;
+		else if ( pev->speed > m_dampSpeed )
+			pev->speed = m_dampSpeed;
+		else if ( pev->speed < -m_dampSpeed )
+			pev->speed = -m_dampSpeed;
 	}
 }
 
@@ -635,16 +620,13 @@ void CPendulum::Touch( void *funcArgs )
 {
 	entvars_t *pevToucher = VARS( ENT( gpGlobals->other ) );
 
-	// SDKTODO(SanyaSho)
-	//if ( pev->dmg <= 0 )
-	//	return;
+	if ( pev->dmg <= 0 )
+		return;
 
 	if ( pevToucher->takedamage == DAMAGE_NO )
 		return;
 
-	// SDKTODO(SanyaSho)
-	//float flDamage = pev->speed * pev->dmg * 0.01;
-	float flDamage = 10.f;
+	float flDamage = pev->speed * pev->dmg * 0.01;
 	if ( flDamage < 0 )
 		flDamage = -flDamage;
 

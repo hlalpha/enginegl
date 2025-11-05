@@ -667,9 +667,34 @@ void CL_ParseClientdata (int bits)
 				cl.item_gettime[j] = cl.time;
 		cl.items = i;
 	}
+
+	i = MSG_ReadLong ();
+	if (cl.items != i) // FIXME(SanyaSho): BUG? Writting items2 back into cl.items?
+	{
+		Sbar_Changed ();
+		cl.items = i;
+	}
+
+	if (bits & SU_ACTIVEWEAPON)
+		i = MSG_ReadLong ();
+	if (cl.activeweapon != i)
+	{
+		Sbar_Changed ();
+		cl.activeweapon = i;
+	}
 		
 	cl.onground = (bits & SU_ONGROUND) != 0;
 	cl.inwater = (bits & SU_INWATER) != 0;
+
+	if (cl.inwater)
+	{
+		if (bits & SU_UNDERWATER)
+			cl.waterlevel = 3;
+		else
+			cl.waterlevel = 2;
+	}
+	else
+		cl.waterlevel = 0;
 
 	if (bits & SU_WEAPONFRAME)
 		cl.stats[STAT_WEAPONFRAME] = MSG_ReadByte ();
@@ -720,9 +745,9 @@ void CL_ParseClientdata (int bits)
 		}
 	}
 
-	i = MSG_ReadByte ();
+	i = MSG_ReadLong (); // NOTE(SanyaSho): Was MSG_ReadByte
 
-	if (standard_quake)
+	if (standard_quake) // NOTE(SanyaSho): Was added after GLQuake 1.07
 	{
 		if (cl.stats[STAT_ACTIVEWEAPON] != i)
 		{

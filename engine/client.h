@@ -148,6 +148,7 @@ typedef struct
 
 // information for local display
 	int			stats[MAX_CL_STATS];	// health, etc
+	int			activeweapon;	// current weapon
 	int			items;			// inventory bit flags
 	float	item_gettime[32];	// cl.time of aquiring item, for blinking
 	float		faceanimtime;	// use anim frame if cl.time < this
@@ -174,6 +175,7 @@ typedef struct
 	float		pitchvel;
 	qboolean	nodrift;
 	float		driftmove;
+	char		valve_unknown3[4]; // FIXME(SanyaSho)
 	double		laststop;
 
 	float		viewheight;
@@ -185,6 +187,8 @@ typedef struct
 	
 	int			intermission;	// don't change view angle, full screen, etc
 	int			completed_time;	// latched at intermission start
+
+	char		valve_unknown4[4]; // FIXME(SanyaSho)
 	
 	double		mtime[2];		// the timestamp of last two messages	
 	double		time;			// clients view of time, should be between
@@ -226,10 +230,12 @@ typedef struct
 	int			light_level;
 #endif
 
-	char gap8[4];
-	int animtime;
-	int sequence;
-	char gap9[4];
+	int			waterlevel; // current water level (3 - underwater, 2 - mid underwater, 0 - not in water)
+
+	int			animtime;
+	int			sequence;
+
+	char		gap9[4]; // FIXME(SanyaSho)
 } client_state_t;
 
 

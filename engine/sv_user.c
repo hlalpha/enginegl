@@ -439,7 +439,6 @@ void SV_ReadClientMove (usercmd_t *move)
 {
 	int		i;
 	vec3_t	angle;
-	int		bits;
 	
 // read ping time
 	host_client->ping_times[host_client->num_pings%NUM_PING_TIMES]
@@ -458,9 +457,7 @@ void SV_ReadClientMove (usercmd_t *move)
 	move->upmove = MSG_ReadShort ();
 	
 // read buttons
-	bits = MSG_ReadByte ();
-	host_client->edict->v.button0 = bits & 1;
-	host_client->edict->v.button2 = (bits & 2)>>1;
+	host_client->edict->v.button = MSG_ReadShort ();
 
 	i = MSG_ReadByte ();
 	if (i)
