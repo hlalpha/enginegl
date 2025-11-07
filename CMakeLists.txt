@@ -29,6 +29,10 @@ if( WIN32 )
 		_WINDOWS
 		WINDOWS
 	)
+
+	add_compile_options(
+		/MP
+	)
 elseif( LINUX )
 	add_compile_definitions(
 		_LINUX
