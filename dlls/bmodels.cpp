@@ -184,7 +184,7 @@ public:
 	virtual void Blocked( void *funcArgs );
 
 public:
-	BYTE m_fFriction;
+	float m_flFanFriction;
 };
 
 LINK_ENTITY_TO_CLASS( func_rotating, CFuncRotating );
@@ -193,7 +193,7 @@ void CFuncRotating::KeyValue( KeyValueData *pkvd )
 {
 	if ( FStrEq( pkvd->szKeyName, "friction" ) )
 	{
-		m_fFriction = (BYTE)atof( pkvd->szValue );
+		m_flFanFriction = atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 }
@@ -256,32 +256,35 @@ void CFuncRotating::Spawn()
 		break;
 	}
 
-	if ( m_fFriction == 0 )
-		m_fFriction = 1;
+	if ( m_flFanFriction == 0 )
+		m_flFanFriction = 1;
 
-	if ( FBitSet( pev->spawnflags, 4 ) )
+	if ( FBitSet( pev->spawnflags, 0x04 ) )
 		pev->movedir = Vector( 0, 0, 1 );
-	else if ( FBitSet( pev->spawnflags, 8 ) )
+	else if ( FBitSet( pev->spawnflags, 0x08 ) )
 		pev->movedir = Vector( 1, 0, 0 );
 	else
 		pev->movedir = Vector( 0, 1, 0 );
 
-	if ( FBitSet( pev->spawnflags, 2 ) )
-		pev->movedir = -pev->movedir;
+	if ( FBitSet( pev->spawnflags, 0x02 ) )
+		pev->movedir = pev->movedir * -1;
+
+	ALERT( at_info, "%f %f %f", pev->movedir[0], pev->movedir[1], pev->movedir[2] );
 
 	if ( FBitSet( pev->spawnflags, 0x40 ) )
 	{
 		pev->solid = SOLID_NOT;
 		pev->skin = -1;
+		pev->movetype = MOVETYPE_PUSH;
 	}
 	else
 	{
 		pev->solid = SOLID_BSP;
+		pev->movetype = MOVETYPE_PUSH;
 	}
 
-	pev->movetype = MOVETYPE_PUSH;
-
 	UTIL_SetOrigin( pev, pev->origin );
+	SET_MODEL( edict(), STRING( pev->model ) );
 
 	if ( pev->speed <= 0 )
 		pev->speed = 0;
@@ -289,7 +292,7 @@ void CFuncRotating::Spawn()
 	if ( pev->dmg == 0 )
 		pev->dmg = 2;
 
-	if ( FBitSet( pev->spawnflags, 1 ) )
+	if ( FBitSet( pev->spawnflags, 0x01 ) )
 	{
 		SetThink( &CFuncRotating::SUB_CallUseToggle );
 		pev->nextthink = gpGlobals->time + 0.1;
@@ -319,10 +322,13 @@ void CFuncRotating::Touch( void *funcArgs )
 void CFuncRotating::SpinUp( void *funcArgs )
 {
 	pev->nextthink = pev->ltime + 0.1;
+	pev->avelocity = pev->avelocity +( pev->movedir * ( pev->speed * m_flFanFriction ) );
 
-	pev->avelocity = pev->avelocity + ( pev->movedir * ( pev->speed * m_fFriction ) );
-
-	if ( ( pev->movedir[0] * pev->speed ) <= pev->avelocity[0] && ( pev->movedir[1] * pev->speed ) <= pev->avelocity[1] && ( pev->movedir[2] * pev->speed ) <= pev->avelocity[2] )
+	if (
+		pev->avelocity[0] >= ( pev->movedir[0] * pev->speed ) &&
+		pev->avelocity[1] >= ( pev->movedir[1] * pev->speed ) &&
+		pev->avelocity[2] >= ( pev->movedir[2] * pev->speed )
+	)
 	{
 		pev->avelocity = pev->movedir * pev->speed;
 
@@ -334,8 +340,7 @@ void CFuncRotating::SpinUp( void *funcArgs )
 void CFuncRotating::SpinDown( void *funcArgs )
 {
 	pev->nextthink = pev->ltime + 0.1;
-
-	pev->avelocity = pev->avelocity - ( pev->movedir * ( pev->speed * m_fFriction ) );
+	pev->avelocity = pev->avelocity - ( pev->movedir * ( pev->speed * m_flFanFriction ) );
 
 	if ( pev->avelocity.x <= 0 && pev->avelocity.y <= 0 && pev->avelocity.z <= 0 )
 	{
@@ -381,7 +386,7 @@ void CFuncRotating::Use( void *funcArgs )
 
 void CFuncRotating::Blocked( void *funcArgs )
 {
-	CBaseMonster *pBlocker = GetClassPtr( (CBaseMonster *)ENT( gpGlobals->other ) );
+	CBaseMonster *pBlocker = (CBaseMonster *)GET_PRIVATE( ENT( globals->other ) );
 	pBlocker->TakeDamage( pev, pev, pev->dmg );
 }
 
@@ -450,7 +455,7 @@ void CPushable::Touch( void *funcArgs )
 		return;
 
 	// Don't move if the player is standing on us
-	if ( FBitSet( pevToucher->flags, FL_ONGROUND ) && VARS( ENT( pevToucher->groundentity ) ) == pev )
+	if ( FBitSet( pevToucher->flags, FL_ONGROUND ) && VARS( pevToucher->groundentity ) == pev )
 		return;
 
 	pev->velocity.x += pevToucher->velocity.x * 0.5;
