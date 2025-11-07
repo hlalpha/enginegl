@@ -498,10 +498,11 @@ void R_SparkStreaks (vec3_t org)
 		p->next = active_particles;
 		active_particles = p;
 
-		for (j=0;j<3;j++)
-			p->org[j] = org[j] + ((rand()&31)-16);
+		VectorCopy (org, p->org);
 
-		p->vel[2] = (rand()%63);
+		p->vel[0] = ((rand()&31)-16);
+		p->vel[1] = ((rand()&31)-16);
+		p->vel[2] = (rand()&63);
 
 		p->ramp = 0;
 		p->color = 254;
@@ -591,8 +592,8 @@ void R_LargeFunnel (vec3_t org)
 				dir[1] = org[1] - p->org[1];
 				dir[2] = org[2] - p->org[2];
 
-				VectorNormalize (dir);
-				vel = (100 + (rand()&63));
+				VectorNormalize (dir);						
+				vel = 100 + (rand()&63);
 				VectorScale (dir, vel, p->vel);
 			}
 }
@@ -657,7 +658,7 @@ void R_ShowLine (vec3_t startpos, vec3_t endpos)
 	norm = VectorNormalize (trace);
 	VectorScale (trace, 5.0, trace);
 
-	for ( ; norm ; norm-=5.0)
+	for ( ; norm>0 ; norm-=5)
 	{
 		if (!free_particles)
 			return;
@@ -684,7 +685,7 @@ R_BloodStream
 */
 void R_BloodStream (vec3_t pos, vec3_t dir, int pcolor, int speed)
 {
-	Sys_Error ("%s: not implemented!", __FUNCTION__);
+	// TODO(SanyaSho): Implement me!
 }
 
 /*
@@ -695,7 +696,46 @@ R_Blood
 */
 void R_Blood (vec3_t pos, vec3_t dir, int pcolor, int speed)
 {
-	Sys_Error ("%s: not implemented!", __FUNCTION__);
+	particle_t	*p;
+	int			stepCount, intensity;
+	int			i, j;
+	vec3_t		org, vel;
+
+	stepCount = speed / 2;
+	intensity = 3 * speed;
+
+	VectorNormalize (dir); // FIXME(SanyaSho): what's the point of this?
+
+	for (i=0 ; i<stepCount ; i++ , intensity-=speed)
+	{
+		org[0] = pos[0] + ((rand()&6)-3);
+		org[1] = pos[1] + ((rand()&6)-3);
+		org[2] = pos[2] + ((rand()&6)-3);
+
+		vel[0] = dir[0] + ((rand()&6)-0.06);
+		vel[1] = dir[1] + ((rand()&6)-0.06);
+		vel[2] = dir[2] + ((rand()&6)-0.06);
+
+		for (j=0 ; j<8 ; j++)
+		{
+			if (!free_particles)
+				return;
+			p = free_particles;
+			free_particles = p->next;
+			p->next = active_particles;
+			active_particles = p;
+
+			p->die = cl.time + 1.5;
+			p->type = pt_vox_grav;
+			p->color = (rand()%10) + pcolor;
+
+			p->org[0] = org[0] + (((rand()&2)-1)*0.5);
+			p->org[1] = org[1] + (((rand()&2)-1)*0.5);
+			p->org[2] = org[2] + (((rand()&2)-1)*0.5);
+
+			VectorScale (vel, intensity, p->vel);
+		}
+	}
 }
 
 void R_RocketTrail (vec3_t start, vec3_t end, int type)
@@ -885,7 +925,7 @@ void R_DrawParticles (void)
 			scale = 1;
 		else
 			scale = 1 + scale * 0.004;
-		memcpy ( color, &host_basepal[(int)p->color * 3], sizeof(color));
+		memcpy (color, &host_basepal[(int)p->color * 3], sizeof(color));
 		color[3] = 255;
 		glColor3ubv (color);
 		glTexCoord2f (0,0);

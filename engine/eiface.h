@@ -48,8 +48,8 @@ typedef struct enginefuncs_s
 
 	void				(*pfnChangeLevel)				( char *s1, char *s2 );
 
-	void				(*pfnSetSpawnParams)			( struct edict_s *ent );
-	void				(*pfnSaveSpawnParams)			( struct edict_s *e );
+	void				(*pfnSetSpawnParms)				( struct edict_s *ent );
+	void				(*pfnSaveSpawnParms)			( struct edict_s *e );
 
 	float				(*pfnVecToYaw)					( float *in );
 	void				(*pfnVecToAngles)				( float *in, float *out );

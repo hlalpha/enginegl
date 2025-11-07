@@ -164,12 +164,11 @@ R_FizzEffect
 */
 void R_FizzEffect (entity_t *ent, int modelIndex, int density)
 {
-	Sys_Error ("%s: not implemented!", __FUNCTION__);
-
 	model_t		*entmodel, *pmod;
-	int			framecount, i;
+	int			framecount, i, speed;
 	TEMPENTITY	*ptemp;
 	vec3_t		org;
+	float		width, depth, maxHeight;
 
 	// the entity doesn't have a model
 	entmodel = ent->model;
@@ -181,22 +180,34 @@ void R_FizzEffect (entity_t *ent, int modelIndex, int density)
 	if (!pmod)
 		return;
 
+	// calculate the effect params
+	width = entmodel->maxs[0] - entmodel->mins[0];
+	maxHeight = entmodel->maxs[2] - entmodel->mins[2];
+	depth = entmodel->maxs[1] - entmodel->mins[1];
+
+	speed = 3 * (density + 3);
+
 	framecount = ModelFrameCount (pmod);
 
-	for (i=0 ; i<density+1 ; i++)
+	for (i=0 ; i<(density+1) ; i++)
 	{
+		org[0] = entmodel->mins[0] + (rand() % (int)width);
+		org[1] = entmodel->mins[1] + (rand() % (int)depth);
+		org[2] = entmodel->mins[2];
+
 		ptemp = CL_TempEntAlloc(org, pmod);
 		if (!ptemp)
 			break;
 
-		// TODO(SanyaSho): The origin is calculated using model bbox and some rand() calls,
-		// but decompiled code looks like it was eaten 3 times so i can't RE this func atm.
-
 		ptemp->flags |= FTENT_SINEWAVE;
 
-		ptemp->entity.syncbase = org[0];
+		ptemp->entity.syncbase = org[0]; // syncbase is used as a origin[0] in CL_TempEntUpdate
 
-		/// ????
+		ptemp->entity.baseline.origin[2] = speed + (rand()&31);
+
+		ptemp->die = maxHeight / ptemp->entity.baseline.origin[2] + cl.time;
+
+		ptemp->entity.frame = (rand() % framecount);
 	}
 }
 
@@ -229,7 +240,7 @@ void R_TempSphereModel (vec3_t pos, vec_t scale, float life, int count, int mode
 		if (!ptemp)
 			break;
 
-		ptemp->entity.body = (rand() % framecount);
+		ptemp->entity.body = (rand() % framecount); // TODO(SanyaSho): Support for Sprites/AliasMDL!
 
 		if ((rand()&255) >= 200)
 			ptemp->flags |= FTENT_GRAVITY;
@@ -815,7 +826,7 @@ void CL_TempEntUpdate (void)
 	gravity = -frametime * sv_gravity.value;
 	gravitySlow = gravity * 0.5;
 
-	while ( pTemp )
+	while (pTemp)
 	{
 		life = pTemp->die - cl.time;
 
@@ -834,7 +845,7 @@ void CL_TempEntUpdate (void)
 		{
 			pprev = pTemp;
 
-			VectorCopy( pTemp->entity.origin, pTemp->entity.msg_origins[0] );
+			VectorCopy (pTemp->entity.origin, pTemp->entity.msg_origins[0]);
 
 			if (pTemp->flags & FTENT_SINEWAVE)
 			{
@@ -843,15 +854,11 @@ void CL_TempEntUpdate (void)
 				pTemp->entity.origin[2] += pTemp->entity.baseline.origin[2] * frametime;
 			}
 			else
-			{
 				for (i=0;i<3;i++)
 					pTemp->entity.origin[i] += pTemp->entity.baseline.origin[i] * frametime;
-			}
 
 			if (pTemp->flags & FTENT_ROTATE)
-			{
 				VectorAdd (pTemp->entity.angles, pTemp->entity.msg_angles[0], pTemp->entity.angles);
-			}
 
 			if (pTemp->flags & FTENT_COLLIDEWORLD)
 			{
