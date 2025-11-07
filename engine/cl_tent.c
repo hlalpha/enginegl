@@ -693,7 +693,7 @@ void CL_ParseTEnt (void)
 		pos[2] = MSG_ReadCoord ();
 		dir[0] = MSG_ReadCoord (); // scaling
 		modelindex = MSG_ReadShort ();
-		count = MSG_ReadByte ();
+		count = MSG_ReadShort ();
 		lifetime = (MSG_ReadByte () * 0.1);
 		R_TempSphereModel (pos, dir[0], lifetime, count, modelindex);
 		break;
@@ -730,11 +730,9 @@ void CL_TempEntInit (void)
 	int		i;
 
 	memset (&gTempEnts, 0, sizeof(gTempEnts));
-	for (i = 0; i < MAX_TEMP_ENTITIES; i++)
-	{
-		gTempEnts[i].next = &gTempEnts[i + 1];
-	}
-	gTempEnts[MAX_TEMP_ENTITIES - 1].next = NULL;
+	for (i=0 ; i<MAX_TEMP_ENTITIES; i++)
+		gTempEnts[i].next = &gTempEnts[i+1];
+	gTempEnts[MAX_TEMP_ENTITIES-1].next = NULL;
 
 	gpTempEntFree = gTempEnts;
 	gpTempEntActive = NULL;
@@ -769,7 +767,7 @@ TEMPENTITY *CL_TempEntAlloc (vec3_t org, model_t *model)
 	ent->entity.renderfx = kRenderFXNormal;
 	ent->die = cl.time+0.75;
 
-	for (i=0;i<3;i++)
+	for (i=0 ; i<3 ; i++)
 	{
 		ent->entity.origin[i] = org[i] + ((rand() % 6) - 3);
 		ent->entity.msg_origins[0][i] = (4 * (rand() % 100) - 200); // FIXME(SanyaSho): This is probably not what is in "*origin - 25"
