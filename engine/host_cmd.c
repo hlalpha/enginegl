@@ -748,6 +748,7 @@ void Host_Loadgame_f (void)
 }
 
 #ifdef QUAKE2
+#if !defined( QUIVER )
 void SaveGamestate()
 {
 	char	name[256];
@@ -901,6 +902,7 @@ int LoadGamestate(char *level, char *startspot)
 
 	return 0;
 }
+#endif // !QUIVER
 
 // changing levels within a unit
 void Host_Changelevel2_f (void)
@@ -931,11 +933,13 @@ void Host_Changelevel2_f (void)
 
 	SV_SaveSpawnparms ();
 
+#if !defined( QUIVER )
 	// save the current level's state
 	SaveGamestate ();
 
 	// try to restore the new level
 	if (LoadGamestate (level, startspot))
+#endif // !QUIVER
 		SV_SpawnServer (level, startspot);
 }
 #endif
