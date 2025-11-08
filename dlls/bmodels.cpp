@@ -269,8 +269,6 @@ void CFuncRotating::Spawn()
 	if ( FBitSet( pev->spawnflags, 0x02 ) )
 		pev->movedir = pev->movedir * -1;
 
-	ALERT( at_info, "%f %f %f", pev->movedir[0], pev->movedir[1], pev->movedir[2] );
-
 	if ( FBitSet( pev->spawnflags, 0x40 ) )
 	{
 		pev->solid = SOLID_NOT;

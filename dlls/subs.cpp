@@ -75,8 +75,6 @@ void CBaseDelay::SUB_UseTargets( void *funcArgs )
 		}
 	}
 
-	ALERT( at_log, "Firing: (%s)\n", STRING( pev->target ) );
-
 	if ( !FStringNull( pev->target ) )
 	{
 		int oldSelf = globals->self;
@@ -87,7 +85,6 @@ void CBaseDelay::SUB_UseTargets( void *funcArgs )
 		for (;;)
 		{
 			pEnt = FIND_ENTITY_BY_STRING( pEnt, "targetname", STRING( pev->target ) );
-			ALERT( at_log, "Found: %s, firing (%s)\n", STRING( pEnt->v.classname ), STRING( pev->target ) );
 			if ( FNullEnt ( pEnt ) )
 				break;
 
