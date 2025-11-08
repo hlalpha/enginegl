@@ -94,7 +94,7 @@ void CBaseDelay::SUB_UseTargets( void *funcArgs )
 			globals->self = OFFSET( pEnt );
 			globals->other = oldSelf;
 
-			CPointEntity *pTarget = GetClassPtr( (CPointEntity *)pEnt );
+			CPointEntity *pTarget = GetClassPtr( (CPointEntity *)VARS( pEnt ) );
 			pTarget->Use( NULL );
 
 			globals->self = oldSelf;
