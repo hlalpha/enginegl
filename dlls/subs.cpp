@@ -181,9 +181,9 @@ void CBaseToggle::AngularMoveDone( void *funcArgs )
 	if ( FBitSet( pev->spawnflags, 0x40 ) )
 		pev->movedir = Vector( 0, 0, 1 );
 	else if ( FBitSet( pev->spawnflags, 0x80 ) )
-		pev->movedir = Vector( 0, 1, 0 );
-	else
 		pev->movedir = Vector( 1, 0, 0 );
+	else
+		pev->movedir = Vector( 0, 1, 0 );
 }
 
 /*static*/ float CBaseToggle::AxisDelta( int flags, Vector &angle1, Vector &angle2 )
