@@ -19,6 +19,9 @@ set( DLLS_SOURCES # "Source Files"
 	"items.cpp"
 	"bmodels.cpp"
 	"globals.cpp"
+	"doors.cpp"
+	"plats.cpp"
+	"john_train.cpp"
 )
 
 set( DLLS_HEADERS # "Header Files"
@@ -36,10 +39,11 @@ set( DLLS_HEADERS # "Header Files"
 	"vector.h"
 	"basemonster.h"
 	"items.h"
+	"doors.h"
 )
 
 add_library( hl SHARED ${DLLS_SOURCES} ${DLLS_HEADERS} )
 install_multiplatform( hl "${SRCDIR}/game/valve/dlls" )
 
-target_compile_definitions( hl PRIVATE GLQUAKE QUIVER )
+target_compile_definitions( hl PRIVATE GLQUAKE QUIVER QUAKE2 )
 target_include_directories( hl PRIVATE "../engine" "." )

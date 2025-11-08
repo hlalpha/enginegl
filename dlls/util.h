@@ -54,7 +54,7 @@ typedef int EOFFSET;
 extern edict_t *DBG_EntOfVars(const entvars_t *pev);
 inline edict_t *ENT(const entvars_t *pev)	{ return DBG_EntOfVars(pev); }
 #else
-inline edict_t *ENT(const entvars_t *pev)	{ return pev->pContainingEntity; }
+inline edict_t *ENT(const entvars_t *pev)	{ return (edict_t *)pev->pContainingEntity; }
 #endif
 inline edict_t *ENT(edict_t *pent)			{ return pent; }
 inline edict_t *ENT(EOFFSET eoffset)		{ return (*g_engfuncs.pfnPEntityOfEntOffset)(eoffset); }
@@ -86,7 +86,7 @@ inline entvars_t *VARS(edict_t *pent)
 }
 
 inline entvars_t* VARS(EOFFSET eoffset)	{ return VARS(ENT(eoffset)); }
-
+inline int ENTINDEX(int ent) { return (*g_engfuncs.pfnIndexOfEdict)(ent); }
 
 // Testing the three types of "entity" for nullity
 #define eoNullEntity 0

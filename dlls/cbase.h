@@ -100,6 +100,8 @@ enum TOGGLE_STATE
 	TS_GOING_DOWN,
 };
 
+#define SetMoveDone( a )		m_pfnCallWhenMoveDone		= static_cast <void (CBaseToggle:: *)( void *funcArgs )>( a )
+
 class CBaseToggle : public CBaseDelay
 {
 public:
@@ -111,7 +113,7 @@ public:
 	static void AxisDir( entvars_t *pev );
 	static float AxisDelta( int flags, Vector &angle1, Vector &angle2 );
 
-protected:
+public: // protected:
 	TOGGLE_STATE m_toggle_state;
 
 	float m_flActivateFinished;
@@ -131,7 +133,7 @@ protected:
 
 	int m_nActivator;
 
-	void( __stdcall *m_pfnCallWhenMoveDone )( void *funcArg );
+	void (CBaseToggle:: *m_pfnCallWhenMoveDone)( void *funcArgs );
 
 	Vector m_vecFinalDest;
 	Vector m_vecFinalAngle;
