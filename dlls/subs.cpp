@@ -140,7 +140,7 @@ void CBaseToggle::LinearMoveDone( void *funcArgs )
 	UTIL_SetOrigin( pev, m_vecFinalDest );
 	pev->velocity = g_vecZero;
 	pev->nextthink = -1;
-	m_pfnCallWhenMoveDone( NULL );
+	(this->*m_pfnCallWhenMoveDone)( NULL );
 }
 
 void CBaseToggle::AngularMove( Vector vecDestAngle, float flSpeed )
@@ -173,7 +173,7 @@ void CBaseToggle::AngularMoveDone( void *funcArgs )
 	pev->angles = m_vecFinalAngle;
 	pev->avelocity = g_vecZero;
 	pev->nextthink = -1;
-	m_pfnCallWhenMoveDone( NULL );
+	(this->*m_pfnCallWhenMoveDone)( NULL );
 }
 
 /*static*/ void CBaseToggle::AxisDir( entvars_t *pev )

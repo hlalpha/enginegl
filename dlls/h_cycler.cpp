@@ -79,6 +79,10 @@ void CCycler::Pain( float flDamage )
 	pev->frame = 0.0;
 }
 
+
+//
+// cycler_scientist
+//
 class CCyclerScientist : public CCycler
 {
 public:
@@ -87,8 +91,13 @@ public:
 		GenericCyclerSpawn( "models/scientist.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_scientist, CCyclerScientist );
 
+
+//
+// cycler_headcrab
+//
 class CCyclerHeadcrab : public CCycler
 {
 public:
@@ -97,8 +106,13 @@ public:
 		GenericCyclerSpawn( "models/headcrab.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_headcrab, CCyclerHeadcrab );
 
+
+//
+// cycler_panther
+//
 class CCyclerPanther : public CCycler
 {
 public:
@@ -107,8 +121,13 @@ public:
 		GenericCyclerSpawn( "models/panther.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_panther, CCyclerPanther );
 
+
+//
+// cycler_houndeye
+//
 class CCyclerHoundeye : public CCycler
 {
 public:
@@ -117,8 +136,13 @@ public:
 		GenericCyclerSpawn( "models/houndeye.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_houndeye, CCyclerHoundeye );
 
+
+//
+// cycler_secure
+//
 class CCyclerSecure : public CCycler
 {
 public:
@@ -127,8 +151,13 @@ public:
 		GenericCyclerSpawn( "models/barney.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_secure, CCyclerSecure );
 
+
+//
+// cycler_bullchicken
+//
 class CCyclerBullchicken : public CCycler
 {
 public:
@@ -137,8 +166,13 @@ public:
 		GenericCyclerSpawn( "models/bullchik.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_bullchicken, CCyclerBullchicken );
 
+
+//
+// cycler_doctor
+//
 class CCyclerDoctor : public CCycler
 {
 public:
@@ -147,8 +181,13 @@ public:
 		GenericCyclerSpawn( "models/doctor.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_doctor, CCyclerDoctor );
 
+
+//
+// cycler_reddoc
+//
 class CCyclerReddoc : public CCycler
 {
 public:
@@ -157,8 +196,13 @@ public:
 		GenericCyclerSpawn( "models/reddoc.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_reddoc, CCyclerReddoc );
 
+
+//
+// cycler_greendoc
+//
 class CCyclerGreendoc : public CCycler
 {
 public:
@@ -167,8 +211,13 @@ public:
 		GenericCyclerSpawn( "models/greendoc.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_greendoc, CCyclerGreendoc );
 
+
+//
+// cycler_bluedoc
+//
 class CCyclerBluedoc : public CCycler
 {
 public:
@@ -177,8 +226,13 @@ public:
 		GenericCyclerSpawn( "models/bluedoc.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_bluedoc, CCyclerBluedoc );
 
+
+//
+// cycler_turret
+//
 class CCyclerTurret : public CCycler
 {
 public:
@@ -188,6 +242,12 @@ public:
 	}
 };
 
+//LINK_ENTITY_TO_CLASS( cycler_turret, CCyclerTurret );
+
+
+//
+// cycler_human_assaunt
+//
 class CCyclerHumanAssault : public CCycler
 {
 public:
@@ -196,8 +256,13 @@ public:
 		GenericCyclerSpawn( "models/hassault.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_human_assault, CCyclerHumanAssault );
 
+
+//
+// cycler_human_grunt
+//
 class CCyclerHumanGrunt : public CCycler
 {
 public:
@@ -206,8 +271,13 @@ public:
 		GenericCyclerSpawn( "models/hgrunt.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_human_grunt, CCyclerHumanGrunt );
 
+
+//
+// cycler_human_desert
+//
 class CCyclerHumanDesert : public CCycler
 {
 public:
@@ -216,8 +286,13 @@ public:
 		GenericCyclerSpawn( "models/desert.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_desert, CCyclerHumanDesert );
 
+
+//
+// cycler_olive
+//
 class CCyclerOlive : public CCycler
 {
 public:
@@ -226,8 +301,13 @@ public:
 		GenericCyclerSpawn( "models/olive.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_olive, CCyclerOlive );
 
+
+//
+// cycler_alien_grunt
+//
 class CCyclerAlienGrunt : public CCycler
 {
 public:
@@ -236,8 +316,13 @@ public:
 		GenericCyclerSpawn( "models/agrunt.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_alien_grunt, CCyclerAlienGrunt );
 
+
+//
+// cycler_alien_slave
+//
 class CCyclerAlienSlave : public CCycler
 {
 public:
@@ -246,8 +331,13 @@ public:
 		GenericCyclerSpawn( "models/islave.mdl", Vector( -16, -16, 0 ), Vector( 16, 16, 64 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_alien_slave, CCyclerAlienSlave );
 
+
+//
+// cycler_prdroid
+//
 class CCyclerPrdroid : public CCycler
 {
 public:
@@ -258,7 +348,9 @@ public:
 		GenericCyclerSpawn( "models/prdroid.mdl", Vector( -16, -16, -16 ), Vector( 16, 16, 16 ) );
 	}
 };
+
 LINK_ENTITY_TO_CLASS( cycler_prdroid, CCyclerPrdroid );
+
 
 LINK_ENTITY_TO_CLASS( cycler_turret, CCyclerTurret ); // ??
 

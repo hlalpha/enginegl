@@ -66,3 +66,4 @@ void CTrainInfo::Spawn()
 	pev->movetype = MOVETYPE_NONE;
 	UTIL_SetSize( pev, Vector( -32, -32, -32 ), Vector( 32, 32, 32 ) );
 }
+

@@ -1,29 +1,12 @@
-/*
-
-===== h_export.cpp ========================================================
-
-  Entity classes exported by Halflife.
-
-*/
-
+// h_export.cpp
 #include "extdll.h"
 #include "util.h"
-
 #include "cbase.h"
 
-// Holds engine functionality callbacks
 enginefuncs_t g_engfuncs;
 
-// Required DLL entry point
-BOOL WINAPI DllMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 {
-	if (fdwReason == DLL_PROCESS_ATTACH)
-	{
-	}
-	else if (fdwReason == DLL_PROCESS_DETACH)
-	{
-	}
-
 	return TRUE;
 }
 

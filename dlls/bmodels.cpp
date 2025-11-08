@@ -661,3 +661,4 @@ void CPendulum::RopeTouch( void *funcArgs )
 		pevToucher->movetype = MOVETYPE_NONE;
 	}
 }
+

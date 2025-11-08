@@ -21,14 +21,9 @@ public:
 		CineSpawn( "models/cine-scientist.mdl" );
 	}
 };
-class CCine2Scientist : public CCineMonster
-{
-public:
-	void Spawn()
-	{
-		CineSpawn( "models/cine2-scientist.mdl" );
-	}
-};
+
+LINK_ENTITY_TO_CLASS( monster_cine_scientist, CCineScientist );
+
 class CCinePanther : public CCineMonster
 {
 public:
@@ -37,6 +32,8 @@ public:
 		CineSpawn( "models/cine-panther.mdl" );
 	}
 };
+
+LINK_ENTITY_TO_CLASS( monster_cine_panther, CCinePanther );
 
 class CCineBarney : public CCineMonster
 {
@@ -47,6 +44,19 @@ public:
 	}
 };
 
+LINK_ENTITY_TO_CLASS( monster_cine_barney, CCineBarney );
+
+class CCine2Scientist : public CCineMonster
+{
+public:
+	void Spawn()
+	{
+		CineSpawn( "models/cine2-scientist.mdl" );
+	}
+};
+
+LINK_ENTITY_TO_CLASS( monster_cine2_scientist, CCine2Scientist );
+
 class CCine2HeavyWeapons : public CCineMonster
 {
 public:
@@ -55,6 +65,8 @@ public:
 		CineSpawn( "models/cine2_hvyweapons.mdl" );
 	}
 };
+
+LINK_ENTITY_TO_CLASS( monster_cine2_hvyweapons, CCine2HeavyWeapons );
 
 class CCine2Slave : public CCineMonster
 {
@@ -65,6 +77,8 @@ public:
 	}
 };
 
+LINK_ENTITY_TO_CLASS( monster_cine2_slave, CCine2Slave );
+
 class CCine3Scientist : public CCineMonster
 {
 public:
@@ -73,6 +87,8 @@ public:
 		CineSpawn( "models/cine3-scientist.mdl" );
 	}
 };
+
+LINK_ENTITY_TO_CLASS( monster_cine3_scientist, CCine3Scientist );
 
 class CCine3Barney : public CCineMonster
 {
@@ -83,24 +99,9 @@ public:
 	}
 };
 
-//
-// ********** Scientist SPAWN **********
-//
-
-LINK_ENTITY_TO_CLASS( monster_cine_scientist, CCineScientist );
-LINK_ENTITY_TO_CLASS( monster_cine_panther, CCinePanther );
-LINK_ENTITY_TO_CLASS( monster_cine_barney, CCineBarney );
-LINK_ENTITY_TO_CLASS( monster_cine2_scientist, CCine2Scientist );
-LINK_ENTITY_TO_CLASS( monster_cine2_hvyweapons, CCine2HeavyWeapons );
-LINK_ENTITY_TO_CLASS( monster_cine2_slave, CCine2Slave );
-LINK_ENTITY_TO_CLASS( monster_cine3_scientist, CCine3Scientist );
 LINK_ENTITY_TO_CLASS( monster_cine3_barney, CCine3Barney );
 
-//
-// ********** Scientist SPAWN **********
-//
-
-void CCineMonster ::CineSpawn( char *szModel )
+void CCineMonster::CineSpawn( char *szModel )
 {
 	PRECACHE_MODEL( szModel );
 	SET_MODEL( edict(), szModel );
@@ -130,32 +131,20 @@ void CCineMonster ::CineSpawn( char *szModel )
 	}
 }
 
-//
-// CineStart
-//
-void CCineMonster ::Use( void *funcArgs )
+void CCineMonster::Use( void *funcArgs )
 {
 	pev->animtime = 0; // reset the sequence
 	SetThink( &CCineMonster::CineThink );
 	pev->nextthink = gpGlobals->time;
 }
 
-//
-// ********** Scientist DIE **********
-//
-void CCineMonster ::Die()
+void CCineMonster::Die()
 {
 	SetThink( &CCineMonster::SUB_Remove );
 }
 
 void CCineMonster ::CineThink( void *funcArgs )
 {
-	// DBG_CheckMonsterData(pev);
-
-	// Emit particles from origin (double check animator's placement of model)
-	// THIS is a test feature
-	//UTIL_ParticleEffect(pev->origin, g_vecZero, 255, 20);
-
 	if ( !pev->animtime )
 		ResetSequenceInfo( 0.1f );
 
@@ -170,63 +159,35 @@ void CCineMonster ::CineThink( void *funcArgs )
 	StudioFrameAdvance( 1.0f );
 }
 
+
 //
 // cine_blood
 //
 class CCineBlood : public CBaseEntity
 {
 public:
-	void Spawn();
+	virtual void Spawn();
 	void BloodStart( void *funcArgs );
 	void BloodGush( void *funcArgs );
 };
 
 LINK_ENTITY_TO_CLASS( cine_blood, CCineBlood );
 
-void CCineBlood ::BloodGush( void *funcArgs )
+void CCineBlood::BloodGush( void *funcArgs )
 {
-	Vector vecSplatDir;
-	TraceResult tr;
-	pev->nextthink = gpGlobals->time + 0.1;
-
-#if 0
-	UTIL_MakeVectors( pev->angles );
-	if ( pev->health-- < 0 )
-		REMOVE_ENTITY( edict() );
-	// CHANGE_METHOD ( ENT(pev), em_think, SUB_Remove );
-
-	if ( RANDOM_FLOAT( 0, 1 ) < 0.7 ) // larger chance of globs
-	{
-		UTIL_BloodDrips( pev->origin, UTIL_RandomBloodVector(), BLOOD_COLOR_RED, 10 );
-	}
-	else // slim chance of geyser
-	{
-		UTIL_BloodStream( pev->origin, UTIL_RandomBloodVector(), BLOOD_COLOR_RED, RANDOM_LONG( 50, 150 ) );
-	}
-
-	if ( RANDOM_FLOAT( 0, 1 ) < 0.75 )
-	{ // decals the floor with blood.
-		vecSplatDir = Vector( 0, 0, -1 );
-		vecSplatDir = vecSplatDir + ( RANDOM_FLOAT( -1, 1 ) * 0.6 * gpGlobals->v_right ) + ( RANDOM_FLOAT( -1, 1 ) * 0.6 * gpGlobals->v_forward ); // randomize a bit
-		UTIL_TraceLine( pev->origin + Vector( 0, 0, 64 ), pev->origin + vecSplatDir * 256, ignore_monsters, edict(), &tr );
-		if ( tr.flFraction != 1.0 )
-		{
-			// Decal with a bloodsplat
-			UTIL_BloodDecalTrace( &tr, BLOOD_COLOR_RED );
-		}
-	}
-#endif
+	// SDKTODO(SanyaSho)
 }
 
-void CCineBlood ::BloodStart( void *funcArgs )
+void CCineBlood::BloodStart( void *funcArgs )
 {
 	SetThink( &CCineBlood::BloodGush );
-	pev->nextthink = gpGlobals->time; // now!
+	pev->nextthink = gpGlobals->time;
 }
 
-void CCineBlood ::Spawn()
+void CCineBlood::Spawn()
 {
 	pev->solid = SOLID_NOT;
 	SetUse( &CCineBlood::BloodStart );
-	pev->health = 20; //hacked health to count iterations
+	pev->health = 20;
 }
+

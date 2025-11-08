@@ -5,7 +5,9 @@
 #include "basemonster.h"
 #include "doors.h"
 
+
 void PlatSpawnInsideTrigger( entvars_t *pevPlatform );
+
 
 class CBasePlatTrain : public CBaseToggle
 {
@@ -31,6 +33,7 @@ void CBasePlatTrain::KeyValue( KeyValueData *pkvd )
 		pkvd->fHandled = 1;
 	}
 }
+
 
 //
 // func_plat
@@ -98,6 +101,7 @@ void CFuncPlat::Spawn()
 	}
 }
 
+
 //
 // func_plat
 //
@@ -162,6 +166,7 @@ void CPlatTrigger::Touch( void *funcArgs )
 	};
 }
 
+
 void CFuncPlat::PlatUse( void *funcArgs )
 {
 	SetUse( NULL );
@@ -220,6 +225,7 @@ void CFuncPlat::Blocked( void *funcArgs )
 		break;
 	};
 }
+
 
 //
 // func_train
@@ -364,3 +370,4 @@ void CFuncTrain::Spawn()
 	pev->nextthink = pev->ltime + 0.1f;
 	SetThink( &CFuncTrain::Activate );
 }
+

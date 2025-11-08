@@ -39,8 +39,9 @@ void CItem::Use( void *funcArgs )
 
 void CItem::Touch( void *funcArgs )
 {
-	entvars_t *pevToucher = VARS( ENT( gpGlobals->other ) );
+	entvars_t *pevToucher = VARS( gpGlobals->other );
 
+	// Must be a player!
 	if ( !FClassnameIs( pevToucher, "player" ) )
 		return;
 

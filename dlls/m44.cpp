@@ -6,7 +6,7 @@
 class CM44 : public CBaseEntity
 {
 public:
-	void Spawn();
+	virtual void Spawn();
 };
 
 LINK_ENTITY_TO_CLASS( monster_m44, CM44 );
@@ -32,3 +32,4 @@ void CM44::Spawn()
 
 	pev->nextthink += UTIL_RandomFloat( 0.0, 0.5 );
 }
+

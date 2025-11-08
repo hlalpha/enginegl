@@ -1,11 +1,4 @@
-/*
-
-===== lights.cpp ========================================================
-
-  spawn and think functions for editor-placed lights
-
-*/
-
+// lights.cpp
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -15,16 +8,14 @@ class CLight : public CBaseEntity
 public:
 	virtual void KeyValue( KeyValueData *pkvd );
 	virtual void Spawn();
-	void Use( void *funcArg );
+	virtual void Use( void *funcArg );
 
 private:
 	int m_iStyle;
 };
+
 LINK_ENTITY_TO_CLASS( light, CLight );
 
-//
-// Cache user-entity-field values until spawn is called.
-//
 void CLight::KeyValue( KeyValueData *pkvd )
 {
 	if ( FStrEq( pkvd->szKeyName, "style" ) )
@@ -39,24 +30,16 @@ void CLight::KeyValue( KeyValueData *pkvd )
 	}
 }
 
-/*QUAKED light (0 1 0) (-8 -8 -8) (8 8 8) LIGHT_START_OFF
-Non-displayed light.
-Default light value is 300
-Default style is 0
-If targeted, it will toggle between on or off.
-*/
 void CLight::Spawn()
 {
 	if ( FStringNull( pev->targetname ) )
 	{
-		// inert light
 		REMOVE_ENTITY( edict() );
 		return;
 	}
 
 	if ( m_iStyle >= 32 )
 	{
-		//CHANGE_METHOD(ENT(pev), em_use, light_use);
 		if ( FBitSet( pev->spawnflags, SF_LIGHT_START_OFF ) )
 			LIGHT_STYLE( m_iStyle, "a" );
 		else
@@ -81,8 +64,5 @@ void CLight::Use( void *funcArg )
 	}
 }
 
-//
-// shut up spawn functions for new spotlights
-//
 LINK_ENTITY_TO_CLASS( light_spot, CLight );
 

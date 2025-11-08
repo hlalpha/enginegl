@@ -671,3 +671,4 @@ void CTriggerPush::Use( void *funcArgs )
 		pev->solid = SOLID_TRIGGER;
 	}
 }
+

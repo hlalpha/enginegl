@@ -4,8 +4,10 @@
 #include "cbase.h"
 #include "doors.h"
 
+
 extern void SetMovedir( entvars_t *pev );
 extern int g_eoActivator;
+
 
 //
 // func_door/func_water
@@ -363,6 +365,7 @@ void CBaseDoor::Blocked( void *funcArgs )
 	// SDKTODO(SanyaSho)
 }
 
+
 //
 // func_door_rotating
 //
@@ -416,6 +419,7 @@ void CRotDoor::Spawn()
 	else
 		SetTouch( &CRotDoor::DoorTouch );
 }
+
 
 //
 // momentary_door
@@ -503,3 +507,4 @@ void CMomentaryDoor::Use( void *funcArgs )
 
 	LinearMove( vecMove, pev->speed );
 }
+

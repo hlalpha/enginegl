@@ -1,3 +1,4 @@
+// cbase.cpp
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -128,3 +129,4 @@ void CBaseEntity::Blocked( void *funcArgs )
 	if ( m_pfnBlocked )
 		(this->*m_pfnBlocked)( funcArgs );
 }
+
