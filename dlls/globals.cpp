@@ -7,3 +7,4 @@ DLL_GLOBAL unsigned int g_ulModelIndexPlayer;
 DLL_GLOBAL Vector g_vecAttackDir;
 DLL_GLOBAL int g_iSkillLevel;
 DLL_GLOBAL Vector g_vecZero = Vector( 0, 0, 0 );
+DLL_GLOBAL int g_fDrawLines;

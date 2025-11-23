@@ -528,6 +528,9 @@ void CTriggerCounter::Spawn()
 	SetUse( &CBaseTrigger::CounterUse );
 }
 
+
+char st_szNextMap[cchMapNameMost];
+
 //
 // trigger_changelevel
 //
@@ -543,7 +546,7 @@ private:
 	char m_szMapName[cchMapNameMost];
 };
 
-//LINK_ENTITY_TO_CLASS( trigger_changelevel, CChangeLevel );
+LINK_ENTITY_TO_CLASS( trigger_changelevel, CChangeLevel );
 
 void CChangeLevel::KeyValue( KeyValueData *pkvd )
 {
@@ -566,7 +569,41 @@ void CChangeLevel::Spawn()
 
 void CChangeLevel::TouchChangeLevel( void *funcArgs )
 {
-	// SDKTODO(SanyaSho)
+	entvars_t *pevGlobalOther = VARS( gpGlobals->other ); // landmark
+	entvars_t *pevOther = VARS( globals->other ); // player
+
+	// Must be a player!
+	if ( !FClassnameIs( pevOther, "player" ) )
+		return;
+
+	SetTouch( NULL );
+
+	pev->solid = SOLID_NOT;
+
+	//SDK_SaveRestore *pSaveRestore = malloc( sizeof( SDK_SaveRestore ) );
+	//TODO
+	{
+	}
+
+	strcpy( st_szNextMap, m_szMapName );
+
+	SUB_UseTargets( pev );
+
+	// SDKTODO
+	/*entvars_t *pEntVars = NULL;
+	edict_t *pEnt = UTIL_FindRadius( VecBModelOrigin( pev ), 128.f );
+	for ( ;; )
+	{
+		if ( FNullEnt( pEnt ) )
+			break;
+
+
+
+		pEntVars = VARS( pEnt );
+		pEnt = ENT( pEntVars->chain );
+	}*/
+
+	CHANGE_LEVEL( st_szNextMap, "" );
 }
 
 //

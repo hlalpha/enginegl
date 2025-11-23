@@ -5,10 +5,88 @@
 #include "basemonster.h"
 #include "../engine/studio.h"
 
-int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage )
+extern DLL_GLOBAL Vector g_vecAttackDir;
+extern Vector VecBModelOrigin( entvars_t *pevBModel );
+
+void CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage )
 {
-	// SDKTODO(SanyaSho)
-	return 0;
+	// Can't take damage!
+	if ( pev->takedamage == DAMAGE_NO )
+		return;
+
+	g_vecAttackDir = ( pevInflictor->origin - VecBModelOrigin( pev ) ).Normalize();
+
+	float flArmor = ceil( pev->armortype * flDamage );
+	if ( pev->armortype <= 0 )
+	{
+		flArmor = pev->armorvalue;
+		pev->armortype = 0;
+		//pev->items &= ~IT_ARMOR; // TODO
+	}
+
+	pev->armorvalue -= flArmor;
+
+	float flDamageTaken = ceil( flDamage - flArmor );
+	if ( FBitSet( pev->flags, FL_CLIENT ) )
+	{
+		pev->dmg_take += flDamageTaken;
+		pev->dmg_save += flArmor;
+		pev->dmg_inflictor = OFFSET( pevInflictor );
+	}
+
+	if ( !FNullEnt( pevInflictor ) )
+	{
+		if ( pev->movetype != MOVETYPE_WALK && pevAttacker->solid != SOLID_TRIGGER )
+		{
+			Vector pushDir = pev->origin - ( ( pevInflictor->absmin + pevInflictor->absmax ) * 0.5f ).Normalize();
+
+			pev->velocity.x += pushDir.x * flDamage * 8.0f;
+			pev->velocity.y += pushDir.y * flDamage * 8.0f;
+			pev->velocity.z += pushDir.z * flDamage * 8.0f;
+		}
+	}
+
+	// Check if we're in the same team
+	if ( !strcmp( STRING( pev->classname ), "player" ) )
+	{
+		if ( FBitSet( pev->flags, FL_GODMODE ) )
+			return;
+
+		if ( ( globals->teamplay != 0 ) && pevAttacker->team == pev->team )
+			return;
+	}
+
+	pev->health -= flDamageTaken;
+
+	if ( pev->health <= 0 )
+	{
+		// TODO
+		//GibMonster( OFFSET( pevAttacker ) );
+		Die();
+		return;
+	}
+
+	if ( FBitSet( pev->flags, FL_MONSTER ) )
+	{
+		if ( !FNullEnt( pevAttacker ) )
+		{
+			if ( FBitSet( pevAttacker->flags, FL_MONSTER | FL_CLIENT ) )
+			{
+				CBaseMonster *pMonsterAttacker = (CBaseMonster *)CBaseMonster::Instance( pevAttacker );
+
+				if ( Classify() != pMonsterAttacker->Classify() )
+				{
+					pev->enemy = pev->goalentity = OFFSET( pevAttacker );
+					m_pLastAttacker = pevAttacker;
+					m_vecAttackDir = ( pev->origin * 64 ) + g_vecAttackDir;
+					pev->ideal_yaw = UTIL_VecToYaw( m_vecAttackDir - pev->origin );
+				}
+			}
+		}
+	}
+
+	if ( gpGlobals->time > pev->pain_finished )
+		Pain( flDamage );
 }
 
 void CBaseMonster::SetDeathType( int iDeathType )

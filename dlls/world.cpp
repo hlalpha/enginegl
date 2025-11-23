@@ -13,44 +13,7 @@
 /*extern*/ CBaseEntity				*g_pLastSpawn; // TODO(SanyaSho): Move it into player.cpp
 DLL_GLOBAL EOFFSET					g_eoBodyQueueHead;
 
-//extern void W_Precache();
-void W_Precache()
-{
-#if 0
-	PRECACHE_MODEL( "models/grenade.mdl" );
-	PRECACHE_MODEL( "sprites/shard.spr" );
-	PRECACHE_MODEL( "models/v_crowbar.mdl" );
-	PRECACHE_MODEL( "models/v_glock.mdl" );
-	PRECACHE_MODEL( "models/v_mp5.mdl" );
-#endif
-
-#if 0
-	m_iShell = PRECACHE_MODEL( "models/shell.mdl" );
-	m_iShrapnel = PRECACHE_MODEL( "models/shrapnel.mdl" );
-#endif
-
-	PRECACHE_SOUND( "weapons/debris1.wav" );
-	PRECACHE_SOUND( "weapons/debris2.wav" );
-	PRECACHE_SOUND( "weapons/debris3.wav" );
-
-	PRECACHE_SOUND( "weapons/pl_shell1.wav" );
-	PRECACHE_SOUND( "weapons/pl_shell2.wav" );
-	PRECACHE_SOUND( "weapons/pl_shell3.wav" );
-
-	PRECACHE_SOUND( "weapons/hks1.wav" );
-	PRECACHE_SOUND( "weapons/hks2.wav" );
-	PRECACHE_SOUND( "weapons/hks3.wav" );
-
-	PRECACHE_SOUND( "weapons/pl_gun1.wav" );
-	PRECACHE_SOUND( "weapons/pl_gun2.wav" );
-
-	PRECACHE_SOUND( "weapons/glauncher.wav" );
-	PRECACHE_SOUND( "weapons/glauncher2.wav" );
-
-	PRECACHE_SOUND( "weapons/g_bounce1.wav" );
-	PRECACHE_SOUND( "weapons/g_bounce2.wav" );
-	PRECACHE_SOUND( "weapons/g_bounce3.wav" );
-}
+extern void W_Precache();
 
 char *g_szDecals[] =
 {

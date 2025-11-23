@@ -231,7 +231,7 @@ void CBaseDoor::DoorTouch( void *funcArgs )
 		return;
 
 	SetTouch( NULL );
-	m_nActivator = gpGlobals->other;
+	m_eoActivator = gpGlobals->other;
 	DoorActivate();
 }
 
@@ -246,7 +246,7 @@ void CBaseDoor::DoorActivate()
 	if ( !FBitSet( pev->spawnflags, 0x20 ) || m_toggle_state != TS_AT_TOP )
 	{
 		// Healing stations
-		entvars_t *pActivator = VARS( m_nActivator );
+		entvars_t *pActivator = VARS( m_eoActivator );
 		if ( FClassnameIs( pActivator, "player" ) )
 		{
 			pActivator->health += m_bHealthValue;
