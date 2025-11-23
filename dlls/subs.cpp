@@ -188,7 +188,7 @@ void CBaseToggle::AngularMoveDone( void *funcArgs )
 	if ( FBitSet( flags, 0x40 ) )
 		return angle1.z - angle2.z;
 	else if ( FBitSet( flags, 0x80 ) )
-		return angle1.y - angle2.y;
-	else
 		return angle1.x - angle2.x;
+	else
+		return angle1.y - angle2.y;
 }
