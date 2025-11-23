@@ -144,21 +144,21 @@ void CFuncGlass::Die()
 
 	UTIL_MakeVectors( pev->angles );
 
-	WRITE_BYTE( MSG_ONE, 23 );											// msg
-	WRITE_BYTE( MSG_ONE, TE_BREAKMODEL );								// teid
-	WRITE_COORD( MSG_ONE, ( pev->mins[0] + pev->maxs[0] ) * 0.5f );		// x
-	WRITE_COORD( MSG_ONE, ( pev->mins[1] + pev->maxs[1] ) * 0.5f );		// y
-	WRITE_COORD( MSG_ONE, ( pev->mins[2] + pev->maxs[2] ) * 0.5f );		// z
-	WRITE_COORD( MSG_ONE, pev->size[0] );								// sizex
-	WRITE_COORD( MSG_ONE, pev->size[1] );								// sizey
-	WRITE_COORD( MSG_ONE, pev->size[2] );								// sizez
-	WRITE_COORD( MSG_ONE, 1 );											// pitch
-	WRITE_COORD( MSG_ONE, 1 );											// yaw
-	WRITE_COORD( MSG_ONE, 1 );											// roll
-	WRITE_SHORT( MSG_ONE, m_nBreakModel );								// modelindex
-	WRITE_BYTE( MSG_ONE, 12 );											// count
-	WRITE_BYTE( MSG_ONE, 15 );											// lifetime * 0.1
-	WRITE_BYTE( MSG_ONE, BREAK_GLASS );									// flags
+	WRITE_BYTE( MSG_BROADCAST, 23 );											// msg
+	WRITE_BYTE( MSG_BROADCAST, TE_BREAKMODEL );									// teid
+	WRITE_COORD( MSG_BROADCAST, ( pev->mins[0] + pev->maxs[0] ) * 0.5f );		// x
+	WRITE_COORD( MSG_BROADCAST, ( pev->mins[1] + pev->maxs[1] ) * 0.5f );		// y
+	WRITE_COORD( MSG_BROADCAST, ( pev->mins[2] + pev->maxs[2] ) * 0.5f );		// z
+	WRITE_COORD( MSG_BROADCAST, pev->size[0] );									// sizex
+	WRITE_COORD( MSG_BROADCAST, pev->size[1] );									// sizey
+	WRITE_COORD( MSG_BROADCAST, pev->size[2] );									// sizez
+	WRITE_COORD( MSG_BROADCAST, 1 );											// pitch
+	WRITE_COORD( MSG_BROADCAST, 1 );											// yaw
+	WRITE_COORD( MSG_BROADCAST, 1 );											// roll
+	WRITE_SHORT( MSG_BROADCAST, m_nBreakModel );								// modelindex
+	WRITE_BYTE( MSG_BROADCAST, 12 );											// count
+	WRITE_BYTE( MSG_BROADCAST, 15 );											// lifetime * 0.1
+	WRITE_BYTE( MSG_BROADCAST, BREAK_GLASS );									// flags
 
 	// Make entities fall thru the glass
 	pev->solid = SOLID_NOT;
@@ -320,7 +320,7 @@ void CFuncRotating::Touch( void *funcArgs )
 void CFuncRotating::SpinUp( void *funcArgs )
 {
 	pev->nextthink = pev->ltime + 0.1;
-	pev->avelocity = pev->avelocity +( pev->movedir * ( pev->speed * m_flFanFriction ) );
+	pev->avelocity = pev->avelocity + ( pev->movedir * ( pev->speed * m_flFanFriction ) );
 
 	if (
 		pev->avelocity[0] >= ( pev->movedir[0] * pev->speed ) &&
