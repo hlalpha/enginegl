@@ -38,10 +38,9 @@ void CFrictionModifier::Spawn()
 
 void CFrictionModifier::ChangeFriction( void *funcArgs )
 {
-	edict_t *pOther = ENT( gpGlobals->other );
-	entvars_t *pVars = VARS( pOther );
+	entvars_t *pevToucher = VARS( gpGlobals->other );
 
-	//pVars->friction = m_flFrictionModifier; // TODO(SanyaSho)
+	pevToucher->friction = m_flFrictionModifier;
 }
 
 void CFrictionModifier::KeyValue( KeyValueData *pkvd )
@@ -141,9 +140,8 @@ void CBaseTrigger::KeyValue( KeyValueData *pkvd )
 	}
 	else if ( FStrEq( pkvd->szKeyName, "damage" ) )
 	{
-		// TODO(SanyaSho)
-		//pev->dmg = atof( pkvd->szValue );
-		//pkvd->fHandled = TRUE;
+		pev->dmg = atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq( pkvd->szKeyName, "count" ) )
 	{
@@ -194,8 +192,7 @@ void CTriggerMonsterJump::Spawn()
 	SetUse( &CTriggerMonsterJump::ToggleUse );
 	SetTouch( &CTriggerMonsterJump::TriggerTouch );
 
-	// TODO(SanyaSho)
-	//pev->speed = 200;
+	pev->speed = 200;
 
 	m_flHeight = 150.f;
 
@@ -219,7 +216,7 @@ void CTriggerMonsterJump::ToggleUse( void *funcArgs )
 
 void CTriggerMonsterJump::TriggerTouch( void *funcArgs )
 {
-	entvars_t *pevToucher = VARS( ENT( gpGlobals->other ) );
+	entvars_t *pevToucher = VARS( gpGlobals->other );
 
 	// only monsters can pass
 	if ( !FBitSet( pevToucher->flags, FL_MONSTER ) )
@@ -228,10 +225,9 @@ void CTriggerMonsterJump::TriggerTouch( void *funcArgs )
 	pevToucher->origin.z += 1.f; // HACK: Move the entity 1 unit above the ground to prevent stuck
 
 	if ( FBitSet( pevToucher->flags, FL_ONGROUND ) )
-		pevToucher->flags -= FL_ONGROUND; // FIXME(SanyaSho)
+		ClearBits( pevToucher->flags, FL_ONGROUND );
 
-	// TODO(SanyaSho)
-	//pev->velocity = pev->movedir * pev->speed;
+	pev->velocity = pev->movedir * pev->speed;
 
 	// Make a "jump"
 	pev->velocity.z += m_flHeight;
@@ -348,8 +344,7 @@ void CTriggerHurt::HurtTouch( void *funcArgs )
 	if ( pevToucher->takedamage != DAMAGE_NO && gpGlobals->time >= m_flDelay )
 	{
 		CBaseMonster *pMonster = (CBaseMonster *)CBaseMonster::Instance( gpGlobals->other );
-		//pMonster->TakeDamage( pev, pev, pev->dmg ); // TODO(SanyaSho)
-		pMonster->TakeDamage( pev, pev, 10.f );
+		pMonster->TakeDamage( pev, pev, pev->dmg );
 
 		m_flDelay += 0.5f;
 	}
@@ -675,9 +670,8 @@ void CTriggerPush::Spawn()
 
 	InitTrigger();
 
-	// TODO(SanyaSho)
-	//if ( pev->speed == 0.f )
-	//	pev->speed = 1000.f;
+	if ( pev->speed == 0.f )
+		pev->speed = 1000.f;
 
 	if ( FBitSet( pev->spawnflags, 2 ) )
 		pev->solid = SOLID_NOT;
@@ -685,12 +679,11 @@ void CTriggerPush::Spawn()
 
 void CTriggerPush::Touch( void *funcArgs )
 {
-	entvars_t *pevToucher = VARS( ENT( gpGlobals->other ) );
+	entvars_t *pevToucher = VARS( gpGlobals->other );
 
 	if ( pevToucher->health > 0 )
 	{
-		//pevToucher->velocity = pev->movedir * pev->speed * 10.f; // TODO(SanyaSho)
-		pevToucher->velocity = pev->movedir * 10.f * 10.f;
+		pevToucher->velocity = pev->movedir * pev->speed * 10.f;
 	}
 
 	if ( FBitSet( pev->spawnflags, 1 ) )
