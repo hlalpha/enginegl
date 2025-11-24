@@ -27,6 +27,7 @@ set( DLLS_SOURCES # "Source Files"
 	"john_train.cpp"
 	"h_dispatch.cpp"
 	"buttons.cpp"
+	"func_break.cpp"
 )
 
 set( DLLS_HEADERS # "Header Files"
@@ -48,6 +49,7 @@ set( DLLS_HEADERS # "Header Files"
 	"client.h"
 	"weapons.h"
 	"doors.h"
+	"func_break.h"
 )
 
 add_library( hl SHARED ${DLLS_SOURCES} ${DLLS_HEADERS} )
