@@ -20,6 +20,7 @@
 #define FL_FLASHLIGHT			8192
 #define FL_ARCHIVE_OVERRIDE		1048576
 #endif
+#define FL_DUCKING				16384
 
 // edict->movetype values
 #define	MOVETYPE_NONE			0		// never moves
@@ -109,7 +110,7 @@
 #define	TE_BLOODSTREAM		101		// [coords] x y z [coords] pitch yaw roll [byte] color [byte] speed
 #define	TE_SHOWLINE			102		// [coords] x y z [coords] endx endy endz
 #define	TE_BLOOD			103		// [coords] x y z [coords] pitch yaw roll [byte] color [byte] speed
-#define	TE_GUNSHOTDECAL		104		// [coords] x y z [byte] entity [byte] decalid
+#define	TE_GUNSHOTDECAL		104		// [coords] x y z [short] entity [byte] decalid
 #define	TE_FIZZ				105		// [byte] entity [short] modelindex [byte] density
 #define	TE_MODEL			106		// [coords] x y z [coords] pitch yaw roll [short] modelindex [byte] lifetime
 #define	TE_EXPLODEMODEL		107		// [coords] x y z [float] scale [short] modelindex [short] count [byte] lifetime
