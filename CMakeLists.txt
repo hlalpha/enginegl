@@ -42,17 +42,31 @@ elseif( LINUX )
 	)
 endif()
 
-function( install_multiplatform target outdir )
+function( install_multiplatform )
+	cmake_parse_arguments(
+		ARGS
+		""
+		"TARGET;OUTDIR;OUTNAME"
+		""
+		${ARGN}
+	)
+
+	if( NOT ARGS_OUTNAME )
+		set( ARGS_OUTNAME "${ARGS_TARGET}" )
+	endif()
+
+	set_target_properties( ${ARGS_TARGET} PROPERTIES OUTPUT_NAME "${ARGS_OUTNAME}" )
+
 	install(
-		TARGETS ${target}
-		RUNTIME DESTINATION "${outdir}"
-		LIBRARY DESTINATION "${outdir}"
+		TARGETS ${ARGS_TARGET}
+		RUNTIME DESTINATION "${ARGS_OUTDIR}"
+		LIBRARY DESTINATION "${ARGS_OUTDIR}"
 	)
 
 	if( WIN32 )
 		install(
-			FILES $<TARGET_PDB_FILE:${target}>
-			DESTINATION "${outdir}"
+			FILES $<TARGET_PDB_FILE:${ARGS_TARGET}>
+			DESTINATION "${ARGS_OUTDIR}"
 			OPTIONAL
 		)
 	endif()

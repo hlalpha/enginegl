@@ -4,7 +4,7 @@ cmake_minimum_required( VERSION 3.20 )
 
 set( DLLS_SOURCES # "Source Files"
 	"h_export.cpp"
-	"hl.def"
+	"hlgl.def"
 	"util.cpp"
 	"cbase.cpp"
 	"lights.cpp"
@@ -52,8 +52,8 @@ set( DLLS_HEADERS # "Header Files"
 	"func_break.h"
 )
 
-add_library( hl SHARED ${DLLS_SOURCES} ${DLLS_HEADERS} )
-install_multiplatform( hl "${SRCDIR}/game/valve/dlls" )
+add_library( hlgl SHARED ${DLLS_SOURCES} ${DLLS_HEADERS} )
+install_multiplatform( TARGET hlgl OUTDIR "${SRCDIR}/game/valve/dlls" OUTNAME "hl" )
 
-target_compile_definitions( hl PRIVATE GLQUAKE QUIVER QUAKE2 )
-target_include_directories( hl PRIVATE "../engine" "." )
+target_compile_definitions( hlgl PRIVATE GLQUAKE QUIVER QUAKE2 )
+target_include_directories( hlgl PRIVATE "../engine" "." )

@@ -22,7 +22,7 @@ set( QLUMPY_HEADERS # "Header Files"
 )
 
 add_executable( qlumpy ${QLUMPY_SOURCES} ${QLUMPY_HEADERS} )
-install_multiplatform( qlumpy "${SRCDIR}/game" )
+install_multiplatform( TARGET qlumpy OUTDIR "${SRCDIR}/game" )
 
 target_compile_definitions( qlumpy PRIVATE "$<${QUIVER}:QUIVER>" )
 target_include_directories( qlumpy PRIVATE "." "../common" )

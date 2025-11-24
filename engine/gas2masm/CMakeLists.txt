@@ -5,4 +5,4 @@ set( GASTOMASM_SOURCES # "Source Files"
 )
 
 add_executable( gas2masm ${GASTOMASM_SOURCES} )
-install_multiplatform( gas2masm "${SRCDIR}/game" )
+install_multiplatform( TARGET gas2masm OUTDIR "${SRCDIR}/game" )

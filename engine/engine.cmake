@@ -271,7 +271,7 @@ function( add_engine )
 		""
 		${ARGN}
 	)
-	
+
 	if ( NOT ARGS_HW AND NOT ARGS_SW )
 		message( FATAL_ERROR "add_engine must have HW or SW set!" )
 	endif()
@@ -285,8 +285,8 @@ function( add_engine )
 		$<${IS_HW}:${ENGINE_HW_SOURCES}> $<${IS_SW}:${ENGINE_SW_SOURCES}>
 	)
 	install_multiplatform(
-		${ARGS_TARGET}
-		"${SRCDIR}/game"
+		TARGET ${ARGS_TARGET}
+		OUTDIR "${SRCDIR}/game"
 	)
 
 	target_compile_definitions(
