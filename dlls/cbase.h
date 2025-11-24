@@ -86,6 +86,20 @@ class CPointEntity : public CBaseEntity
 public:
 };
 
+class CMultiSource : public CPointEntity
+{
+public:
+	virtual void KeyValue( KeyValueData *pkvd );
+	virtual void Spawn();
+	virtual void Use( void *funcArgs );
+	void sub_10015810( void *funcArgs );
+	void Register( void *funcArgs );
+
+public: //private:
+	int m_iUnknown; // SDKTODO
+	int m_iTotal;
+};
+
 class CBaseDelay : public CBaseEntity
 {
 public:
@@ -141,6 +155,31 @@ public: // protected:
 
 	Vector m_vecFinalDest;
 	Vector m_vecFinalAngle;
+};
+
+#include "basemonster.h"
+
+char *ButtonSound( int sound );
+
+class CBaseButton : public CBaseMonster
+{
+public:
+	virtual void KeyValue( KeyValueData *pkvd );
+	virtual void Pain( float flDamage );
+	virtual void Spawn();
+
+	void ButtonSpark( void *funcArgs );
+	void ButtonUse( void *funcArgs );
+	void ButtonTouch( void *funcArgs );
+	void ButtonActivate();
+	void TriggerAndWait( void *funcArgs );
+	void ButtonReturn( void *funcArgs );
+	void ButtonBackHome( void *funcArgs );
+
+protected:
+	BOOL m_fStayPushed;
+	BOOL m_fRotating;
+	string_t m_iszMaster;
 };
 
 // this moved here from world.cpp, to allow classes to be derived from it

@@ -294,7 +294,7 @@ void CFuncTrain::Wait( void *funcArgs )
 
 void CFuncTrain::Next( void *funcArgs )
 {
-	entvars_t *pTarget = VARS( FIND_ENTITY_BY_STRING( NULL, "targetname", STRING( pev->target ) ) );
+	entvars_t *pTarget = VARS( FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->target ) ) );
 	if ( FNullEnt( pTarget ) )
 	{
 		ALERT( at_error, "TrainNext--cannot find next target '%s'", STRING( pev->target ) );
@@ -330,7 +330,7 @@ void CFuncTrain::Next( void *funcArgs )
 
 void CFuncTrain::Activate( void *funcArgs )
 {
-	entvars_t *pTarget = VARS( FIND_ENTITY_BY_STRING( NULL, "targetname", STRING( pev->target ) ) );
+	entvars_t *pTarget = VARS( FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->target ) ) );
 	pev->target = pTarget->target;
 
 	UTIL_SetOrigin( pev, pTarget->origin - ( pev->mins + pev->maxs ) * 0.5 );

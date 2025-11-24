@@ -95,6 +95,23 @@ inline BOOL FNullEnt(edict_t* pent)		{ return pent == NULL || FNullEnt(OFFSET(pe
 inline BOOL FNullEnt(entvars_t* pev)	{ return pev == NULL || FNullEnt(OFFSET(pev)); }
 
 
+inline edict_t *FIND_ENTITY_BY_CLASSNAME( edict_t *entStart, char *pszName )
+{
+	return FIND_ENTITY_BY_STRING( entStart, "classname", pszName );
+}
+
+inline edict_t *FIND_ENTITY_BY_TARGETNAME( edict_t *entStart, char *pszName )
+{
+	return FIND_ENTITY_BY_STRING( entStart, "targetname", pszName );
+}
+
+// for doing a reverse lookup. Say you have a door, and want to find its button.
+inline edict_t *FIND_ENTITY_BY_TARGET( edict_t *entStart, char *pszName )
+{
+	return FIND_ENTITY_BY_STRING( entStart, "target", pszName );
+}
+
+
 // Testing strings for nullity
 #define iStringNull 0
 inline BOOL FStringNull(int iString)			{ return iString == iStringNull; }

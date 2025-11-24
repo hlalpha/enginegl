@@ -26,6 +26,7 @@ set( DLLS_SOURCES # "Source Files"
 	"plats.cpp"
 	"john_train.cpp"
 	"h_dispatch.cpp"
+	"buttons.cpp"
 )
 
 set( DLLS_HEADERS # "Header Files"

@@ -66,12 +66,12 @@ void CBaseDelay::SUB_UseTargets( void *funcArgs )
 
 	if ( m_iszKillTarget )
 	{
-		edict_t *pEnt = FIND_ENTITY_BY_STRING( NULL, "targetname", m_iszKillTarget );
+		edict_t *pEnt = FIND_ENTITY_BY_TARGETNAME( NULL, m_iszKillTarget );
 		while ( FNullEnt( pEnt ) )
 		{
 			REMOVE_ENTITY( pEnt );
 
-			pEnt = FIND_ENTITY_BY_STRING( pEnt, "targetname", m_iszKillTarget );
+			pEnt = FIND_ENTITY_BY_TARGETNAME( pEnt, m_iszKillTarget );
 		}
 	}
 
@@ -84,7 +84,7 @@ void CBaseDelay::SUB_UseTargets( void *funcArgs )
 
 		for (;;)
 		{
-			pEnt = FIND_ENTITY_BY_STRING( pEnt, "targetname", STRING( pev->target ) );
+			pEnt = FIND_ENTITY_BY_TARGETNAME( pEnt, STRING( pev->target ) );
 			if ( FNullEnt ( pEnt ) )
 				break;
 
