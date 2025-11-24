@@ -19,10 +19,10 @@ typedef enum alert_s
 
 typedef struct KeyValueData_s
 {
-	char	*szClassName;	// in: entity classname
-	char	*szKeyName;		// in: name of key
-	char	*szValue;		// in: value of key
-	int		fHandled;		// out: DLL sets to true if key-value pair was understood
+	char	*szClassName;		// in: entity classname
+	char	*szKeyName;			// in: name of key
+	char	*szValue;			// in: value of key
+	int		fHandled;			// out: DLL sets to true if key-value pair was understood
 } KeyValueData;
 
 typedef struct TraceResult_s
@@ -40,85 +40,85 @@ typedef struct TraceResult_s
 
 typedef struct enginefuncs_s
 {
-	int					(*pfnPrecacheModel)				( char *s );
-	int					(*pfnPrecacheSound)				( char *s );
-	void				(*pfnSetModel)					( struct edict_s *e, char *m );
-	int					(*pfnModelIndex)				( char *m );
-	void				(*pfnSetSize)					( struct edict_s *e, float *min, float *max );
+	int					(*pfnPrecacheModel)				(char *s);
+	int					(*pfnPrecacheSound)				(char *s);
+	void				(*pfnSetModel)					(struct edict_s *e, char *m);
+	int					(*pfnModelIndex)				(char *m);
+	void				(*pfnSetSize)					(struct edict_s *e, float *rgflMin, float *rgflMax);
 
-	void				(*pfnChangeLevel)				( char *s1, char *s2 );
+	void				(*pfnChangeLevel)				(char *s1, char *s2);
 
-	void				(*pfnSetSpawnParms)				( struct edict_s *ent );
-	void				(*pfnSaveSpawnParms)			( struct edict_s *e );
+	void				(*pfnSetSpawnParms)				(struct edict_s *ent);
+	void				(*pfnSaveSpawnParms)			(struct edict_s *ent);
 
-	float				(*pfnVecToYaw)					( float *in );
-	void				(*pfnVecToAngles)				( float *in, float *out );
-	void				(*pfnMoveToGoal)				( struct edict_s *ent, float dist );
-	void				(*pfnMoveToOrigin)				( struct edict_s *ent, float *goal, float dist, int strafe );
-	void				(*pfnChangeYaw)					( struct edict_s *ent );
-	void				(*pfnChangePitch)				( struct edict_s *ent );
-	struct edict_s*		(*pfnFindEntityByString)		( struct edict_s *e, char *key, char *value );
-	int					(*pfnGetEntityIllum)			( struct edict_s *pEnt );
-	struct edict_s*		(*pfnFindRadius)				( float *org, float rad );
-	struct edict_s*		(*pfnCheckClient)				( void );
-	void				(*pfnMakeVectors)				( float *angles );
-	struct edict_s*		(*pfnCreateEntity)				( void );
-	void				(*pfnRemoveEntity)				( struct edict_s *ed );
-	void				(*pfnMakeStatic)				( struct edict_s *ent );
-	float				(*pfnEntIsOnFloor)				( struct edict_s *ent ); // float?
-	float				(*pfnDropToFloor)				( struct edict_s *ent ); // float?
-	float				(*pfnWalkMove)					( struct edict_s *ent, float yaw, float dist ); // float?
-	void				(*pfnSetOrigin)					( struct edict_s *e, float *org );
-	void				(*pfnEmitSound)					( struct edict_s *entity, int channel, char *sample, float volume, float attenuation );
-	void				(*pfnEmitAmbientSound)			( float *pos, char *samp, float vol, float attenuation );
-	void				(*pfnTraceLine)					( float *v1, float *v2, int fNoMonsters, struct edict_s *pentToSkip, TraceResult *ptr );
-	void				(*pfnTraceToss)					( struct edict_s *ent, struct edict_s *ignore, TraceResult *ptr );
-	void				(*pfnGetAimVector)				( struct edict_s *ent, float speed, vec_t *out );
-	void				(*pfnServerCommand)				( char *str );
-	void				(*pfnServerExecute)				( struct edict_s *e, char *format, ... );
-	void				(*pfnParticleEffect)			( float *org, float *dir, float color, float count );
-	void				(*pfnLightStyle)				( int style, char *val );
-	int					(*pfnDecalIndex)				( int idx, char *name );
-	int					(*pfnPointContents)				( float *v );
+	float				(*pfnVecToYaw)					(float *rgflVector);
+	void				(*pfnVecToAngles)				(float *rgflVectorIn, float *rgflVectorOut);
+	void				(*pfnMoveToGoal)				(struct edict_s *ent, float dist);
+	void				(*pfnMoveToOrigin)				(struct edict_s *ent, float *pflGoal, float dist, int strafe);
+	void				(*pfnChangeYaw)					(struct edict_s *ent);
+	void				(*pfnChangePitch)				(struct edict_s *ent);
+	struct edict_s*		(*pfnFindEntityByString)		(struct edict_s *pEdictStartSearchAfter, char *key, char *value);
+	int					(*pfnGetEntityIllum)			(struct edict_s *pEnt);
+	struct edict_s*		(*pfnFindRadius)				(float *org, float rad);
+	struct edict_s*		(*pfnCheckClient)				(void);
+	void				(*pfnMakeVectors)				(float *rgflVector);
+	struct edict_s*		(*pfnCreateEntity)				(void);
+	void				(*pfnRemoveEntity)				(struct edict_s *e);
+	void				(*pfnMakeStatic)				(struct edict_s *ent);
+	float				(*pfnEntIsOnFloor)				(struct edict_s *e); // float?
+	float				(*pfnDropToFloor)				(struct edict_s *e); // float?
+	float				(*pfnWalkMove)					(struct edict_s *ent, float yaw, float dist); // float?
+	void				(*pfnSetOrigin)					(struct edict_s *e, float *org);
+	void				(*pfnEmitSound)					(struct edict_s *entity, int channel, char *sample, float volume, float attenuation);
+	void				(*pfnEmitAmbientSound)			(float *pos, char *samp, float vol, float attenuation);
+	void				(*pfnTraceLine)					(float *v1, float *v2, int fNoMonsters, struct edict_s *pentToSkip, TraceResult *ptr);
+	void				(*pfnTraceToss)					(struct edict_s *ent, struct edict_s *ignore, TraceResult *ptr);
+	void				(*pfnGetAimVector)				(struct edict_s *ent, float speed, vec_t *out);
+	void				(*pfnServerCommand)				(char *str);
+	void				(*pfnServerExecute)				(struct edict_s *e, char *format, ...);
+	void				(*pfnParticleEffect)			(float *org, float *dir, float color, float count);
+	void				(*pfnLightStyle)				(int style, char *val);
+	int					(*pfnDecalIndex)				(int idx, char *name);
+	int					(*pfnPointContents)				(float *rgflVector);
 
-	void				(*pfnWriteByte)					( int dest, int c );
-	void				(*pfnWriteChar)					( int dest, int c );
-	void				(*pfnWriteShort)				( int dest, int c );
-	void				(*pfnWriteLong)					( int dest, int c );
-	void				(*pfnWriteAngle)				( int dest, float f );
-	void				(*pfnWriteCoord)				( int dest, float f );
-	void				(*pfnWriteString)				( int dest, char *s );
-	void				(*pfnWriteEntity)				( int dest, int c );
+	void				(*pfnWriteByte)					(int dest, int c);
+	void				(*pfnWriteChar)					(int dest, int c);
+	void				(*pfnWriteShort)				(int dest, int c);
+	void				(*pfnWriteLong)					(int dest, int c);
+	void				(*pfnWriteAngle)				(int dest, float f);
+	void				(*pfnWriteCoord)				(int dest, float f);
+	void				(*pfnWriteString)				(int dest, char *s);
+	void				(*pfnWriteEntity)				(int dest, int c);
 
-	float				(*pfnCVarGetFloat)				( char *name );
-	char*				(*pfnCVarGetString)				( char *name );
-	void				(*pfnCVarSetFloat)				( char *name, float value );
-	void				(*pfnCVarSetString)				( char *name, char *value );
+	float				(*pfnCVarGetFloat)				(char *name);
+	char*				(*pfnCVarGetString)				(char *name);
+	void				(*pfnCVarSetFloat)				(char *name, float value);
+	void				(*pfnCVarSetString)				(char *name, char *value);
 
-	void				(*pfnAlertMessage)				( int atype, char *szFmt, ... );
-	int					(*pfnEngineFprintf)				( FILE *f, char *format, ... );
+	void				(*pfnAlertMessage)				(int atype, char *szFmt, ...);
+	int					(*pfnEngineFprintf)				(void *pfile, char *szFmt, ...);
 
-	void*				(*pfnPvAllocEntPrivateData)		( struct edict_s *pEdict, int size );
-	void*				(*pfnPvEntPrivateData)			( struct edict_s *pEdict );
-	void				(*pfnFreeEntPrivateData)		( struct edict_s *pEdict );
+	void*				(*pfnPvAllocEntPrivateData)		(struct edict_s *pEdict, int cb);
+	void*				(*pfnPvEntPrivateData)			(struct edict_s *pEdict);
+	void				(*pfnFreeEntPrivateData)		(struct edict_s *pEdict);
 
-	void*				(*pfnDispatchFuncById)			( struct edict_s *ent, int dllFunc );
-	void				(*pfnChangeMethods)				( void ); // TODO
+	void*				(*pfnDispatchFuncById)			(struct edict_s *ent, int dllFunc);
+	void				(*pfnChangeMethods)				(void); // TODO
 
-	char*				(*pfnSzFromIndex)				( string_t iString );
-	int					(*pfnAllocString)				( char *string );
+	char*				(*pfnSzFromIndex)				(string_t iString);
+	int					(*pfnAllocString)				(char *string);
 
-	struct entvars_s*	(*pfnGetVarsOfEnt)				( struct edict_s *pEdict );
-	struct edict_s*		(*pfnPEntityOfEntOffset)		( int iEntOffset );
-	int					(*pfnEntOffsetOfPEntity)		( struct edict_s *pEdict );
-	int					(*pfnIndexOfEdict)				( int ent ); // TODO
-	struct edict_s*		(*pfnFindEntityByVars)			( struct entvars_s *pEntVars );
+	struct entvars_s*	(*pfnGetVarsOfEnt)				(struct edict_s *pEdict);
+	struct edict_s*		(*pfnPEntityOfEntOffset)		(int iEntOffset);
+	int					(*pfnEntOffsetOfPEntity)		(struct edict_s *pEdict);
+	int					(*pfnIndexOfEdict)				(int ent);
+	struct edict_s*		(*pfnFindEntityByVars)			(struct entvars_s *pEntVars);
 
-	void*				(*pfnGetModelPtr)				( struct edict_s *pEdict );
+	void*				(*pfnGetModelPtr)				(struct edict_s *pEdict);
 
 #if defined( QUIVER_TESTS )
 	// EXTENDED API FOR TESTS
-	void				(*pfnRegisterCvar)				( struct cvar_s *cvar );
+	void				(*pfnCVarRegister)				(struct cvar_s *pCvar);
 #endif
 } enginefuncs_t;
 
