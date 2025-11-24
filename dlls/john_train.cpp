@@ -30,8 +30,10 @@ void CJohnTrain::Spawn()
 {
 	pev->movetype = MOVETYPE_PUSH;
 	pev->solid = SOLID_BSP;
+
 	SET_MODEL( edict(), STRING( pev->model ) );
-	pev->nextthink = pev->ltime = 0.1f;
+
+	pev->nextthink = pev->ltime + 0.1f;
 }
 
 //
@@ -54,7 +56,7 @@ void CTrainInfo::Think( void *funcArgs )
 
 void CTrainInfo::Touch( void *funcArgs )
 {
-	SET_MODEL( edict(), "models/scientist.mdl" );
+	SET_MODEL( ENT( globals->other ), "models/scientist.mdl" );
 
 	pev->speed = 0.f;
 	pev->avelocity.y = 150.f;
