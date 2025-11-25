@@ -443,13 +443,13 @@ void CBaseButton::ButtonBackHome( void *funcArgs )
 			if ( FNullEnt( pentTarget ) )
 				break;
 
-			if ( !FClassnameIs( pentTarget, "multisource" ) )
-				break;
-
-			CMultiSource *pMultiSource = (CMultiSource *)CMultiSource::Instance( pentTarget );
-			if ( pMultiSource )
+			if ( FClassnameIs( pentTarget, "multisource" ) )
 			{
-				pMultiSource->sub_10015810( NULL );
+				CMultiSource *pMultiSource = (CMultiSource *)CMultiSource::Instance( pentTarget );
+				if ( pMultiSource )
+				{
+					pMultiSource->sub_10015810( NULL );
+				}
 			}
 		}
 	}
@@ -530,7 +530,7 @@ public:
 	virtual void KeyValue( KeyValueData *pkvd );
 	void PlaySound();
 	virtual void Use( void *funcArgs );
-	void UpdateTarget( void *funcArgs );
+	void UpdateTarget( float value );
 	void Off( void *funcArgs );
 	void Return( void *funcArgs );
 
@@ -621,12 +621,60 @@ void CMomentaryRotButton::PlaySound()
 
 void CMomentaryRotButton::Use( void *funcArgs )
 {
-	// SDKTODO
+	if ( m_lastUsed == 0 )
+		m_direction = -m_direction;
+
+	pev->nextthink = pev->ltime + 0.1f;
+
+	float dt = CBaseToggle::AxisDelta( pev->spawnflags, pev->angles, m_start ) / m_moveDistance;
+
+	if ( m_direction > 0 && dt >= 1.f )
+	{
+		pev->avelocity = g_vecZero;
+		pev->angles = m_end;
+
+		m_lastUsed = 1;
+		return;
+	}
+
+	if ( m_direction < 0 && dt <= 0.f )
+	{
+		pev->avelocity = g_vecZero;
+		pev->angles = m_start;
+
+		m_lastUsed = 1;
+		return;
+	}
+
+	PlaySound();
+
+	m_lastUsed = 1;
+
+	UpdateTarget( dt );
+
+	pev->avelocity = pev->movedir * ( m_direction * pev->speed );
+
+	SetThink( &CMomentaryRotButton::Off );
 }
 
-void CMomentaryRotButton::UpdateTarget( void *funcArgs )
+void CMomentaryRotButton::UpdateTarget( float value )
 {
-	// SDKTODO
+	if ( FStringNull( pev->target ) )
+		return;
+
+	edict_t *pentTarget = NULL;
+	for ( ;; )
+	{
+		pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( pev->target ) );
+		if ( FNullEnt( pentTarget ) )
+			break;
+
+		CPointEntity *pEntity = (CPointEntity *)CPointEntity::Instance( pentTarget );
+		if ( pEntity )
+		{
+			pEntity->Use( &value ); // /shrug
+		}
+	}
 }
 
 void CMomentaryRotButton::Off( void *funcArgs )
@@ -647,5 +695,22 @@ void CMomentaryRotButton::Off( void *funcArgs )
 
 void CMomentaryRotButton::Return( void *funcArgs )
 {
-	// SDKTODO
+	float dt = CBaseToggle::AxisDelta( pev->spawnflags, pev->angles, m_start );
+
+	if ( dt < 0 )
+	{
+		pev->avelocity = g_vecZero;
+		pev->angles = m_start;
+
+		pev->nextthink = -1.f;
+		SetThink( NULL );
+	}
+	else
+	{
+		UpdateTarget( dt / m_moveDistance );
+
+		pev->avelocity = -( pev->movedir * m_returnSpeed );
+		pev->nextthink = pev->ltime + 0.1f;
+	}
 }
+
