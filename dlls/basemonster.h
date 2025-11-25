@@ -1,3 +1,4 @@
+// basemonster.h
 #if !defined( BASEMONSTER_H )
 #define BASEMONSTER_H
 
@@ -46,33 +47,31 @@ protected:
 	int unk42;
 	int unk43;
 	int unk44;
-	int unk45;
-	int unk46;
-	int unk47;
+	Vector m_vecUnknown;
 	int unk48;
 	int unk49;
 	int unk50;
 	Vector m_vecAttackDir;
 	entvars_t *m_pLastAttacker;
-	int unk55;
+	byte unk55;
 	int unk56;
-	int unk57;
-	int unk58;
+	float unk57;
+	float unk58;
 	float m_flFrameRate;
 	float m_flGroundSpeed;
 	float m_flNextWeaponThink;
 	int unk62;
-	int unk63;
+	float m_flNextAlertTime;
 	int unk64;
 	int unk65;
 	int unk66;
-	int unk67;
+	BYTE unk67;
 	BOOL m_fSequenceFinished;
-	int unk69;
+	int m_nSquadSize;
 	int unk70;
 	int unk71;
-	int unk72;
-	int unk73;
+	entvars_t *m_pOwner;
+	entvars_t *m_pSquadOwner;
 	int unk74;
 	int unk75;
 	int unk76;
