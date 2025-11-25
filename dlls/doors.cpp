@@ -362,7 +362,43 @@ void CBaseDoor::DoorHitBottom( void *funcArgs )
 
 void CBaseDoor::Blocked( void *funcArgs )
 {
-	// SDKTODO(SanyaSho)
+	CBaseMonster *pToucher = (CBaseMonster *)GET_PRIVATE( ENT( gpGlobals->other ) );
+	pToucher->TakeDamage( pev, pev, pev->dmg );
+
+	if ( m_flWait >= 0 )
+	{
+		if ( m_toggle_state == TS_GOING_DOWN )
+		{
+			DoorGoUp( NULL );
+		}
+		else
+		{
+			DoorGoDown( NULL );
+		}
+	}
+
+	edict_t *pentTarget = NULL;
+	for ( ;; )
+	{
+		pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( pev->targetname ) );
+		if ( FNullEnt( pentTarget ) )
+			break;
+
+		if ( FClassnameIs( pentTarget, "func_door" ) )
+		{
+			CBaseDoor *pDoor = GetClassPtr( (CBaseDoor *)VARS( pentTarget ) );
+
+			if ( pDoor->m_flWait >= 0 )
+			{
+				VARS( pentTarget )->origin = pev->origin;
+
+				if ( pDoor->m_toggle_state == TS_GOING_DOWN )
+					pDoor->DoorGoUp( NULL );
+				else
+					pDoor->DoorGoDown( NULL );
+			}
+		}
+	}
 }
 
 
