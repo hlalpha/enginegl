@@ -1,16 +1,10 @@
+// cbase.h
 #if !defined( CBASE_H )
 #define CBASE_H
 
 class CBaseEntity;
 class CBaseToggle;
 class CBaseMonster;
-
-// TODO(SanyaSho): Move this somewhere!
-#define DotProduct(x,y) (x[0]*y[0]+x[1]*y[1]+x[2]*y[2])
-#define VectorSubtract(a,b,c) {c[0]=a[0]-b[0];c[1]=a[1]-b[1];c[2]=a[2]-b[2];}
-#define VectorAdd(a,b,c) {c[0]=a[0]+b[0];c[1]=a[1]+b[1];c[2]=a[2]+b[2];}
-#define VectorCopy(a,b) {b[0]=a[0];b[1]=a[1];b[2]=a[2];}
-#define VectorLerp(a, b, c, t) {c[0] = a[0] + (b[0] - a[0]) * t;c[1] = a[1] + (b[1] - a[1]) * t;c[2] = a[2] + (b[2] - a[2]) * t;}
 
 #define SetThink( a )		m_pfnThink		= static_cast <void (CBaseEntity:: *)( void *funcArgs )>( a )
 #define SetTouch( a )		m_pfnTouch		= static_cast <void (CBaseEntity:: *)( void *funcArgs )>( a )
@@ -95,7 +89,7 @@ public:
 	void sub_10015810( void *funcArgs );
 	void Register( void *funcArgs );
 
-public: //private:
+public: // private:
 	int m_iUnknown; // SDKTODO
 	int m_iTotal;
 };

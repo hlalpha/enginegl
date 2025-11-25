@@ -18,8 +18,8 @@ class CAmbientGeneric : public CBaseEntity
 public:
 	virtual void Spawn();
 	virtual void KeyValue( KeyValueData *pkvd );
-	void ToggleUse( void *funcArgs );
 	void RampThink( void *funcArgs );
+	void ToggleUse( void *funcArgs );
 
 private:
 	BOOL m_fActive;
@@ -50,10 +50,7 @@ void CAmbientGeneric::Spawn()
 		float volume, attenuation;
 		VOL_AND_ATT( volume, attenuation );
 
-		vec3_t vecOrigin;
-		VectorCopy( pev->origin, vecOrigin );
-
-		UTIL_EmitAmbientSound( vecOrigin, sample, volume, attenuation );
+		UTIL_EmitAmbientSound( pev->origin, sample, volume, attenuation );
 	}
 }
 
@@ -131,9 +128,8 @@ BOOL FEnvSoundInRange( entvars_t *pev, entvars_t *pevTarget, float *pflRange )
 {
 	CEnvSound *pSound = GetClassPtr( (CEnvSound *)pev );
 
-	vec3_t vecSpot1, vecSpot2;
-	VectorAdd( pev->view_ofs, pev->origin, vecSpot1 );
-	VectorAdd( pevTarget->view_ofs, pevTarget->origin, vecSpot2 );
+	Vector vecSpot1 = pev->view_ofs + pev->origin;
+	Vector vecSpot2 = pevTarget->view_ofs + pevTarget->origin;
 
 	TraceResult tr;
 	UTIL_TraceLine( vecSpot1, vecSpot2, FALSE, ENT( pev ), &tr );
@@ -143,11 +139,9 @@ BOOL FEnvSoundInRange( entvars_t *pev, entvars_t *pevTarget, float *pflRange )
 		return FALSE;
 
 	// calc range from sound entity to player
-	vec3_t vecRange;
-	VectorSubtract( tr.vecEndPos, vecSpot1, vecRange );
+	Vector vecRange = tr.vecEndPos - vecSpot1;
 
-	float flRange;
-	flRange = DotProduct( vecRange, vecRange );
+	float flRange = DotProduct( vecRange, vecRange );
 
 	if ( pSound->m_flRadius < flRange )		
 		return FALSE;
@@ -166,6 +160,6 @@ void CEnvSound::Think( void *funcArg )
 void CEnvSound::Spawn()
 {
 	MARK_STUB_ENTITY;
-	pev->nextthink = gpGlobals->time + UTIL_RandomFloat( 0.0, 0.5 );
+	pev->nextthink = gpGlobals->time + UTIL_RandomFloat( 0.f, 0.5f );
 }
 
