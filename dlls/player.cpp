@@ -46,7 +46,7 @@ void CBasePlayer::Die()
 
 		SetActivity( 35 );
 
-		//SetThink(); // TODO
+		SetThink( &CBasePlayer::PlayerDeathThink );
 		pev->nextthink = 0.1;
 	}
 }
@@ -118,9 +118,49 @@ void CBasePlayer::CheckWaterJump()
 	// SDKTODO
 }
 
-void CBasePlayer::DeathThink( void *funcArgs )
+extern void respawn( entvars_t *pev );
+void CBasePlayer::PlayerDeathThink( void *funcArgs )
 {
-	// SDKTODO
+	if ( FBitSet( pev->flags, FL_ONGROUND ) )
+	{
+		float flForward = pev->velocity.Length() - 20;
+		if ( flForward <= 0 )
+		{
+			pev->velocity = g_vecZero;
+		}
+		else
+		{
+			pev->velocity = flForward * pev->velocity.Normalize();
+		}
+	}
+
+	if ( !m_fSequenceFinished && ( pev->deadflag == DEAD_DYING ) )
+	{
+		StudioFrameAdvance( 0.1 );
+	}
+
+	if ( pev->deadflag == DEAD_DYING )
+	{
+		pev->deadflag = DEAD_DEAD;
+	}
+
+	if ( pev->deadflag == DEAD_DEAD )
+	{
+		if ( pev->button )
+			return;
+
+		pev->deadflag = DEAD_RESPAWNABLE;
+		return;
+	}
+
+	if ( !pev->button )
+	{
+		return;
+	}
+
+	pev->button = 0;
+	respawn( pev );
+	pev->nextthink = -1;
 }
 
 void CBasePlayer::PlayerUse()
@@ -258,9 +298,9 @@ void CBasePlayer::PreThink()
 	if ( pev->waterlevel == 2 )
 		CheckWaterJump();
 
-	if ( pev->deadflag != DEAD_NO )
+	if ( pev->deadflag >= DEAD_DYING )
 	{
-		DeathThink( NULL );
+		PlayerDeathThink( NULL );
 		return;
 	}
 

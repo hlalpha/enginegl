@@ -55,7 +55,7 @@ public:
 	void nullsub_14();
 	void CheckWaterJump();
 	void WaterMove();
-	void DeathThink( void *funcArgs );
+	void PlayerDeathThink( void *funcArgs );
 	void PlayerUse();
 
 	void ImpulseCommands();

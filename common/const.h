@@ -51,6 +51,7 @@
 #define	DEAD_NO					0
 #define	DEAD_DYING				1
 #define	DEAD_DEAD				2
+#define	DEAD_RESPAWNABLE		3		// HLSDK
 
 #define	DAMAGE_NO				0
 #define	DAMAGE_YES				1
@@ -120,6 +121,21 @@
 #define	MSG_ONE				1		// reliable to one (msg_entity)
 #define	MSG_ALL				2		// reliable to all
 #define	MSG_INIT			3		// write to the init string
+
+#ifdef QUAKE2
+#define	CONTENT_WATER	-3
+#define	CONTENT_SLIME	-4
+#define	CONTENT_LAVA	-5
+
+#define	FL_IMMUNE_WATER	131072
+#define	FL_IMMUNE_SLIME	262144
+#define	FL_IMMUNE_LAVA	524288
+
+#define	CHAN_VOICE	2
+#define	CHAN_BODY	4
+
+#define	ATTN_NORM	1
+#endif
 
 // TEMPENTITY flags
 #define	FTENT_NONE			0x0
