@@ -910,6 +910,8 @@ void R_SetupFrame (void)
 	r_viewleaf = Mod_PointInLeaf (r_origin, cl.worldmodel);
 
 	V_SetContentsColor (r_viewleaf->contents);
+	if (cl.waterlevel > 2)
+		V_SetContentsColor (CONTENTS_WATER);
 	V_CalcBlend ();
 
 	r_cache_thrash = false;
