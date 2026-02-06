@@ -150,6 +150,8 @@ typedef struct
 #define	CONTENTS_CURRENT_UP		-13
 #define	CONTENTS_CURRENT_DOWN	-14
 
+#define	CONTENTS_TRANSLUCENT	-15
+
 
 // !!! if this is changed, it must be changed in asm_i386.h too !!!
 typedef struct

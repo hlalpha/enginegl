@@ -447,8 +447,16 @@ void SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 	if (ent->v.modelindex)
 		SV_FindTouchedLeafs (ent, sv.worldmodel->nodes);
 
-	if (ent->v.solid == SOLID_NOT)
+	if (ent->v.solid == SOLID_NOT && (int)ent->v.skin == -1)
 		return;
+
+	if (ent->v.solid == SOLID_BSP && !sv.models[ (int)ent->v.modelindex ] && !strlen(&pr_strings[(int)ent->v.model]))
+	{
+		if (developer.value != 0.0)
+			Con_Printf ("Inserted %s with no model\n", &pr_strings[ent->v.classname]); // TODO(SanyaSho): Use Con_DPrintf!
+
+		return;
+	}
 
 // find the first node that the ent's box crosses
 	node = sv_areanodes;
@@ -474,6 +482,44 @@ void SV_LinkEdict (edict_t *ent, qboolean touch_triggers)
 // if touch_triggers, touch all entities at this node and decend for more
 	if (touch_triggers)
 		SV_TouchLinks ( ent, sv_areanodes );
+}
+
+
+
+/*
+==================
+SV_LinkContents
+
+==================
+*/
+int SV_LinkContents (areanode_t *node, const vec_t *pos)
+{
+	link_t		*l;
+	edict_t		*touch;
+
+	for (l = node->solid_edicts.next; l != &node->solid_edicts; l = l->next)
+	{
+		touch = EDICT_FROM_AREA(l);
+
+		if (touch->v.solid != SOLID_NOT)
+			continue;
+
+		if (touch->v.absmax[0] < pos[0] || touch->v.absmax[1] < pos[1] || touch->v.absmax[2] < pos[2]
+			|| touch->v.absmin[0] > pos[0] || touch->v.absmin[1] > pos[1] || touch->v.absmin[2] > pos[2])
+			continue;
+
+		return (int)touch->v.skin;
+	}
+
+	if (node->axis == -1)
+		return CONTENTS_EMPTY;
+
+	if (pos[node->axis] > node->dist)
+		return SV_LinkContents (node->children[0], pos);
+	else if (pos[node->axis] < node->dist)
+		return SV_LinkContents (node->children[1], pos);
+
+	return CONTENTS_EMPTY;
 }
 
 
@@ -532,11 +578,19 @@ SV_PointContents
 */
 int SV_PointContents (vec3_t p)
 {
-	int		cont;
+	int		cont, entityContents;
 
-	cont = SV_HullPointContents (&sv.worldmodel->hulls[0], 0, p);
+	cont = SV_TruePointContents (p);
 	if (cont <= CONTENTS_CURRENT_0 && cont >= CONTENTS_CURRENT_DOWN)
 		cont = CONTENTS_WATER;
+
+	if (cont != CONTENTS_SOLID)
+	{
+		entityContents = SV_LinkContents (&sv_areanodes[0], p);
+		if (entityContents != CONTENTS_EMPTY)
+			return entityContents;
+	}
+
 	return cont;
 }
 

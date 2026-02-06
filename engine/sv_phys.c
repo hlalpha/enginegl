@@ -1243,7 +1243,7 @@ void SV_CheckWaterTransition (edict_t *ent)
 		return;
 	}
 	
-	if (cont <= CONTENTS_WATER)
+	if (cont <= CONTENTS_WATER && cont > CONTENTS_TRANSLUCENT)
 	{
 		if (ent->v.watertype == CONTENTS_EMPTY)
 		{	// just crossed into water
