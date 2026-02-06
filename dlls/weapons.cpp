@@ -163,18 +163,18 @@ void CBasePlayer::ImpulseCommands()
 		if ( iWeapon < 0 )
 			iWeapon = MAX_WEAPONS - 1;
 
-		//sub_1000FA20(v3, iWeapon);
+		//set_prev_weapon(pev, iWeapon);
 		break;
 	}
 	case 100: // flashlight
 	{
-		if ( FBitSet( pev->effects, FL_FLASHLIGHT ) )
+		if ( FBitSet( pev->effects, EF_DIMLIGHT ) )
 		{
-			ClearBits( pev->effects, FL_FLASHLIGHT );
+			ClearBits( pev->effects, EF_DIMLIGHT );
 		}
 		else
 		{
-			SetBits( pev->effects, FL_FLASHLIGHT );
+			SetBits( pev->effects, EF_DIMLIGHT );
 		}
 		break;
 	}
